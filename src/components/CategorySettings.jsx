@@ -33,68 +33,68 @@ import {
 const initialCategories = [
   { 
     id: 1, 
-    name: 'Shingles', 
-    description: 'Roofing shingles and materials',
+    name: 'Roofing', 
+    description: 'Roofing services and repairs',
     visibility: { technicians: true, customerPortal: true },
     subCategories: [
-      { id: 101, name: 'Asphalt 3-Tab', description: 'Standard 3-tab asphalt shingles', visibility: { technicians: true, customerPortal: true } },
-      { id: 102, name: 'Asphalt Architectural', description: 'Premium architectural shingles', visibility: { technicians: true, customerPortal: true } },
-      { id: 103, name: 'Metal Standing Seam', description: 'Metal roofing panels', visibility: { technicians: true, customerPortal: false } },
+      { id: 101, name: 'Installation', description: 'New roof installation services', visibility: { technicians: true, customerPortal: true } },
+      { id: 102, name: 'Repair', description: 'Roof repair and patching', visibility: { technicians: true, customerPortal: true } },
+      { id: 103, name: 'Inspection', description: 'Roof inspection services', visibility: { technicians: true, customerPortal: false } },
     ]
   },
   { 
     id: 2, 
-    name: 'Underlayments', 
-    description: 'Protective underlayment materials',
+    name: 'Plumbing', 
+    description: 'Plumbing services and installations',
     visibility: { technicians: true, customerPortal: true },
     subCategories: []
   },
   { 
     id: 3, 
-    name: 'Fasteners', 
-    description: 'Nails, screws, and fastening hardware',
+    name: 'Electrical', 
+    description: 'Electrical services and wiring',
     visibility: { technicians: true, customerPortal: false },
     subCategories: [
-      { id: 301, name: 'Roofing Nails', description: 'Standard roofing nails', visibility: { technicians: true, customerPortal: false } },
-      { id: 302, name: 'Screws', description: 'Metal and wood screws', visibility: { technicians: true, customerPortal: false } },
+      { id: 301, name: 'Installation', description: 'New electrical installations', visibility: { technicians: true, customerPortal: false } },
+      { id: 302, name: 'Maintenance', description: 'Electrical system maintenance', visibility: { technicians: true, customerPortal: false } },
     ]
   },
   { 
     id: 4, 
-    name: 'Flashing', 
-    description: 'Metal flashing for waterproofing',
+    name: 'HVAC', 
+    description: 'Heating, ventilation, and air conditioning',
     visibility: { technicians: true, customerPortal: true },
     subCategories: []
   },
   { 
     id: 5, 
-    name: 'Ventilation', 
-    description: 'Roof vents and ventilation systems',
+    name: 'Landscaping', 
+    description: 'Lawn care and landscaping services',
     visibility: { technicians: true, customerPortal: true },
     subCategories: []
   },
   { 
     id: 6, 
-    name: 'Labor', 
-    description: 'Service and labor charges',
+    name: 'General Labor', 
+    description: 'General labor and handyman services',
     visibility: { technicians: false, customerPortal: true },
     subCategories: [
-      { id: 601, name: 'Installation', description: 'Installation labor', visibility: { technicians: false, customerPortal: true } },
-      { id: 602, name: 'Repair', description: 'Repair labor', visibility: { technicians: false, customerPortal: true } },
-      { id: 603, name: 'Inspection', description: 'Inspection services', visibility: { technicians: true, customerPortal: true } },
+      { id: 601, name: 'Hourly Labor', description: 'Standard hourly labor charges', visibility: { technicians: false, customerPortal: true } },
+      { id: 602, name: 'Emergency Services', description: 'After-hours emergency services', visibility: { technicians: false, customerPortal: true } },
+      { id: 603, name: 'Consultation', description: 'Professional consultation services', visibility: { technicians: true, customerPortal: true } },
     ]
   },
   { 
     id: 7, 
     name: 'Internal Costs', 
-    description: 'Internal cost tracking (hidden from field)',
+    description: 'Internal cost tracking (hidden from customers)',
     visibility: { technicians: false, customerPortal: false },
     subCategories: []
   },
   { 
     id: 8, 
-    name: 'Gutters', 
-    description: 'Gutter systems and accessories',
+    name: 'Painting', 
+    description: 'Interior and exterior painting services',
     visibility: { technicians: true, customerPortal: true },
     subCategories: []
   },
@@ -489,7 +489,7 @@ function CategoryModal({
             )}
             <div className="flex-1">
               <p className="text-[12px] text-[#64748B]">
-                Upload an image for this category. This will be displayed in the mobile app for easy visual identification.
+                Upload an image for this {isSubCategory ? 'sub-category' : 'category'}. This will be displayed in the mobile app for easy visual identification.
               </p>
               <p className="text-[11px] text-[#94A3B8] mt-1">
                 Recommended: 200x200px, PNG or JPG
@@ -505,7 +505,7 @@ function CategoryModal({
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={isSubCategory ? `e.g., Asphalt 3-Tab` : 'e.g., Shingles'}
+            placeholder={isSubCategory ? 'e.g., Installation, Repair, Materials' : 'e.g., Roofing, Plumbing, Electrical'}
           />
         </div>
 
