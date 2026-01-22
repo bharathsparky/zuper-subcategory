@@ -136,7 +136,7 @@ function RowActionsMenu({ onEdit, onDelete, onAddSubCategory, isParent = true })
                     active ? 'bg-[#F8FAFC]' : ''
                   } text-[#1E293B]`}
                 >
-                  <IconPlus size={15} className="text-[#64748B]" stroke={2} />
+                  <IconPlus size={15} className="text-[#64748B] w-[15px] h-[15px] min-w-[15px] min-h-[15px]" stroke={2} />
                   Add Sub-Category
                 </button>
               )}
@@ -288,7 +288,7 @@ function CategoryRow({
             className="w-7 h-7 flex items-center justify-center rounded hover:bg-[#EFF6FF] text-[#94A3B8] hover:text-[#2563EB] transition-colors"
             title="Add sub-category"
           >
-            <IconPlus size={16} stroke={2} />
+            <IconPlus size={16} stroke={2} className="w-4 h-4 min-w-[16px] min-h-[16px]" />
           </button>
         )}
       </div>
@@ -317,7 +317,7 @@ function AddSubCategoryRow({ onClick }) {
         onClick={onClick}
         className="flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium text-[#2563EB] hover:bg-[#EFF6FF] rounded-md transition-colors"
       >
-        <IconPlus size={15} stroke={2.5} />
+        <IconPlus size={15} stroke={2.5} className="w-[15px] h-[15px] min-w-[15px] min-h-[15px]" />
         <span>Add sub-category</span>
       </button>
     </div>
@@ -477,7 +477,7 @@ function CategoryModal({
               </div>
             ) : (
               <label className="w-[80px] h-[80px] rounded-lg border-2 border-dashed border-[#CBD5E1] flex flex-col items-center justify-center cursor-pointer hover:border-[#94A3B8] hover:bg-[#F8FAFC] transition-colors">
-                <IconPlus size={20} className="text-[#94A3B8]" />
+                <IconPlus size={20} className="text-[#94A3B8] w-5 h-5 min-w-[20px] min-h-[20px]" />
                 <span className="text-[10px] text-[#94A3B8] mt-1">Upload</span>
                 <input 
                   type="file" 
@@ -920,7 +920,7 @@ function CategorySettings() {
             onClick={() => openCreateModal()}
             className="gap-1.5"
           >
-            <IconPlus size={14} stroke={2.5} />
+            <IconPlus size={14} stroke={2.5} className="w-3.5 h-3.5 min-w-[14px] min-h-[14px]" />
             New Category
           </Button>
         </div>
