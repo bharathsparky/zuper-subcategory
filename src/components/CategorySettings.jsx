@@ -12,9 +12,9 @@ import {
   IconChevronLeft,
   IconChevronsLeft,
   IconChevronsRight,
-  IconEye,
-  IconEyeOff,
-  IconDotsVertical
+  IconDotsVertical,
+  IconCheck,
+  IconX
 } from '@tabler/icons-react';
 import { 
   Modal, 
@@ -208,13 +208,12 @@ function CategoryRow({
   isSearchMatch = false,
 }) {
   const hasSubCategories = !isSubCategory && category.subCategories?.length > 0;
-  const isRestricted = !category.visibility.technicians || !category.visibility.customerPortal;
   const isParent = !isSubCategory;
   
   return (
     <div 
       className={`
-        grid grid-cols-[28px_24px_1fr_100px_36px_36px] h-[52px] border-b border-[#E2E8F0] 
+        grid grid-cols-[28px_24px_48px_1fr_36px_36px] h-[52px] border-b border-[#E2E8F0] 
         hover:bg-[#FAFBFC] transition-colors group
         ${isSubCategory ? 'bg-[#FAFBFC]' : 'bg-white'}
         ${isSearchMatch ? 'bg-[#FFFBEB]' : ''}
@@ -245,8 +244,23 @@ function CategoryRow({
         ) : null}
       </div>
       
+      {/* Category Image */}
+      <div className="flex items-center justify-center">
+        {category.image ? (
+          <div className="w-[36px] h-[36px] rounded-md border border-[#E2E8F0] overflow-hidden">
+            <img src={category.image} alt={category.name} className="w-full h-full object-cover" />
+          </div>
+        ) : (
+          <div className="w-[36px] h-[36px] rounded-md bg-[#F1F5F9] flex items-center justify-center">
+            <span className="text-[12px] font-medium text-[#94A3B8]">
+              {category.name?.charAt(0)?.toUpperCase() || '?'}
+            </span>
+          </div>
+        )}
+      </div>
+      
       {/* Category Name & Description */}
-      <div className={`flex items-center min-w-0 ${isSubCategory ? 'pl-2' : ''}`}>
+      <div className={`flex items-center min-w-0 pl-3 ${isSubCategory ? 'pl-5' : ''}`}>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <span className={`text-[13px] font-medium truncate ${isSubCategory ? 'text-[#475569]' : 'text-[#1E293B]'}`}>
@@ -264,21 +278,6 @@ function CategoryRow({
             </span>
           )}
         </div>
-      </div>
-      
-      {/* Visibility Status */}
-      <div className="flex items-center px-3">
-        {isRestricted ? (
-          <div className="flex items-center gap-1.5 text-[12px] text-[#94A3B8]">
-            <IconEyeOff size={14} stroke={2} />
-            <span>Restricted</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-1.5 text-[12px] text-[#64748B]">
-            <IconEye size={14} stroke={2} />
-            <span>Visible</span>
-          </div>
-        )}
       </div>
       
       {/* Add Sub-Category button - only for parent categories */}
@@ -329,6 +328,19 @@ function AddSubCategoryRow({ onClick }) {
 // Category Modal (Create/Edit)
 // ============================================
 
+// Trade Types data
+const TRADE_TYPES = [
+  { id: 1, name: 'Plumbing' },
+  { id: 2, name: 'Gutters' },
+  { id: 3, name: 'Siding' },
+  { id: 4, name: 'Roofing' },
+  { id: 5, name: 'Exteriors' },
+  { id: 6, name: 'Electrical' },
+  { id: 7, name: 'Interiors' },
+  { id: 8, name: 'HVAC' },
+  { id: 9, name: 'Other' },
+];
+
 function CategoryModal({ 
   isOpen, 
   onClose, 
@@ -339,16 +351,20 @@ function CategoryModal({
 }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [technicianVisibility, setTechnicianVisibility] = useState(true);
-  const [customerPortalVisibility, setCustomerPortalVisibility] = useState(true);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [selectedTradeTypes, setSelectedTradeTypes] = useState([]);
+  const [tradeTypeDropdownOpen, setTradeTypeDropdownOpen] = useState(false);
+  const [tradeTypeSearch, setTradeTypeSearch] = useState('');
 
   // Reset form when modal opens
   React.useEffect(() => {
     if (isOpen) {
       setName(initialData?.name || '');
       setDescription(initialData?.description || '');
-      setTechnicianVisibility(initialData?.visibility?.technicians ?? true);
-      setCustomerPortalVisibility(initialData?.visibility?.customerPortal ?? true);
+      setImagePreview(initialData?.image || null);
+      setSelectedTradeTypes(initialData?.tradeTypes || []);
+      setTradeTypeSearch('');
+      setTradeTypeDropdownOpen(false);
     }
   }, [isOpen, initialData]);
 
@@ -358,14 +374,46 @@ function CategoryModal({
         name: name.trim(),
         description: description.trim(),
         parentId: parentCategory?.id || null,
-        visibility: {
-          technicians: technicianVisibility,
-          customerPortal: customerPortalVisibility,
-        },
+        image: imagePreview,
+        tradeTypes: selectedTradeTypes,
       });
       onClose();
     }
   };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImagePreview(null);
+  };
+
+  const toggleTradeType = (tradeType) => {
+    setSelectedTradeTypes(prev => {
+      const isSelected = prev.some(t => t.id === tradeType.id);
+      if (isSelected) {
+        return prev.filter(t => t.id !== tradeType.id);
+      } else {
+        return [...prev, tradeType];
+      }
+    });
+  };
+
+  const removeTradeType = (tradeTypeId) => {
+    setSelectedTradeTypes(prev => prev.filter(t => t.id !== tradeTypeId));
+  };
+
+  const filteredTradeTypes = TRADE_TYPES.filter(t => 
+    t.name.toLowerCase().includes(tradeTypeSearch.toLowerCase())
+  );
 
   const isSubCategory = parentCategory !== null;
 
@@ -374,7 +422,10 @@ function CategoryModal({
     if (mode === 'edit') {
       return initialData?.isSubCategory ? 'Edit Sub-Category' : 'Edit Category';
     }
-    return isSubCategory ? 'New Sub-Category' : 'New Category';
+    if (isSubCategory) {
+      return `New Sub-Category for ${parentCategory.name}`;
+    }
+    return 'New Category';
   };
 
   return (
@@ -398,21 +449,54 @@ function CategoryModal({
       }
     >
       <div className="space-y-5">
-        {/* Show parent context when creating sub-category */}
-        {mode === 'create' && isSubCategory && (
-          <div className="bg-[#F8FAFC] rounded-lg px-4 py-3">
-            <span className="text-[12px] text-[#64748B]">Creating sub-category under </span>
-            <span className="text-[13px] font-medium text-[#1E293B]">{parentCategory.name}</span>
+        {/* Show parent context in edit mode if it's a sub-category - more subtle */}
+        {mode === 'edit' && initialData?.isSubCategory && (
+          <div className="flex items-center gap-1.5 text-[12px] text-[#64748B]">
+            <span>Sub-category of</span>
+            <span className="font-medium text-[#475569]">{initialData.parentName}</span>
           </div>
         )}
 
-        {/* Show parent context in edit mode if it's a sub-category */}
-        {mode === 'edit' && initialData?.isSubCategory && (
-          <div className="bg-[#F8FAFC] rounded-lg px-4 py-3">
-            <span className="text-[12px] text-[#64748B]">Sub-category of </span>
-            <span className="text-[13px] font-medium text-[#1E293B]">{initialData.parentName}</span>
+        {/* Category Image */}
+        <div>
+          <Label className="mb-2 block">Image</Label>
+          <div className="flex items-start gap-4">
+            {imagePreview ? (
+              <div className="relative w-[80px] h-[80px] rounded-lg border border-[#E2E8F0] overflow-hidden group">
+                <img 
+                  src={imagePreview} 
+                  alt="Category" 
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  onClick={removeImage}
+                  className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                >
+                  <IconTrash size={20} className="text-white" />
+                </button>
+              </div>
+            ) : (
+              <label className="w-[80px] h-[80px] rounded-lg border-2 border-dashed border-[#CBD5E1] flex flex-col items-center justify-center cursor-pointer hover:border-[#94A3B8] hover:bg-[#F8FAFC] transition-colors">
+                <IconPlus size={20} className="text-[#94A3B8]" />
+                <span className="text-[10px] text-[#94A3B8] mt-1">Upload</span>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleImageUpload}
+                  className="hidden" 
+                />
+              </label>
+            )}
+            <div className="flex-1">
+              <p className="text-[12px] text-[#64748B]">
+                Upload an image for this category. This will be displayed in the mobile app for easy visual identification.
+              </p>
+              <p className="text-[11px] text-[#94A3B8] mt-1">
+                Recommended: 200x200px, PNG or JPG
+              </p>
+            </div>
           </div>
-        )}
+        </div>
 
         {/* Category Name */}
         <div>
@@ -436,61 +520,99 @@ function CategoryModal({
           />
         </div>
 
-
-        {/* Visibility Settings */}
+        {/* Trade Type - Picker for categories, Read-only for sub-categories */}
         <div>
-          <Label className="mb-3 block">Visibility</Label>
-          <div className="border border-[#E2E8F0] rounded-lg divide-y divide-[#E2E8F0]">
-            <div 
-              className="flex items-center justify-between p-3 cursor-pointer hover:bg-[#FAFBFC] transition-colors"
-              onClick={() => setTechnicianVisibility(!technicianVisibility)}
-            >
-              <div>
-                <span className="text-[13px] font-medium text-[#1E293B] block">Field Technicians</span>
-                <span className="text-[12px] text-[#94A3B8]">Visible in mobile app</span>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={technicianVisibility}
-                onClick={(e) => { e.stopPropagation(); setTechnicianVisibility(!technicianVisibility); }}
-                className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  technicianVisibility ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    technicianVisibility ? 'translate-x-4' : 'translate-x-0'
-                  }`}
-                />
-              </button>
+          <Label className="mb-2 block">Trade Type</Label>
+          {isSubCategory ? (
+            // Read-only display for sub-categories - shows inherited trade types from parent
+            <div className="min-h-[42px] px-3 py-2 border border-[#E2E8F0] rounded-lg bg-[#F8FAFC] flex items-center flex-wrap gap-2">
+              {parentCategory?.tradeTypes?.length > 0 ? (
+                parentCategory.tradeTypes.map(t => (
+                  <span key={t.id} className="text-[13px] text-[#1E293B] bg-white px-2 py-1 rounded border border-[#E2E8F0]">
+                    {t.name}
+                  </span>
+                ))
+              ) : (
+                <span className="text-[13px] text-[#94A3B8]">Not set</span>
+              )}
             </div>
-
-            <div 
-              className="flex items-center justify-between p-3 cursor-pointer hover:bg-[#FAFBFC] transition-colors"
-              onClick={() => setCustomerPortalVisibility(!customerPortalVisibility)}
-            >
-              <div>
-                <span className="text-[13px] font-medium text-[#1E293B] block">Customer Portal</span>
-                <span className="text-[12px] text-[#94A3B8]">Visible on estimates & invoices</span>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={customerPortalVisibility}
-                onClick={(e) => { e.stopPropagation(); setCustomerPortalVisibility(!customerPortalVisibility); }}
-                className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  customerPortalVisibility ? 'bg-[#2563EB]' : 'bg-[#E2E8F0]'
-                }`}
+          ) : (
+            // Trade Type multi-select picker for categories
+            <div className="relative">
+              {/* Selected Trade Types display with dropdown trigger */}
+              <div 
+                className="min-h-[42px] px-3 py-2 border border-[#E2E8F0] rounded-lg bg-white cursor-pointer flex items-center flex-wrap gap-2"
+                onClick={() => setTradeTypeDropdownOpen(!tradeTypeDropdownOpen)}
               >
-                <span
-                  className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    customerPortalVisibility ? 'translate-x-4' : 'translate-x-0'
-                  }`}
+                {selectedTradeTypes.length === 0 ? (
+                  <span className="text-[13px] text-[#94A3B8]">Choose Trade Type(s)</span>
+                ) : (
+                  selectedTradeTypes.map(trade => (
+                    <span 
+                      key={trade.id}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-[#EFF6FF] text-[#2563EB] rounded text-[12px] font-medium"
+                    >
+                      {trade.name}
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); removeTradeType(trade.id); }}
+                        className="hover:bg-[#DBEAFE] rounded-full p-0.5"
+                      >
+                        <IconX size={12} stroke={2} />
+                      </button>
+                    </span>
+                  ))
+                )}
+                <IconChevronDown 
+                  size={16} 
+                  className={`ml-auto text-[#94A3B8] transition-transform flex-shrink-0 ${tradeTypeDropdownOpen ? 'rotate-180' : ''}`} 
                 />
-              </button>
+              </div>
+              
+              {/* Dropdown */}
+              {tradeTypeDropdownOpen && (
+                <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-[#E2E8F0] rounded-lg shadow-lg max-h-[240px] overflow-hidden">
+                  {/* Search */}
+                  <div className="p-2 border-b border-[#E2E8F0]">
+                    <input
+                      type="text"
+                      placeholder="Search"
+                      value={tradeTypeSearch}
+                      onChange={(e) => setTradeTypeSearch(e.target.value)}
+                      className="w-full h-[32px] px-3 text-[13px] text-[#64748B] placeholder-[#94A3B8] border border-[#E2E8F0] rounded bg-white focus:outline-none focus:border-[#94A3B8]"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                  
+                  {/* Options - multi-select with checkboxes */}
+                  <div className="max-h-[180px] overflow-y-auto">
+                    {filteredTradeTypes.map(trade => {
+                      const isSelected = selectedTradeTypes.some(t => t.id === trade.id);
+                      return (
+                        <div
+                          key={trade.id}
+                          className="px-3 py-2.5 hover:bg-[#F8FAFC] cursor-pointer flex items-center gap-3"
+                          onClick={(e) => { e.stopPropagation(); toggleTradeType(trade); }}
+                        >
+                          {/* Checkbox */}
+                          <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
+                            isSelected ? 'bg-[#2563EB] border-[#2563EB]' : 'border-[#CBD5E1]'
+                          }`}>
+                            {isSelected && (
+                              <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                                <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            )}
+                          </div>
+                          <span className="text-[13px] text-[#1E293B]">{trade.name}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          )}
         </div>
       </div>
     </Modal>
@@ -736,8 +858,8 @@ function CategorySettings() {
   };
 
   // Open edit modal
-  const openEditModal = (category, isSubCategory = false, parentId = null, parentName = null) => {
-    setSelectedCategory({ ...category, isSubCategory, parentId, parentName });
+  const openEditModal = (category, isSubCategory = false, parentId = null, parentName = null, parentTradeType = null) => {
+    setSelectedCategory({ ...category, isSubCategory, parentId, parentName, parentTradeType });
     setIsEditModalOpen(true);
   };
 
@@ -807,11 +929,11 @@ function CategorySettings() {
       {/* Table */}
       <div className="flex-1 overflow-hidden flex flex-col">
         {/* Table Header */}
-        <div className="bg-[#F8FAFC] border-b border-[#E2E8F0] grid grid-cols-[28px_24px_1fr_100px_36px_36px] h-[36px] min-h-[36px] px-5">
+        <div className="bg-[#F8FAFC] border-b border-[#E2E8F0] grid grid-cols-[28px_24px_48px_1fr_36px_36px] h-[36px] min-h-[36px] px-5">
           <div></div>
           <div></div>
-          <div className="flex items-center text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Name</div>
-          <div className="flex items-center text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Visibility</div>
+          <div className="flex items-center text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Image</div>
+          <div className="flex items-center text-[11px] font-semibold text-[#64748B] uppercase tracking-wider pl-3">Name</div>
           <div></div>
           <div></div>
         </div>
@@ -872,7 +994,7 @@ function CategorySettings() {
                           key={subCategory.id}
                           category={subCategory}
                           isSubCategory={true}
-                          onEdit={() => openEditModal(subCategory, true, category.id, category.name)}
+                          onEdit={() => openEditModal(subCategory, true, category.id, category.name, category.tradeType)}
                           onDelete={() => openDeleteModal(subCategory, true, category.id)}
                           searchTerm={searchTerm}
                           isSearchMatch={matchingSubCategoryIds.has(subCategory.id)}
@@ -979,6 +1101,11 @@ function CategorySettings() {
         onSave={handleEditCategory}
         mode="edit"
         initialData={selectedCategory}
+        parentCategory={selectedCategory?.isSubCategory ? {
+          id: selectedCategory.parentId,
+          name: selectedCategory.parentName,
+          tradeType: selectedCategory.parentTradeType
+        } : null}
       />
 
       {/* Delete Modal */}

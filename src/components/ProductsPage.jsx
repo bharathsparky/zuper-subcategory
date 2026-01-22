@@ -72,21 +72,22 @@ const getCategoryPath = (product) => {
   return product.category;
 };
 
-// Helper to render category cell with hierarchy
+// Helper to render category cell - shows only subcategory name (or category if no subcategory)
 const CategoryCell = ({ product }) => {
-  if (product.subCategory) {
-    return (
-      <div className="flex items-center gap-1 min-w-0" title={`${product.category} > ${product.subCategory}`}>
-        <span className="text-[#64748B] truncate flex-shrink-0 max-w-[60px]">{product.category}</span>
-        <IconBreadcrumb size={12} className="text-[#94A3B8] flex-shrink-0" stroke={2} />
-        <span className="text-[#1E293B] truncate">{product.subCategory}</span>
-      </div>
-    );
-  }
-  return <span className="text-[#1E293B]">{product.category}</span>;
+  // Show subcategory name if it exists, otherwise show the category name
+  const displayName = product.subCategory || product.category;
+  
+  return (
+    <span 
+      className="text-[#1E293B] truncate block" 
+      title={product.subCategory ? `${product.category} > ${product.subCategory}` : product.category}
+    >
+      {displayName}
+    </span>
+  );
 };
 
-// Hierarchical Category Selector Component
+// Hierarchical Category Selector Component - with checkbox pattern
 function CategoryValueSelector({ 
   categoryOptions, 
   selectedValues, 
@@ -120,54 +121,58 @@ function CategoryValueSelector({
 
         return (
           <div key={category} className="border-b border-[#F1F5F9] last:border-b-0">
-            {/* Parent Category Header */}
-            <div 
-              onClick={() => {
-                if (hasSubCategories) {
-                  // Categories with sub-categories: click expands/collapses
-                  toggleCategory(category);
-                } else {
-                  // Categories without sub-categories: click selects
-                  if (!isParentSelected) onSelectValue(category);
-                }
-              }}
-              className={`flex items-center h-9 px-3 hover:bg-[#F8FAFC] transition-colors cursor-pointer ${
-                !hasSubCategories && isParentSelected ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {hasSubCategories && (
-                <IconChevronDown 
-                  size={14} 
-                  stroke={2}
-                  className={`mr-2 text-[#64748B] transition-transform ${isExpanded ? '' : '-rotate-90'}`}
-                />
+            {/* Parent Category Header with expand arrow and checkbox */}
+            <div className="flex items-center h-10 px-3 hover:bg-[#F8FAFC] transition-colors">
+              {/* Expand/Collapse Arrow */}
+              {hasSubCategories ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleCategory(category);
+                  }}
+                  className="w-5 h-5 flex items-center justify-center mr-1"
+                >
+                  <IconChevronDown 
+                    size={14} 
+                    stroke={2}
+                    className={`text-[#64748B] transition-transform ${isExpanded ? '' : '-rotate-90'}`}
+                  />
+                </button>
+              ) : (
+                <div className="w-6" />
               )}
               
-              <span className="text-[13px] text-[#1E293B] flex-1">{category}</span>
-              {hasSubCategories && (
-                <span className="text-[11px] text-[#94A3B8]">
-                  ({subCategoryArray.length})
-                </span>
-              )}
+              {/* Checkbox for selecting parent category */}
+              <button
+                type="button"
+                onClick={() => !isParentSelected && onSelectValue(category)}
+                disabled={isParentSelected}
+                className={`w-4 h-4 mr-2.5 rounded border flex items-center justify-center flex-shrink-0 ${
+                  isParentSelected 
+                    ? 'bg-[#2563EB] border-[#2563EB] cursor-not-allowed' 
+                    : 'border-[#CBD5E1] bg-white hover:border-[#94A3B8] cursor-pointer'
+                }`}
+              >
+                {isParentSelected && (
+                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                    <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </button>
+              
+              {/* Category Name */}
+              <span 
+                className={`text-[13px] flex-1 ${isParentSelected ? 'text-[#1E293B] font-medium' : 'text-[#1E293B]'}`}
+                onClick={() => !isParentSelected && onSelectValue(category)}
+              >
+                {category}
+              </span>
             </div>
 
-            {/* Sub-Categories (Expanded) */}
+            {/* Sub-Categories (Expanded) - no "All" option */}
             {hasSubCategories && isExpanded && (
               <div className="bg-[#FAFBFC]">
-                {/* "All [Category]" option to select the parent */}
-                <div
-                  onClick={() => !isParentSelected && onSelectValue(category)}
-                  className={`w-full h-8 pl-7 pr-3 flex items-center cursor-pointer hover:bg-[#F1F5F9] transition-colors border-b border-[#E2E8F0] ${
-                    isParentSelected ? 'opacity-50 cursor-not-allowed bg-[#F1F5F9]' : ''
-                  }`}
-                >
-                  <span className="text-[13px] text-[#1E293B] font-medium flex-1">All {category}</span>
-                  {isParentSelected && (
-                    <IconCheck size={14} className="text-[#22C55E]" stroke={2} />
-                  )}
-                </div>
-                
-                {/* Individual sub-categories */}
                 {subCategoryArray.map((sub) => {
                   const subValue = `${category} > ${sub}`;
                   const isSelected = selectedValues.includes(subValue);
@@ -175,15 +180,32 @@ function CategoryValueSelector({
                   return (
                     <div
                       key={sub}
-                      onClick={() => !isSelected && onSelectValue(subValue)}
-                      className={`w-full h-8 pl-7 pr-3 flex items-center cursor-pointer hover:bg-[#F1F5F9] transition-colors ${
-                        isSelected ? 'opacity-50 cursor-not-allowed bg-[#F1F5F9]' : ''
-                      }`}
+                      className="flex items-center h-9 pl-11 pr-3 hover:bg-[#F1F5F9] transition-colors"
                     >
-                      <span className="text-[13px] text-[#64748B] flex-1">{sub}</span>
-                      {isSelected && (
-                        <IconCheck size={14} className="text-[#22C55E]" stroke={2} />
-                      )}
+                      {/* Checkbox for subcategory */}
+                      <button
+                        type="button"
+                        onClick={() => !isSelected && onSelectValue(subValue)}
+                        disabled={isSelected}
+                        className={`w-4 h-4 mr-2.5 rounded border flex items-center justify-center flex-shrink-0 ${
+                          isSelected 
+                            ? 'bg-[#2563EB] border-[#2563EB] cursor-not-allowed' 
+                            : 'border-[#CBD5E1] bg-white hover:border-[#94A3B8] cursor-pointer'
+                        }`}
+                      >
+                        {isSelected && (
+                          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                            <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
+                      </button>
+                      
+                      <span 
+                        className={`text-[13px] flex-1 cursor-pointer ${isSelected ? 'text-[#1E293B] font-medium' : 'text-[#64748B]'}`}
+                        onClick={() => !isSelected && onSelectValue(subValue)}
+                      >
+                        {sub}
+                      </span>
                     </div>
                   );
                 })}
@@ -739,7 +761,11 @@ function ProductsPage({ onNavigateToSettings, onProductClick, onNewPartService }
               onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
               className="h-[31.5px] px-3 flex items-center gap-2 border border-[#E2E8F0] rounded-md text-[13px] font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors"
             >
-              {categoryFilter === 'all' ? 'All Parts & Services' : categoryFilter}
+              {categoryFilter === 'all' 
+                ? 'All Parts & Services' 
+                : categoryFilter.includes(' > ') 
+                  ? categoryFilter.split(' > ')[1] 
+                  : categoryFilter}
               <IconChevronDown size={14} className="text-[#64748B]" stroke={2} />
             </button>
             

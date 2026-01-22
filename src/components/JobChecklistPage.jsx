@@ -157,61 +157,57 @@ function CategoryDropdown({ isOpen, onClose, selectedCategories, onCategoryToggl
 
           return (
             <div key={category.name}>
-              {/* Parent Category */}
-              <div
-                onClick={() => {
-                  if (hasSubCategories) {
-                    toggleCategory(category.name);
-                  } else {
-                    onCategoryToggle(category.name);
-                  }
-                }}
-                className={`flex items-center h-[40px] px-[12px] cursor-pointer hover:bg-[#F8FAFC] transition-colors ${
-                  isParentSelected && !hasSubCategories ? 'bg-[#EFF6FF]' : ''
-                }`}
-              >
+              {/* Parent Category with expand arrow and checkbox */}
+              <div className="flex items-center h-[40px] px-[12px] hover:bg-[#F8FAFC] transition-colors">
+                {/* Expand/Collapse Arrow */}
                 {hasSubCategories ? (
-                  <IconChevronDown 
-                    size={16} 
-                    stroke={2}
-                    className={`mr-[8px] text-[#64748B] transition-transform ${isExpanded ? '' : '-rotate-90'}`}
-                  />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCategory(category.name);
+                    }}
+                    className="w-5 h-5 flex items-center justify-center mr-1"
+                  >
+                    <IconChevronDown 
+                      size={14} 
+                      stroke={2}
+                      className={`text-[#64748B] transition-transform ${isExpanded ? '' : '-rotate-90'}`}
+                    />
+                  </button>
                 ) : (
-                  <div className="w-[24px]" />
+                  <div className="w-6" />
                 )}
                 
-                <span className={`flex-1 text-[14px] ${
-                  isParentSelected && !hasSubCategories ? 'text-[#2563EB] font-medium' : 'text-[#1E293B]'
-                }`}>
+                {/* Checkbox for parent category */}
+                <button
+                  type="button"
+                  onClick={() => onCategoryToggle(category.name)}
+                  className={`w-4 h-4 mr-2.5 rounded border flex items-center justify-center flex-shrink-0 ${
+                    isParentSelected 
+                      ? 'bg-[#2563EB] border-[#2563EB]' 
+                      : 'border-[#CBD5E1] bg-white hover:border-[#94A3B8]'
+                  }`}
+                >
+                  {isParentSelected && (
+                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                      <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </button>
+                
+                {/* Category Name */}
+                <span 
+                  className={`flex-1 text-[14px] cursor-pointer ${isParentSelected ? 'text-[#1E293B] font-medium' : 'text-[#1E293B]'}`}
+                  onClick={() => onCategoryToggle(category.name)}
+                >
                   {category.name}
                 </span>
-                
-                {!hasSubCategories && isParentSelected && (
-                  <IconCheck size={16} className="text-[#22C55E]" stroke={2} />
-                )}
               </div>
 
-              {/* Sub-Categories */}
+              {/* Sub-Categories (no "All" option) */}
               {hasSubCategories && isExpanded && (
                 <div className="bg-[#FAFBFC]">
-                  {/* All [Category] option */}
-                  <div
-                    onClick={() => onCategoryToggle(category.name)}
-                    className={`flex items-center h-[36px] pl-[40px] pr-[12px] cursor-pointer hover:bg-[#F1F5F9] transition-colors ${
-                      isParentSelected ? 'bg-[#EFF6FF]' : ''
-                    }`}
-                  >
-                    <span className={`flex-1 text-[13px] font-medium ${
-                      isParentSelected ? 'text-[#2563EB]' : 'text-[#1E293B]'
-                    }`}>
-                      All {category.name}
-                    </span>
-                    {isParentSelected && (
-                      <IconCheck size={14} className="text-[#22C55E]" stroke={2} />
-                    )}
-                  </div>
-                  
-                  {/* Individual sub-categories */}
                   {showAllSubs.map((sub) => {
                     const subValue = `${category.name} > ${sub}`;
                     const isSelected = selectedCategories.includes(subValue);
@@ -219,19 +215,31 @@ function CategoryDropdown({ isOpen, onClose, selectedCategories, onCategoryToggl
                     return (
                       <div
                         key={sub}
+                        className="flex items-center h-[36px] pl-[44px] pr-[12px] cursor-pointer hover:bg-[#F1F5F9] transition-colors"
                         onClick={() => onCategoryToggle(subValue)}
-                        className={`flex items-center h-[36px] pl-[40px] pr-[12px] cursor-pointer hover:bg-[#F1F5F9] transition-colors ${
-                          isSelected ? 'bg-[#EFF6FF]' : ''
-                        }`}
                       >
-                        <span className={`flex-1 text-[13px] ${
-                          isSelected ? 'text-[#2563EB] font-medium' : 'text-[#1E293B]'
-                        }`}>
+                        {/* Checkbox */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onCategoryToggle(subValue);
+                          }}
+                          className={`w-4 h-4 mr-2.5 rounded border flex items-center justify-center flex-shrink-0 ${
+                            isSelected 
+                              ? 'bg-[#2563EB] border-[#2563EB]' 
+                              : 'border-[#CBD5E1] bg-white hover:border-[#94A3B8]'
+                          }`}
+                        >
+                          {isSelected && (
+                            <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                              <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          )}
+                        </button>
+                        <span className={`flex-1 text-[13px] ${isSelected ? 'text-[#1E293B] font-medium' : 'text-[#64748B]'}`}>
                           {sub}
                         </span>
-                        {isSelected && (
-                          <IconCheck size={14} className="text-[#22C55E]" stroke={2} />
-                        )}
                       </div>
                     );
                   })}
