@@ -333,10 +333,26 @@ function SelectedProductCard({ product, quantity, onEdit, onRemove }) {
   );
 }
 
-// Category Grid Picker (for Add Products)
-function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selectedSubCategory }) {
+// Category Grid Picker (for Add Products) - Multi-select subcategories
+function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selectedSubCategories = [] }) {
   const [viewingCategory, setViewingCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [tempSelectedSubs, setTempSelectedSubs] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  
+  // Initialize temp selection only when entering subcategory view
+  React.useEffect(() => {
+    if (viewingCategory) {
+      const category = CATEGORIES.find(c => c.id === viewingCategory);
+      if (selectedCategory === category?.name) {
+        setTempSelectedSubs([...selectedSubCategories]);
+        setSelectAll(selectedSubCategories.length === 0);
+      } else {
+        setTempSelectedSubs([]);
+        setSelectAll(false);
+      }
+    }
+  }, [viewingCategory]); // Only trigger when viewingCategory changes
   
   if (!isOpen) return null;
 
@@ -344,7 +360,27 @@ function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selec
     cat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Subcategory view
+  const toggleSubCategory = (subName) => {
+    setSelectAll(false);
+    setTempSelectedSubs(prev => 
+      prev.includes(subName) 
+        ? prev.filter(s => s !== subName)
+        : [...prev, subName]
+    );
+  };
+
+  const handleSelectAll = () => {
+    setSelectAll(true);
+    setTempSelectedSubs([]);
+  };
+
+  const handleApply = (categoryName) => {
+    onSelect(categoryName, selectAll ? [] : tempSelectedSubs);
+    setViewingCategory(null);
+    onClose();
+  };
+
+  // Subcategory view with multi-select
   if (viewingCategory) {
     const category = CATEGORIES.find(c => c.id === viewingCategory);
     return (
@@ -362,33 +398,49 @@ function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selec
           </button>
         </div>
 
-        {/* Subcategory Grid */}
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="grid grid-cols-2 gap-3">
-            {/* All option */}
-            <CategoryCard
-              category={`All ${category?.name}`}
-              image={CATEGORY_IMAGES[category?.name]}
-              isSelected={selectedCategory === category?.name && !selectedSubCategory}
-              onClick={() => {
-                onSelect(category.name, null);
-                setViewingCategory(null);
-                onClose();
-              }}
-            />
-            {category?.subCategories.map(sub => (
-              <CategoryCard
+        {/* Subcategory List with Checkboxes */}
+        <div className="flex-1 overflow-y-auto">
+          {/* All option */}
+          <button
+            onClick={handleSelectAll}
+            className="w-full px-4 py-4 flex items-center gap-4 border-b border-[#2D3339] hover:bg-[#2D3339]"
+          >
+            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+              selectAll ? 'bg-[#F97316] border-[#F97316]' : 'border-[#4B5563]'
+            }`}>
+              {selectAll && <IconCheck size={14} className="text-white" />}
+            </div>
+            <span className="text-white flex-1 text-left">All {category?.name}</span>
+          </button>
+
+          {/* Subcategory items */}
+          {category?.subCategories.map(sub => {
+            const isSelected = tempSelectedSubs.includes(sub.name);
+            return (
+              <button
                 key={sub.id}
-                category={sub.name}
-                isSelected={selectedSubCategory === sub.name}
-                onClick={() => {
-                  onSelect(category.name, sub.name);
-                  setViewingCategory(null);
-                  onClose();
-                }}
-              />
-            ))}
-          </div>
+                onClick={() => toggleSubCategory(sub.name)}
+                className="w-full px-4 py-4 flex items-center gap-4 border-b border-[#2D3339] hover:bg-[#2D3339]"
+              >
+                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
+                  isSelected ? 'bg-[#F97316] border-[#F97316]' : 'border-[#4B5563]'
+                }`}>
+                  {isSelected && <IconCheck size={14} className="text-white" />}
+                </div>
+                <span className="text-white flex-1 text-left">{sub.name}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Apply Button */}
+        <div className="px-4 py-4 border-t border-[#2D3339]">
+          <button 
+            onClick={() => handleApply(category.name)}
+            className="w-full bg-[#F97316] text-white font-medium py-3.5 rounded-lg"
+          >
+            Apply {tempSelectedSubs.length > 0 ? `(${tempSelectedSubs.length} selected)` : ''}
+          </button>
         </div>
       </div>
     );
@@ -442,7 +494,7 @@ function AddProductsScreen({ isOpen, onClose }) {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedSubCategory, setSelectedSubCategory] = useState(null);
+  const [selectedSubCategories, setSelectedSubCategories] = useState([]); // Multi-select
   const [searchTerm, setSearchTerm] = useState('');
   
   if (!isOpen) return null;
@@ -461,14 +513,17 @@ function AddProductsScreen({ isOpen, onClose }) {
     return selectedProducts.some(p => p.product.id === productId);
   };
 
-  const handleCategorySelect = (category, subCategory) => {
+  const handleCategorySelect = (category, subCategories) => {
     setSelectedCategory(category);
-    setSelectedSubCategory(subCategory);
+    setSelectedSubCategories(subCategories || []);
   };
 
   const getCategoryDisplay = () => {
     if (!selectedCategory) return 'All Categories';
-    if (selectedSubCategory) return selectedSubCategory;
+    if (selectedSubCategories.length > 0) {
+      if (selectedSubCategories.length === 1) return selectedSubCategories[0];
+      return `${selectedSubCategories.length} selected`;
+    }
     return selectedCategory;
   };
 
@@ -477,7 +532,9 @@ function AddProductsScreen({ isOpen, onClose }) {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           product.sku.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !selectedCategory || product.category === selectedCategory;
-    const matchesSubCategory = !selectedSubCategory || product.subCategory === selectedSubCategory;
+    // Multi-select: if no subcategories selected, show all; otherwise filter by selected
+    const matchesSubCategory = selectedSubCategories.length === 0 || 
+                               selectedSubCategories.includes(product.subCategory);
     return matchesSearch && matchesCategory && matchesSubCategory;
   });
 
@@ -612,7 +669,7 @@ function AddProductsScreen({ isOpen, onClose }) {
         onClose={() => setShowCategoryPicker(false)}
         onSelect={handleCategorySelect}
         selectedCategory={selectedCategory}
-        selectedSubCategory={selectedSubCategory}
+        selectedSubCategories={selectedSubCategories}
       />
     </div>
   );
