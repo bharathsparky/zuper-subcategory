@@ -342,7 +342,12 @@ function CategoryPickerScreen({
             </div>
             <span className="text-white flex-1 text-left">{category.name}</span>
             {category.subCategories.length > 0 && (
-              <IconChevronRight size={20} className="text-[#6B7280]" />
+              <div className="flex items-center gap-2">
+                <span className="text-[#6B7280] text-sm">
+                  {category.subCategories.length} sub
+                </span>
+                <IconChevronRight size={20} className="text-[#6B7280]" />
+              </div>
             )}
           </button>
         ))}
