@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Header from './components/Header'
 import Sidebar from './components/Sidebar'
 import WorkspaceSidebar from './components/WorkspaceSidebar'
@@ -9,11 +9,32 @@ import NewPartServicePage from './components/NewPartServicePage'
 import JobDetailsPage from './components/JobDetailsPage'
 import JobChecklistPage from './components/JobChecklistPage'
 import ReportsPage from './components/ReportsPage'
+import MobileCategoryPage from './components/MobileCategoryPage'
 
 function App() {
+  // Check if we're on the /mobile route
+  const [isMobileRoute, setIsMobileRoute] = useState(() => {
+    const path = window.location.pathname
+    return path === '/mobile' || path === '/mobile/'
+  })
+  
   // 'workspace' = Products listing, 'settings' = Category Settings, 'product-details' = Product details, 'new-part-service' = New Part/Service form, 'job-details' = Job Details, 'job-checklist' = Job Checklist, 'reports' = Reports
   const [currentView, setCurrentView] = useState('settings')
   const [selectedProduct, setSelectedProduct] = useState(null)
+  
+  useEffect(() => {
+    const checkRoute = () => {
+      const path = window.location.pathname
+      setIsMobileRoute(path === '/mobile' || path === '/mobile/')
+    }
+    window.addEventListener('popstate', checkRoute)
+    return () => window.removeEventListener('popstate', checkRoute)
+  }, [])
+
+  // If on mobile route, render the mobile page
+  if (isMobileRoute) {
+    return <MobileCategoryPage />
+  }
 
   const navigateToWorkspace = () => {
     setSelectedProduct(null)
