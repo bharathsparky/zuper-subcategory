@@ -25,27 +25,27 @@ const CATEGORIES = [
     id: 1, 
     name: 'Roofing',
     subCategories: [
-      { id: 101, name: 'Installation' },
-      { id: 102, name: 'Repair' },
-      { id: 103, name: 'Inspection' },
+      { id: 101, name: 'Installation', image: 'https://images.unsplash.com/photo-1632759145351-1d592919f522?w=400&h=240&fit=crop' },
+      { id: 102, name: 'Repair', image: 'https://images.unsplash.com/photo-1635424710928-0544e8512eae?w=400&h=240&fit=crop' },
+      { id: 103, name: 'Inspection', image: 'https://images.unsplash.com/photo-1590496793929-36417d3117de?w=400&h=240&fit=crop' },
     ]
   },
   { 
     id: 2, 
     name: 'Plumbing',
     subCategories: [
-      { id: 201, name: 'Pipe Repair' },
-      { id: 202, name: 'Drain Cleaning' },
-      { id: 203, name: 'Water Heater' },
+      { id: 201, name: 'Pipe Repair', image: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=400&h=240&fit=crop' },
+      { id: 202, name: 'Drain Cleaning', image: 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=240&fit=crop' },
+      { id: 203, name: 'Water Heater', image: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=400&h=240&fit=crop' },
     ]
   },
   { 
     id: 3, 
     name: 'Electrical',
     subCategories: [
-      { id: 301, name: 'Installation' },
-      { id: 302, name: 'Maintenance' },
-      { id: 303, name: 'Troubleshooting' },
+      { id: 301, name: 'Installation', image: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=400&h=240&fit=crop' },
+      { id: 302, name: 'Maintenance', image: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=240&fit=crop' },
+      { id: 303, name: 'Troubleshooting', image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=240&fit=crop' },
     ]
   },
   { id: 4, name: 'HVAC', subCategories: [] },
@@ -54,9 +54,9 @@ const CATEGORIES = [
     id: 6, 
     name: 'General Labor',
     subCategories: [
-      { id: 601, name: 'Hourly Labor' },
-      { id: 602, name: 'Emergency Services' },
-      { id: 603, name: 'Consultation' },
+      { id: 601, name: 'Hourly Labor', image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=240&fit=crop' },
+      { id: 602, name: 'Emergency Services', image: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?w=400&h=240&fit=crop' },
+      { id: 603, name: 'Consultation', image: 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400&h=240&fit=crop' },
     ]
   },
   { id: 7, name: 'Internal Costs', subCategories: [] },
@@ -380,9 +380,11 @@ function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selec
     onClose();
   };
 
-  // Subcategory view with multi-select
+  // Subcategory view with multi-select and images
   if (viewingCategory) {
     const category = CATEGORIES.find(c => c.id === viewingCategory);
+    const categoryImage = CATEGORY_IMAGES[category?.name];
+    
     return (
       <div className="fixed inset-0 z-50 bg-[#1A1D21] text-white flex flex-col">
         {/* Header */}
@@ -398,39 +400,72 @@ function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selec
           </button>
         </div>
 
-        {/* Subcategory List with Checkboxes */}
-        <div className="flex-1 overflow-y-auto">
-          {/* All option */}
-          <button
-            onClick={handleSelectAll}
-            className="w-full px-4 py-4 flex items-center gap-4 border-b border-[#2D3339] hover:bg-[#2D3339]"
-          >
-            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-              selectAll ? 'bg-[#F97316] border-[#F97316]' : 'border-[#4B5563]'
-            }`}>
-              {selectAll && <IconCheck size={14} className="text-white" />}
-            </div>
-            <span className="text-white flex-1 text-left">All {category?.name}</span>
-          </button>
-
-          {/* Subcategory items */}
-          {category?.subCategories.map(sub => {
-            const isSelected = tempSelectedSubs.includes(sub.name);
-            return (
-              <button
-                key={sub.id}
-                onClick={() => toggleSubCategory(sub.name)}
-                className="w-full px-4 py-4 flex items-center gap-4 border-b border-[#2D3339] hover:bg-[#2D3339]"
-              >
-                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                  isSelected ? 'bg-[#F97316] border-[#F97316]' : 'border-[#4B5563]'
+        {/* Subcategory Grid with Images and Checkboxes */}
+        <div className="flex-1 overflow-y-auto p-4">
+          <div className="grid grid-cols-2 gap-3">
+            {/* All option card */}
+            <button
+              onClick={handleSelectAll}
+              className={`relative bg-[#2D3339] rounded-xl overflow-hidden ${
+                selectAll ? 'ring-2 ring-[#F97316]' : ''
+              }`}
+            >
+              <div className="aspect-[4/3] relative">
+                {categoryImage && (
+                  <img 
+                    src={categoryImage} 
+                    alt={`All ${category?.name}`}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                {/* Checkbox */}
+                <div className={`absolute top-2 left-2 w-6 h-6 rounded border-2 flex items-center justify-center ${
+                  selectAll ? 'bg-[#F97316] border-[#F97316]' : 'border-white/70 bg-black/30'
                 }`}>
-                  {isSelected && <IconCheck size={14} className="text-white" />}
+                  {selectAll && <IconCheck size={16} className="text-white" />}
                 </div>
-                <span className="text-white flex-1 text-left">{sub.name}</span>
-              </button>
-            );
-          })}
+              </div>
+              <div className="p-3">
+                <span className="text-white text-sm font-medium">All {category?.name}</span>
+              </div>
+            </button>
+
+            {/* Subcategory cards */}
+            {category?.subCategories.map((sub, index) => {
+              const isSelected = tempSelectedSubs.includes(sub.name);
+              // Use different seed for each subcategory image
+              const subImage = `https://images.unsplash.com/photo-${1600585154340 + index * 1000}-be6161a56a0c?w=400&h=240&fit=crop`;
+              
+              return (
+                <button
+                  key={sub.id}
+                  onClick={() => toggleSubCategory(sub.name)}
+                  className={`relative bg-[#2D3339] rounded-xl overflow-hidden ${
+                    isSelected ? 'ring-2 ring-[#F97316]' : ''
+                  }`}
+                >
+                  <div className="aspect-[4/3] relative">
+                    <img 
+                      src={sub.image || categoryImage || `https://picsum.photos/seed/${sub.name.toLowerCase()}/400/240`} 
+                      alt={sub.name}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    {/* Checkbox */}
+                    <div className={`absolute top-2 left-2 w-6 h-6 rounded border-2 flex items-center justify-center ${
+                      isSelected ? 'bg-[#F97316] border-[#F97316]' : 'border-white/70 bg-black/30'
+                    }`}>
+                      {isSelected && <IconCheck size={16} className="text-white" />}
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <span className="text-white text-sm font-medium">{sub.name}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Apply Button */}
