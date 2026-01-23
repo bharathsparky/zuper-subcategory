@@ -69,28 +69,36 @@ const CATEGORIES = [
   { id: 14, name: 'Consumable', subCategories: [] },
 ];
 
-// Category images (roofing-related for demo)
+// Category images with reliable placeholder sources
 const CATEGORY_IMAGES = {
-  'Roofing': 'https://images.unsplash.com/photo-1632759145351-1d592919f522?w=200&h=120&fit=crop',
-  'Plumbing': 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=200&h=120&fit=crop',
-  'Electrical': 'https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=200&h=120&fit=crop',
-  'HVAC': 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=200&h=120&fit=crop',
-  'Tools': 'https://images.unsplash.com/photo-1581147036324-c1c1d0d8b5a3?w=200&h=120&fit=crop',
-  'Spare Parts': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&h=120&fit=crop',
+  'Roofing': 'https://picsum.photos/seed/roofing/200/120',
+  'Plumbing': 'https://picsum.photos/seed/plumbing/200/120',
+  'Electrical': 'https://picsum.photos/seed/electrical/200/120',
+  'HVAC': 'https://picsum.photos/seed/hvac/200/120',
+  'Tools': 'https://picsum.photos/seed/tools/200/120',
+  'Spare Parts': 'https://picsum.photos/seed/spareparts/200/120',
+  'Landscaping': 'https://picsum.photos/seed/landscaping/200/120',
+  'Painting': 'https://picsum.photos/seed/painting/200/120',
+  'General Labor': 'https://picsum.photos/seed/labor/200/120',
+  'Internal Costs': 'https://picsum.photos/seed/costs/200/120',
+  'FMCG': 'https://picsum.photos/seed/fmcg/200/120',
+  'Manpower': 'https://picsum.photos/seed/manpower/200/120',
+  'On Demand Service': 'https://picsum.photos/seed/ondemand/200/120',
+  'Consumable': 'https://picsum.photos/seed/consumable/200/120',
 };
 
-// Sample products data
+// Sample products data with reliable placeholder images
 const SAMPLE_PRODUCTS = [
   { 
     id: 1, 
-    name: '10 mm Screw -', 
+    name: '10 mm Screw', 
     sku: '758323', 
     price: 120.00, 
     available: false,
     category: 'Roofing',
     subCategory: 'Installation',
     location: 'Redmond Warehouse',
-    image: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=100&h=100&fit=crop'
+    image: 'https://picsum.photos/seed/screw1/100/100'
   },
   { 
     id: 2, 
@@ -101,7 +109,8 @@ const SAMPLE_PRODUCTS = [
     description: 'Description of the part',
     category: 'Roofing',
     subCategory: 'Repair',
-    location: 'Main Warehouse'
+    location: 'Main Warehouse',
+    image: 'https://picsum.photos/seed/screw2/100/100'
   },
   { 
     id: 3, 
@@ -112,17 +121,19 @@ const SAMPLE_PRODUCTS = [
     category: 'Roofing',
     subCategory: 'Installation',
     location: 'Redmond Warehouse',
-    image: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=100&h=100&fit=crop'
+    image: 'https://picsum.photos/seed/shingles/100/100'
   },
   { 
     id: 4, 
-    name: '12W Battery edited', 
+    name: '12W Battery', 
     sku: '12344', 
     price: 123.00, 
     available: true,
-    description: 'descrption',
+    description: 'Rechargeable battery pack',
     category: 'Electrical',
-    location: 'Main Warehouse'
+    subCategory: 'Installation',
+    location: 'Main Warehouse',
+    image: 'https://picsum.photos/seed/battery/100/100'
   },
   { 
     id: 5, 
@@ -133,7 +144,41 @@ const SAMPLE_PRODUCTS = [
     category: 'Roofing',
     subCategory: 'Installation',
     location: 'Redmond Warehouse',
-    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=100&h=100&fit=crop'
+    image: 'https://picsum.photos/seed/asphalt/100/100'
+  },
+  { 
+    id: 6, 
+    name: 'Roofing Nails', 
+    sku: '33421', 
+    price: 45.00, 
+    available: true,
+    category: 'Roofing',
+    subCategory: 'Installation',
+    location: 'Redmond Warehouse',
+    image: 'https://picsum.photos/seed/nails/100/100'
+  },
+  { 
+    id: 7, 
+    name: 'Roof Sealant', 
+    sku: '88901', 
+    price: 35.00, 
+    available: true,
+    description: 'Waterproof roof sealant',
+    category: 'Roofing',
+    subCategory: 'Repair',
+    location: 'Main Warehouse',
+    image: 'https://picsum.photos/seed/sealant/100/100'
+  },
+  { 
+    id: 8, 
+    name: 'Wire Connector Kit', 
+    sku: '44520', 
+    price: 28.00, 
+    available: true,
+    category: 'Electrical',
+    subCategory: 'Installation',
+    location: 'Main Warehouse',
+    image: 'https://picsum.photos/seed/wire/100/100'
   },
 ];
 
