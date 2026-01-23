@@ -142,7 +142,7 @@ const SAMPLE_PRODUCTS = [
 // ========================================
 
 // Category Grid Card
-function CategoryCard({ category, image, isSelected, onClick, hasSubCategories }) {
+function CategoryCard({ category, image, isSelected, onClick }) {
   return (
     <button 
       onClick={onClick}
@@ -150,16 +150,11 @@ function CategoryCard({ category, image, isSelected, onClick, hasSubCategories }
         isSelected ? 'border-[#F97316]' : 'border-[#3D4349]'
       }`}
     >
-      <div className="h-24 bg-[#3D4955] flex items-center justify-center relative">
+      <div className="h-24 bg-[#3D4955] flex items-center justify-center">
         {image ? (
           <img src={image} alt={category} className="w-full h-full object-cover" />
         ) : (
           <IconPhoto size={32} className="text-[#5B9BD5]" />
-        )}
-        {hasSubCategories && (
-          <div className="absolute top-2 right-2 bg-[#F97316] text-white text-[10px] px-1.5 py-0.5 rounded">
-            +sub
-          </div>
         )}
       </div>
       <div className="py-3 px-2 bg-[#2D3339] text-center">
@@ -367,23 +362,12 @@ function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selec
       {/* Category Grid */}
       <div className="flex-1 overflow-y-auto p-4">
         <div className="grid grid-cols-2 gap-3">
-          {/* All Categories */}
-          <CategoryCard
-            category="All Categories"
-            isSelected={!selectedCategory}
-            onClick={() => {
-              onSelect(null, null);
-              onClose();
-            }}
-          />
-          
           {filteredCategories.map(category => (
             <CategoryCard
               key={category.id}
               category={category.name}
               image={CATEGORY_IMAGES[category.name]}
               isSelected={selectedCategory === category.name}
-              hasSubCategories={category.subCategories.length > 0}
               onClick={() => {
                 if (category.subCategories.length > 0) {
                   setViewingCategory(category.id);
