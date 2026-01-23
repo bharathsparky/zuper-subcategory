@@ -69,25 +69,25 @@ const CATEGORIES = [
   { id: 14, name: 'Consumable', subCategories: [] },
 ];
 
-// Category images with reliable placeholder sources
+// Category images with appropriate visuals
 const CATEGORY_IMAGES = {
-  'Roofing': 'https://picsum.photos/seed/roofing/200/120',
-  'Plumbing': 'https://picsum.photos/seed/plumbing/200/120',
-  'Electrical': 'https://picsum.photos/seed/electrical/200/120',
-  'HVAC': 'https://picsum.photos/seed/hvac/200/120',
-  'Tools': 'https://picsum.photos/seed/tools/200/120',
-  'Spare Parts': 'https://picsum.photos/seed/spareparts/200/120',
-  'Landscaping': 'https://picsum.photos/seed/landscaping/200/120',
-  'Painting': 'https://picsum.photos/seed/painting/200/120',
-  'General Labor': 'https://picsum.photos/seed/labor/200/120',
-  'Internal Costs': 'https://picsum.photos/seed/costs/200/120',
-  'FMCG': 'https://picsum.photos/seed/fmcg/200/120',
-  'Manpower': 'https://picsum.photos/seed/manpower/200/120',
-  'On Demand Service': 'https://picsum.photos/seed/ondemand/200/120',
-  'Consumable': 'https://picsum.photos/seed/consumable/200/120',
+  'Roofing': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=240&fit=crop&crop=top',
+  'Plumbing': 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=400&h=240&fit=crop',
+  'Electrical': 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=400&h=240&fit=crop',
+  'HVAC': 'https://images.unsplash.com/photo-1545259741-2ea3ebf61fa3?w=400&h=240&fit=crop',
+  'Tools': 'https://images.unsplash.com/photo-1530124566582-a618bc2615dc?w=400&h=240&fit=crop',
+  'Spare Parts': 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400&h=240&fit=crop',
+  'Landscaping': 'https://images.unsplash.com/photo-1558904541-efa843a96f01?w=400&h=240&fit=crop',
+  'Painting': 'https://images.unsplash.com/photo-1562259949-e8e7689d7828?w=400&h=240&fit=crop',
+  'General Labor': 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&h=240&fit=crop',
+  'Internal Costs': 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=240&fit=crop',
+  'FMCG': 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=400&h=240&fit=crop',
+  'Manpower': 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=400&h=240&fit=crop',
+  'On Demand Service': 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400&h=240&fit=crop',
+  'Consumable': 'https://images.unsplash.com/photo-1607082349566-187342175e2f?w=400&h=240&fit=crop',
 };
 
-// Sample products data with reliable placeholder images
+// Sample products data with appropriate product images
 const SAMPLE_PRODUCTS = [
   { 
     id: 1, 
@@ -98,19 +98,19 @@ const SAMPLE_PRODUCTS = [
     category: 'Roofing',
     subCategory: 'Installation',
     location: 'Redmond Warehouse',
-    image: 'https://picsum.photos/seed/screw1/100/100'
+    image: 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=200&h=200&fit=crop'
   },
   { 
     id: 2, 
-    name: '10 mm screw', 
+    name: 'Metal Screws Pack', 
     sku: '004', 
     price: 20.00, 
     available: false,
-    description: 'Description of the part',
+    description: 'Stainless steel screws',
     category: 'Roofing',
     subCategory: 'Repair',
     location: 'Main Warehouse',
-    image: 'https://picsum.photos/seed/screw2/100/100'
+    image: 'https://images.unsplash.com/photo-1567361808960-dec9cb578182?w=200&h=200&fit=crop'
   },
   { 
     id: 3, 
@@ -121,53 +121,53 @@ const SAMPLE_PRODUCTS = [
     category: 'Roofing',
     subCategory: 'Installation',
     location: 'Redmond Warehouse',
-    image: 'https://picsum.photos/seed/shingles/100/100'
+    image: 'https://images.unsplash.com/photo-1632759145351-1d592919f522?w=200&h=200&fit=crop'
   },
   { 
     id: 4, 
-    name: '12W Battery', 
+    name: '12V Battery Pack', 
     sku: '12344', 
     price: 123.00, 
     available: true,
-    description: 'Rechargeable battery pack',
+    description: 'Rechargeable power unit',
     category: 'Electrical',
     subCategory: 'Installation',
     location: 'Main Warehouse',
-    image: 'https://picsum.photos/seed/battery/100/100'
+    image: 'https://images.unsplash.com/photo-1609692814858-f7cd2f0afa4f?w=200&h=200&fit=crop'
   },
   { 
     id: 5, 
-    name: 'Asphalt Roll', 
+    name: 'Roofing Felt Roll', 
     sku: '55678', 
     price: 250.00, 
     available: true,
     category: 'Roofing',
     subCategory: 'Installation',
     location: 'Redmond Warehouse',
-    image: 'https://picsum.photos/seed/asphalt/100/100'
+    image: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=200&h=200&fit=crop'
   },
   { 
     id: 6, 
-    name: 'Roofing Nails', 
+    name: 'Roofing Nails Box', 
     sku: '33421', 
     price: 45.00, 
     available: true,
     category: 'Roofing',
     subCategory: 'Installation',
     location: 'Redmond Warehouse',
-    image: 'https://picsum.photos/seed/nails/100/100'
+    image: 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=200&h=200&fit=crop'
   },
   { 
     id: 7, 
-    name: 'Roof Sealant', 
+    name: 'Roof Sealant Tube', 
     sku: '88901', 
     price: 35.00, 
     available: true,
-    description: 'Waterproof roof sealant',
+    description: 'Waterproof silicone sealant',
     category: 'Roofing',
     subCategory: 'Repair',
     location: 'Main Warehouse',
-    image: 'https://picsum.photos/seed/sealant/100/100'
+    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=200&h=200&fit=crop'
   },
   { 
     id: 8, 
@@ -178,7 +178,7 @@ const SAMPLE_PRODUCTS = [
     category: 'Electrical',
     subCategory: 'Installation',
     location: 'Main Warehouse',
-    image: 'https://picsum.photos/seed/wire/100/100'
+    image: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=200&h=200&fit=crop'
   },
 ];
 
