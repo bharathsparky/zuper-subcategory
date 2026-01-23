@@ -142,7 +142,7 @@ const SAMPLE_PRODUCTS = [
 // ========================================
 
 // Category Grid Card
-function CategoryCard({ category, image, isSelected, onClick }) {
+function CategoryCard({ category, image, isSelected, onClick, subCount }) {
   return (
     <button 
       onClick={onClick}
@@ -150,11 +150,17 @@ function CategoryCard({ category, image, isSelected, onClick }) {
         isSelected ? 'border-[#F97316]' : 'border-[#3D4349]'
       }`}
     >
-      <div className="h-24 bg-[#3D4955] flex items-center justify-center">
+      <div className="h-24 bg-[#3D4955] flex items-center justify-center relative">
         {image ? (
           <img src={image} alt={category} className="w-full h-full object-cover" />
         ) : (
           <IconPhoto size={32} className="text-[#5B9BD5]" />
+        )}
+        {subCount > 0 && (
+          <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[11px] px-1.5 py-0.5 rounded flex items-center gap-0.5">
+            <span>{subCount}</span>
+            <IconChevronRight size={12} />
+          </div>
         )}
       </div>
       <div className="py-3 px-2 bg-[#2D3339] text-center">
@@ -368,6 +374,7 @@ function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selec
               category={category.name}
               image={CATEGORY_IMAGES[category.name]}
               isSelected={selectedCategory === category.name}
+              subCount={category.subCategories.length}
               onClick={() => {
                 if (category.subCategories.length > 0) {
                   setViewingCategory(category.id);
