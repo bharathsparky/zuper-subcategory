@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   IconChevronRight,
   IconChevronDown,
@@ -10,6 +10,12 @@ import {
   IconMapPin,
   IconPaperclip,
   IconCheck,
+  IconPalette,
+  IconTrash,
+  IconPhoto,
+  IconUpload,
+  IconGripVertical,
+  IconAlertCircle,
 } from '@tabler/icons-react';
 
 // Hierarchical category data structure
@@ -426,6 +432,308 @@ function NoDataPlaceholder({ title, description, imageSrc }) {
   );
 }
 
+// Toggle Switch Component
+function ToggleSwitch({ checked, onChange, disabled }) {
+  return (
+    <button
+      type="button"
+      onClick={() => !disabled && onChange?.(!checked)}
+      disabled={disabled}
+      className={`relative w-[36px] h-[20px] rounded-full transition-colors ${
+        checked ? 'bg-[#2563EB]' : 'bg-[#CBD5E1]'
+      } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+    >
+      <div
+        className={`absolute top-[2px] w-[16px] h-[16px] rounded-full bg-white shadow transition-transform ${
+          checked ? 'left-[18px]' : 'left-[2px]'
+        }`}
+      />
+    </button>
+  );
+}
+
+// Option Image Upload Component
+function OptionImageUpload({ imageUrl, onUpload, onRemove }) {
+  const fileInputRef = useRef(null);
+  const [isHovering, setIsHovering] = useState(false);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Create a preview URL
+      const url = URL.createObjectURL(file);
+      onUpload?.(url, file);
+    }
+  };
+
+  if (imageUrl) {
+    return (
+      <div 
+        className="relative w-[40px] h-[40px] rounded-md overflow-hidden border border-[#E2E8F0]"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
+        <img src={imageUrl} alt="Option" className="w-full h-full object-cover" />
+        {isHovering && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <button
+              type="button"
+              onClick={onRemove}
+              className="text-white hover:text-red-300"
+            >
+              <IconTrash size={16} />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        className="w-[40px] h-[40px] rounded-md border border-dashed border-[#CBD5E1] bg-[#F8FAFC] flex items-center justify-center hover:border-[#94A3B8] hover:bg-[#F1F5F9] transition-colors"
+      >
+        <IconPhoto size={18} className="text-[#94A3B8]" />
+      </button>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+    </>
+  );
+}
+
+// Options Section Content
+function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, onCustomerSelectionChange }) {
+  const MAX_OPTIONS = 20;
+  const MAX_NAME_LENGTH = 200;
+
+  const [nameErrors, setNameErrors] = useState({});
+
+  const addOption = () => {
+    if (options.length >= MAX_OPTIONS) return;
+    
+    const newOption = {
+      id: `option-${Date.now()}`,
+      name: '',
+      imageUrl: null,
+      available: true,
+      sortOrder: options.length,
+    };
+    onOptionsChange([...options, newOption]);
+  };
+
+  const updateOption = (id, field, value) => {
+    // Validate name length
+    if (field === 'name' && value.length > MAX_NAME_LENGTH) {
+      return;
+    }
+
+    // Check for duplicate names
+    if (field === 'name') {
+      const duplicate = options.find(opt => opt.id !== id && opt.name.toLowerCase() === value.toLowerCase());
+      if (duplicate && value.trim() !== '') {
+        setNameErrors(prev => ({ ...prev, [id]: 'Option name must be unique' }));
+      } else {
+        setNameErrors(prev => {
+          const newErrors = { ...prev };
+          delete newErrors[id];
+          return newErrors;
+        });
+      }
+    }
+
+    onOptionsChange(options.map(opt => 
+      opt.id === id ? { ...opt, [field]: value } : opt
+    ));
+  };
+
+  const removeOption = (id) => {
+    onOptionsChange(options.filter(opt => opt.id !== id));
+    setNameErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[id];
+      return newErrors;
+    });
+  };
+
+  const isAtLimit = options.length >= MAX_OPTIONS;
+
+  // Empty State
+  if (options.length === 0) {
+    return (
+      <div className="pt-[14px]">
+        {/* Empty State */}
+        <div className="flex flex-col items-center py-8 px-4 bg-[#FAFBFC] rounded-lg border border-dashed border-[#E2E8F0]">
+          <div className="w-16 h-16 rounded-full bg-[#EFF6FF] flex items-center justify-center mb-4">
+            <IconPalette size={28} className="text-[#2563EB]" />
+          </div>
+          <h3 className="text-[14px] font-medium text-[#334155] mb-1">No options added yet</h3>
+          <p className="text-[13px] text-[#64748B] text-center max-w-[280px] mb-4">
+            Add color variants, styles, or other options that customers can choose from
+          </p>
+          <button
+            type="button"
+            onClick={addOption}
+            className="h-[34px] px-4 flex items-center gap-2 bg-[#2563EB] text-white rounded-md text-[13px] font-medium hover:bg-[#1D4ED8] transition-colors"
+          >
+            <IconPlus size={14} stroke={2.5} />
+            Add First Option
+          </button>
+        </div>
+
+        {/* Customer Selection Toggle */}
+        <div className="mt-5 pt-5 border-t border-[#E2E8F0]">
+          <div className="flex items-start gap-3">
+            <ToggleSwitch 
+              checked={customerSelectionEnabled} 
+              onChange={onCustomerSelectionChange}
+            />
+            <div className="flex-1">
+              <p className="text-[13px] font-medium text-[#334155]">Enable Customer Selection on Proposal</p>
+              <p className="text-[12px] text-[#64748B] mt-0.5">
+                {customerSelectionEnabled 
+                  ? "Customers will be able to select their preferred option when viewing and signing the proposal."
+                  : "Options will be for internal use only. Customers will see the selected option as static text."}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Options Table
+  return (
+    <div className="pt-[14px]">
+      {/* Options Table */}
+      <div className="border border-[#E2E8F0] rounded-lg overflow-hidden">
+        {/* Table Header */}
+        <div className="grid grid-cols-[48px_1fr_80px_60px] gap-3 px-3 py-2.5 bg-[#F8FAFC] border-b border-[#E2E8F0]">
+          <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide">Image</div>
+          <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide">Name</div>
+          <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide">Available</div>
+          <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide text-center">Actions</div>
+        </div>
+
+        {/* Table Body */}
+        <div className="divide-y divide-[#E2E8F0]">
+          {options.map((option, index) => (
+            <div 
+              key={option.id} 
+              className="grid grid-cols-[48px_1fr_80px_60px] gap-3 px-3 py-2.5 items-center hover:bg-[#FAFBFC] transition-colors group"
+            >
+              {/* Image */}
+              <OptionImageUpload
+                imageUrl={option.imageUrl}
+                onUpload={(url) => updateOption(option.id, 'imageUrl', url)}
+                onRemove={() => updateOption(option.id, 'imageUrl', null)}
+              />
+
+              {/* Name */}
+              <div className="flex flex-col gap-1">
+                <input
+                  type="text"
+                  value={option.name}
+                  onChange={(e) => updateOption(option.id, 'name', e.target.value)}
+                  placeholder="e.g., Charcoal"
+                  maxLength={MAX_NAME_LENGTH}
+                  className={`h-[34px] px-3 border rounded-md text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none transition-colors ${
+                    nameErrors[option.id] 
+                      ? 'border-[#EF4444] focus:border-[#EF4444]' 
+                      : 'border-[#E2E8F0] focus:border-[#94A3B8]'
+                  }`}
+                />
+                {nameErrors[option.id] && (
+                  <div className="flex items-center gap-1 text-[11px] text-[#EF4444]">
+                    <IconAlertCircle size={12} />
+                    {nameErrors[option.id]}
+                  </div>
+                )}
+                {option.name.length > MAX_NAME_LENGTH - 20 && (
+                  <span className="text-[11px] text-[#94A3B8]">
+                    {option.name.length}/{MAX_NAME_LENGTH}
+                  </span>
+                )}
+              </div>
+
+              {/* Available Toggle */}
+              <div className="flex items-center">
+                <ToggleSwitch
+                  checked={option.available}
+                  onChange={(val) => updateOption(option.id, 'available', val)}
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => removeOption(option.id)}
+                  className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#EF4444] hover:bg-[#FEE2E2] transition-colors opacity-0 group-hover:opacity-100"
+                >
+                  <IconTrash size={16} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Add Option Button */}
+      <div className="mt-3 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={addOption}
+          disabled={isAtLimit}
+          className={`h-[32px] px-3 flex items-center gap-1.5 text-[13px] font-medium rounded-md transition-colors ${
+            isAtLimit 
+              ? 'text-[#94A3B8] cursor-not-allowed' 
+              : 'text-[#2563EB] hover:bg-[#EFF6FF]'
+          }`}
+        >
+          <IconPlus size={14} stroke={2.5} />
+          Add Option
+        </button>
+        {isAtLimit && (
+          <span className="text-[12px] text-[#94A3B8]">
+            Maximum {MAX_OPTIONS} options reached
+          </span>
+        )}
+        {!isAtLimit && (
+          <span className="text-[12px] text-[#94A3B8]">
+            {options.length} of {MAX_OPTIONS} options
+          </span>
+        )}
+      </div>
+
+      {/* Customer Selection Toggle */}
+      <div className="mt-5 pt-5 border-t border-[#E2E8F0]">
+        <div className="flex items-start gap-3">
+          <ToggleSwitch 
+            checked={customerSelectionEnabled} 
+            onChange={onCustomerSelectionChange}
+          />
+          <div className="flex-1">
+            <p className="text-[13px] font-medium text-[#334155]">Enable Customer Selection on Proposal</p>
+            <p className="text-[12px] text-[#64748B] mt-0.5">
+              {customerSelectionEnabled 
+                ? "Customers will be able to select their preferred option when viewing and signing the proposal."
+                : "Options will be for internal use only. Customers will see the selected option as static text."}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function NewPartServicePage({ onCancel, onSave }) {
   const [formData, setFormData] = useState({
     type: 'Part',
@@ -455,6 +763,9 @@ function NewPartServicePage({ onCancel, onSave }) {
     location: 'Warehouse',
     locationAvailableQty: '',
     locationMinimumQty: '',
+    // Options (Color/Variant Picker)
+    options: [],
+    customerSelectionEnabled: false,
   });
 
   const handleChange = (field, value) => {
@@ -668,6 +979,16 @@ function NewPartServicePage({ onCancel, onSave }) {
                 {/* Description */}
                 <RichTextEditor label="Description" />
               </div>
+            </CollapsibleSection>
+
+            {/* Options (Color/Variant Picker) */}
+            <CollapsibleSection title="Options" icon={IconPalette} defaultExpanded={true}>
+              <OptionsSection
+                options={formData.options}
+                onOptionsChange={(options) => handleChange('options', options)}
+                customerSelectionEnabled={formData.customerSelectionEnabled}
+                onCustomerSelectionChange={(enabled) => handleChange('customerSelectionEnabled', enabled)}
+              />
             </CollapsibleSection>
 
             {/* Tax Details */}
