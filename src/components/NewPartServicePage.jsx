@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import {
   IconChevronRight,
   IconChevronDown,
+  IconChevronUp,
   IconPlus,
   IconClipboardList,
   IconReceipt,
@@ -563,6 +564,23 @@ function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, on
     });
   };
 
+  const moveOption = (index, direction) => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= options.length) return;
+    
+    const newOptions = [...options];
+    const temp = newOptions[index];
+    newOptions[index] = newOptions[newIndex];
+    newOptions[newIndex] = temp;
+    
+    // Update sortOrder
+    newOptions.forEach((opt, i) => {
+      opt.sortOrder = i;
+    });
+    
+    onOptionsChange(newOptions);
+  };
+
   const isAtLimit = options.length >= MAX_OPTIONS;
 
   // Empty State
@@ -615,7 +633,8 @@ function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, on
       {/* Options Table */}
       <div className="border border-[#E2E8F0] rounded-lg overflow-hidden">
         {/* Table Header */}
-        <div className="grid grid-cols-[48px_1fr_80px_60px] gap-3 px-3 py-2.5 bg-[#F8FAFC] border-b border-[#E2E8F0]">
+        <div className="grid grid-cols-[36px_48px_1fr_80px_80px] gap-3 px-3 py-2.5 bg-[#F8FAFC] border-b border-[#E2E8F0]">
+          <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide">Order</div>
           <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide">Image</div>
           <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide">Name</div>
           <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide">Available</div>
@@ -627,8 +646,38 @@ function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, on
           {options.map((option, index) => (
             <div 
               key={option.id} 
-              className="grid grid-cols-[48px_1fr_80px_60px] gap-3 px-3 py-2.5 items-center hover:bg-[#FAFBFC] transition-colors group"
+              className="grid grid-cols-[36px_48px_1fr_80px_80px] gap-3 px-3 py-2.5 items-center hover:bg-[#FAFBFC] transition-colors group"
             >
+              {/* Reorder Buttons */}
+              <div className="flex flex-col gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => moveOption(index, 'up')}
+                  disabled={index === 0}
+                  className={`w-6 h-5 flex items-center justify-center rounded transition-colors ${
+                    index === 0 
+                      ? 'text-[#D1D5DB] cursor-not-allowed' 
+                      : 'text-[#94A3B8] hover:text-[#64748B] hover:bg-[#F1F5F9]'
+                  }`}
+                  title="Move up"
+                >
+                  <IconChevronUp size={14} stroke={2} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveOption(index, 'down')}
+                  disabled={index === options.length - 1}
+                  className={`w-6 h-5 flex items-center justify-center rounded transition-colors ${
+                    index === options.length - 1 
+                      ? 'text-[#D1D5DB] cursor-not-allowed' 
+                      : 'text-[#94A3B8] hover:text-[#64748B] hover:bg-[#F1F5F9]'
+                  }`}
+                  title="Move down"
+                >
+                  <IconChevronDown size={14} stroke={2} />
+                </button>
+              </div>
+
               {/* Image */}
               <OptionImageUpload
                 imageUrl={option.imageUrl}
@@ -644,7 +693,7 @@ function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, on
                   onChange={(e) => updateOption(option.id, 'name', e.target.value)}
                   placeholder="e.g., Charcoal"
                   maxLength={MAX_NAME_LENGTH}
-                  className={`h-[34px] px-3 border rounded-md text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none transition-colors ${
+                  className={`h-[34px] px-3 border rounded-md text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none transition-colors bg-white ${
                     nameErrors[option.id] 
                       ? 'border-[#EF4444] focus:border-[#EF4444]' 
                       : 'border-[#E2E8F0] focus:border-[#94A3B8]'
