@@ -267,3 +267,47 @@ export function Dropdown({
     </Listbox>
   );
 }
+
+// ============================================
+// Toggle Switch Component
+// ============================================
+
+export function Toggle({ 
+  checked = false, 
+  onChange, 
+  disabled = false,
+  size = 'md',
+  className = ''
+}) {
+  const sizes = {
+    sm: { track: 'w-[32px] h-[18px]', thumb: 'w-[14px] h-[14px]', thumbOn: 'left-[16px]', thumbOff: 'left-[2px]' },
+    md: { track: 'w-[40px] h-[22px]', thumb: 'w-[18px] h-[18px]', thumbOn: 'left-[20px]', thumbOff: 'left-[2px]' },
+    lg: { track: 'w-[48px] h-[26px]', thumb: 'w-[22px] h-[22px]', thumbOn: 'left-[24px]', thumbOff: 'left-[2px]' },
+  };
+
+  const s = sizes[size];
+
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => !disabled && onChange?.(!checked)}
+      disabled={disabled}
+      className={`
+        relative ${s.track} rounded-full transition-colors duration-200
+        ${checked ? 'bg-[#3B4BC4]' : 'bg-[#CBD5E1]'}
+        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+        ${className}
+      `}
+    >
+      <span
+        className={`
+          absolute top-[2px] ${s.thumb} rounded-full bg-white shadow-sm
+          transition-all duration-200 ease-in-out
+          ${checked ? s.thumbOn : s.thumbOff}
+        `}
+      />
+    </button>
+  );
+}

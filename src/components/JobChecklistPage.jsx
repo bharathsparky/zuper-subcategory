@@ -272,13 +272,13 @@ function ToggleSwitch({ enabled, onChange }) {
   return (
     <button
       onClick={() => onChange?.(!enabled)}
-      className={`relative w-[38.5px] h-[21px] rounded-full transition-colors ${
-        enabled ? 'bg-[#0172CB]' : 'bg-[#E2E8F0]'
+      className={`relative w-[40px] h-[22px] rounded-full transition-colors duration-200 ${
+        enabled ? 'bg-[#3B4BC4]' : 'bg-[#CBD5E1]'
       }`}
     >
       <div
-        className={`absolute top-[1.75px] w-[17.5px] h-[17.5px] bg-white border border-[#CBD5E1] rounded-full transition-transform ${
-          enabled ? 'left-[19px]' : 'left-[2px]'
+        className={`absolute top-[2px] w-[18px] h-[18px] bg-white shadow-sm rounded-full transition-all duration-200 ease-in-out ${
+          enabled ? 'left-[20px]' : 'left-[2px]'
         }`}
       />
     </button>

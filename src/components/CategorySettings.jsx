@@ -1,5 +1,21 @@
 import React, { useState, useMemo, Fragment } from 'react';
 import { Transition, Menu } from '@headlessui/react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { 
   IconSearch, 
   IconHome, 
@@ -196,7 +212,7 @@ function HighlightText({ text, searchTerm }) {
   );
 }
 
-function CategoryRow({ 
+function SortableCategoryRow({ 
   category, 
   isExpanded, 
   onToggleExpand, 
@@ -206,26 +222,62 @@ function CategoryRow({
   isSubCategory = false,
   searchTerm = '',
   isSearchMatch = false,
+  isDragDisabled = false,
 }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ 
+    id: category.id,
+    disabled: isDragDisabled,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 'auto',
+  };
+
   const hasSubCategories = !isSubCategory && category.subCategories?.length > 0;
   const isParent = !isSubCategory;
   
   return (
     <div 
+      ref={setNodeRef}
+      style={style}
       className={`
         grid grid-cols-[28px_24px_48px_1fr_36px_36px] h-[52px] border-b border-[#E2E8F0] 
         hover:bg-[#FAFBFC] transition-colors group
         ${isSubCategory ? 'bg-[#FAFBFC]' : 'bg-white'}
         ${isSearchMatch ? 'bg-[#FFFBEB]' : ''}
+        ${isDragging ? 'shadow-lg bg-white ring-2 ring-[#2563EB]/20' : ''}
       `}
     >
       {/* Drag handle - always available */}
       <div className={`flex items-center justify-center ${isSubCategory ? 'pl-4' : ''}`}>
-        <IconGripVertical 
-          size={14} 
-          className="text-[#CBD5E1] cursor-grab opacity-0 group-hover:opacity-100 transition-opacity"
-          stroke={2} 
-        />
+        <button
+          ref={setActivatorNodeRef}
+          {...attributes}
+          {...listeners}
+          className={`p-1 rounded transition-all ${
+            isDragDisabled 
+              ? 'opacity-0 cursor-default' 
+              : 'opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing hover:bg-[#F1F5F9]'
+          }`}
+          disabled={isDragDisabled}
+        >
+          <IconGripVertical 
+            size={14} 
+            className="text-[#94A3B8]"
+            stroke={2} 
+          />
+        </button>
       </div>
 
       {/* Expand/Collapse - only for parents with children */}
@@ -685,6 +737,52 @@ function CategorySettings() {
   
   const totalPages = Math.ceil(categories.length / pageSize);
 
+  // DnD sensors - only activate drag with the handle
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end for parent categories
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      setCategories((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+  };
+
+  // Handle drag end for sub-categories within a parent
+  const handleSubCategoryDragEnd = (parentId) => (event) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      setCategories((items) => 
+        items.map((cat) => {
+          if (cat.id === parentId) {
+            const oldIndex = cat.subCategories.findIndex((sub) => sub.id === active.id);
+            const newIndex = cat.subCategories.findIndex((sub) => sub.id === over.id);
+            return {
+              ...cat,
+              subCategories: arrayMove(cat.subCategories, oldIndex, newIndex),
+            };
+          }
+          return cat;
+        })
+      );
+    }
+  };
+
   // Count total items
   const totalItemsCount = useMemo(() => {
     return categories.reduce((count, cat) => {
@@ -958,55 +1056,79 @@ function CategorySettings() {
               )}
             </div>
           ) : (
-            filteredCategories.map((category) => {
-              const parentMatches = searchTerm && (
-                category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                category.description?.toLowerCase().includes(searchTerm.toLowerCase())
-              );
-              
-              return (
-                <Fragment key={category.id}>
-                  {/* Parent Row */}
-                  <CategoryRow
-                    category={category}
-                    isExpanded={expandedCategories.has(category.id)}
-                    onToggleExpand={() => toggleExpand(category.id)}
-                    onEdit={() => openEditModal(category)}
-                    onDelete={() => openDeleteModal(category)}
-                    onAddSubCategory={() => openAddSubCategoryModal(category)}
-                    searchTerm={searchTerm}
-                    isSearchMatch={parentMatches}
-                  />
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={filteredCategories.map(c => c.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                {filteredCategories.map((category) => {
+                  const parentMatches = searchTerm && (
+                    category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    category.description?.toLowerCase().includes(searchTerm.toLowerCase())
+                  );
                   
-                  {/* Sub-Categories */}
-                  <Transition
-                    show={expandedCategories.has(category.id)}
-                    enter="transition-all duration-200 ease-out"
-                    enterFrom="opacity-0 max-h-0"
-                    enterTo="opacity-100 max-h-[1000px]"
-                    leave="transition-all duration-150 ease-in"
-                    leaveFrom="opacity-100 max-h-[1000px]"
-                    leaveTo="opacity-0 max-h-0"
-                  >
-                    <div className="overflow-hidden">
-                      {category.subCategories?.map((subCategory) => (
-                        <CategoryRow
-                          key={subCategory.id}
-                          category={subCategory}
-                          isSubCategory={true}
-                          onEdit={() => openEditModal(subCategory, true, category.id, category.name, category.tradeType)}
-                          onDelete={() => openDeleteModal(subCategory, true, category.id)}
-                          searchTerm={searchTerm}
-                          isSearchMatch={matchingSubCategoryIds.has(subCategory.id)}
-                        />
-                      ))}
-                      {/* Add sub-category link - hide when searching */}
-                      {!searchTerm && <AddSubCategoryRow onClick={() => openAddSubCategoryModal(category)} />}
-                    </div>
-                  </Transition>
-                </Fragment>
-              );
-            })
+                  return (
+                    <Fragment key={category.id}>
+                      {/* Parent Row */}
+                      <SortableCategoryRow
+                        category={category}
+                        isExpanded={expandedCategories.has(category.id)}
+                        onToggleExpand={() => toggleExpand(category.id)}
+                        onEdit={() => openEditModal(category)}
+                        onDelete={() => openDeleteModal(category)}
+                        onAddSubCategory={() => openAddSubCategoryModal(category)}
+                        searchTerm={searchTerm}
+                        isSearchMatch={parentMatches}
+                        isDragDisabled={!!searchTerm}
+                      />
+                      
+                      {/* Sub-Categories */}
+                      <Transition
+                        show={expandedCategories.has(category.id)}
+                        enter="transition-all duration-200 ease-out"
+                        enterFrom="opacity-0 max-h-0"
+                        enterTo="opacity-100 max-h-[1000px]"
+                        leave="transition-all duration-150 ease-in"
+                        leaveFrom="opacity-100 max-h-[1000px]"
+                        leaveTo="opacity-0 max-h-0"
+                      >
+                        <div className="overflow-hidden">
+                          <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleSubCategoryDragEnd(category.id)}
+                          >
+                            <SortableContext
+                              items={category.subCategories?.map(s => s.id) || []}
+                              strategy={verticalListSortingStrategy}
+                            >
+                              {category.subCategories?.map((subCategory) => (
+                                <SortableCategoryRow
+                                  key={subCategory.id}
+                                  category={subCategory}
+                                  isSubCategory={true}
+                                  onEdit={() => openEditModal(subCategory, true, category.id, category.name, category.tradeType)}
+                                  onDelete={() => openDeleteModal(subCategory, true, category.id)}
+                                  searchTerm={searchTerm}
+                                  isSearchMatch={matchingSubCategoryIds.has(subCategory.id)}
+                                  isDragDisabled={!!searchTerm}
+                                />
+                              ))}
+                            </SortableContext>
+                          </DndContext>
+                          {/* Add sub-category link - hide when searching */}
+                          {!searchTerm && <AddSubCategoryRow onClick={() => openAddSubCategoryModal(category)} />}
+                        </div>
+                      </Transition>
+                    </Fragment>
+                  );
+                })}
+              </SortableContext>
+            </DndContext>
           )}
         </div>
 

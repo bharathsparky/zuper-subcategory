@@ -1,8 +1,23 @@
 import React, { useState, useMemo, useRef } from 'react';
 import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import {
   IconChevronRight,
   IconChevronDown,
-  IconChevronUp,
   IconPlus,
   IconClipboardList,
   IconReceipt,
@@ -440,13 +455,13 @@ function ToggleSwitch({ checked, onChange, disabled }) {
       type="button"
       onClick={() => !disabled && onChange?.(!checked)}
       disabled={disabled}
-      className={`relative w-[36px] h-[20px] rounded-full transition-colors ${
-        checked ? 'bg-[#2563EB]' : 'bg-[#CBD5E1]'
+      className={`relative w-[40px] h-[22px] rounded-full transition-colors duration-200 ${
+        checked ? 'bg-[#3B4BC4]' : 'bg-[#CBD5E1]'
       } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <div
-        className={`absolute top-[2px] w-[16px] h-[16px] rounded-full bg-white shadow transition-transform ${
-          checked ? 'left-[18px]' : 'left-[2px]'
+        className={`absolute top-[2px] w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-all duration-200 ease-in-out ${
+          checked ? 'left-[20px]' : 'left-[2px]'
         }`}
       />
     </button>
@@ -510,25 +525,113 @@ function OptionImageUpload({ imageUrl, onUpload, onRemove }) {
   );
 }
 
+// Sortable Option Row Component
+function SortableOptionRow({ 
+  option, 
+  updateOption, 
+  removeOption, 
+  nameErrors, 
+  MAX_NAME_LENGTH 
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: option.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 1000 : 'auto',
+  };
+
+  return (
+    <div 
+      ref={setNodeRef}
+      style={style}
+      className={`grid grid-cols-[36px_48px_1fr_80px_80px] gap-3 px-3 py-2.5 items-center hover:bg-[#FAFBFC] transition-colors group ${
+        isDragging ? 'bg-white shadow-lg ring-2 ring-[#2563EB]/20' : ''
+      }`}
+    >
+      {/* Drag Handle */}
+      <div className="flex items-center justify-center">
+        <button
+          ref={setActivatorNodeRef}
+          {...attributes}
+          {...listeners}
+          className="p-1.5 rounded cursor-grab active:cursor-grabbing hover:bg-[#F1F5F9] transition-colors"
+        >
+          <IconGripVertical size={16} className="text-[#94A3B8]" stroke={2} />
+        </button>
+      </div>
+
+      {/* Image */}
+      <OptionImageUpload
+        imageUrl={option.imageUrl}
+        onUpload={(url) => updateOption(option.id, 'imageUrl', url)}
+        onRemove={() => updateOption(option.id, 'imageUrl', null)}
+      />
+
+      {/* Name */}
+      <div className="flex flex-col gap-1">
+        <input
+          type="text"
+          value={option.name}
+          onChange={(e) => updateOption(option.id, 'name', e.target.value)}
+          placeholder="e.g., Charcoal"
+          maxLength={MAX_NAME_LENGTH}
+          className={`h-[34px] px-3 border rounded-md text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none transition-colors bg-white ${
+            nameErrors[option.id] 
+              ? 'border-[#EF4444] focus:border-[#EF4444]' 
+              : 'border-[#E2E8F0] focus:border-[#94A3B8]'
+          }`}
+        />
+        {nameErrors[option.id] && (
+          <div className="flex items-center gap-1 text-[11px] text-[#EF4444]">
+            <IconAlertCircle size={12} />
+            {nameErrors[option.id]}
+          </div>
+        )}
+        {option.name.length > MAX_NAME_LENGTH - 20 && (
+          <span className="text-[11px] text-[#94A3B8]">
+            {option.name.length}/{MAX_NAME_LENGTH}
+          </span>
+        )}
+      </div>
+
+      {/* Available Toggle */}
+      <div className="flex items-center">
+        <ToggleSwitch
+          checked={option.available}
+          onChange={(val) => updateOption(option.id, 'available', val)}
+        />
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center justify-center">
+        <button
+          type="button"
+          onClick={() => removeOption(option.id)}
+          className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#EF4444] hover:bg-[#FEE2E2] transition-colors opacity-0 group-hover:opacity-100"
+        >
+          <IconTrash size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // Options Section Content
 function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, onCustomerSelectionChange }) {
   const MAX_OPTIONS = 20;
   const MAX_NAME_LENGTH = 200;
 
   const [nameErrors, setNameErrors] = useState({});
-
-  const addOption = () => {
-    if (options.length >= MAX_OPTIONS) return;
-    
-    const newOption = {
-      id: `option-${Date.now()}`,
-      name: '',
-      imageUrl: null,
-      available: true,
-      sortOrder: options.length,
-    };
-    onOptionsChange([...options, newOption]);
-  };
 
   const updateOption = (id, field, value) => {
     // Validate name length
@@ -564,65 +667,45 @@ function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, on
     });
   };
 
-  const moveOption = (index, direction) => {
-    const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= options.length) return;
-    
-    const newOptions = [...options];
-    const temp = newOptions[index];
-    newOptions[index] = newOptions[newIndex];
-    newOptions[newIndex] = temp;
-    
-    // Update sortOrder
-    newOptions.forEach((opt, i) => {
-      opt.sortOrder = i;
-    });
-    
-    onOptionsChange(newOptions);
-  };
+  // DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
-  const isAtLimit = options.length >= MAX_OPTIONS;
+  // Handle drag end
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    
+    if (over && active.id !== over.id) {
+      const oldIndex = options.findIndex((opt) => opt.id === active.id);
+      const newIndex = options.findIndex((opt) => opt.id === over.id);
+      const newOptions = arrayMove(options, oldIndex, newIndex);
+      
+      // Update sortOrder
+      newOptions.forEach((opt, i) => {
+        opt.sortOrder = i;
+      });
+      
+      onOptionsChange(newOptions);
+    }
+  };
 
   // Empty State
   if (options.length === 0) {
     return (
       <div className="pt-[14px]">
-        {/* Empty State */}
-        <div className="flex flex-col items-center py-8 px-4 bg-[#FAFBFC] rounded-lg border border-dashed border-[#E2E8F0]">
-          <div className="w-16 h-16 rounded-full bg-[#EFF6FF] flex items-center justify-center mb-4">
-            <IconPalette size={28} className="text-[#2563EB]" />
-          </div>
-          <h3 className="text-[14px] font-medium text-[#334155] mb-1">No options added yet</h3>
-          <p className="text-[13px] text-[#64748B] text-center max-w-[280px] mb-4">
-            Add color variants, styles, or other options that customers can choose from
-          </p>
-          <button
-            type="button"
-            onClick={addOption}
-            className="h-[34px] px-4 flex items-center gap-2 bg-[#2563EB] text-white rounded-md text-[13px] font-medium hover:bg-[#1D4ED8] transition-colors"
-          >
-            <IconPlus size={14} stroke={2.5} />
-            Add First Option
-          </button>
-        </div>
-
-        {/* Customer Selection Toggle */}
-        <div className="mt-5 pt-5 border-t border-[#E2E8F0]">
-          <div className="flex items-start gap-3">
-            <ToggleSwitch 
-              checked={customerSelectionEnabled} 
-              onChange={onCustomerSelectionChange}
-            />
-            <div className="flex-1">
-              <p className="text-[13px] font-medium text-[#334155]">Enable Customer Selection on Proposal</p>
-              <p className="text-[12px] text-[#64748B] mt-0.5">
-                {customerSelectionEnabled 
-                  ? "Customers will be able to select their preferred option when viewing and signing the proposal."
-                  : "Options will be for internal use only. Customers will see the selected option as static text."}
-              </p>
-            </div>
-          </div>
-        </div>
+        {/* Empty State - Just placeholder image and text */}
+        <NoDataPlaceholder
+          title="No Options Added"
+          description="Please click on Add to add options like colors, sizes, or variants"
+        />
       </div>
     );
   }
@@ -634,132 +717,37 @@ function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, on
       <div className="border border-[#E2E8F0] rounded-lg overflow-hidden">
         {/* Table Header */}
         <div className="grid grid-cols-[36px_48px_1fr_80px_80px] gap-3 px-3 py-2.5 bg-[#F8FAFC] border-b border-[#E2E8F0]">
-          <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide">Order</div>
+          <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide"></div>
           <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide">Image</div>
           <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide">Name</div>
           <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide">Available</div>
           <div className="text-[11px] font-medium text-[#64748B] uppercase tracking-wide text-center">Actions</div>
         </div>
 
-        {/* Table Body */}
-        <div className="divide-y divide-[#E2E8F0]">
-          {options.map((option, index) => (
-            <div 
-              key={option.id} 
-              className="grid grid-cols-[36px_48px_1fr_80px_80px] gap-3 px-3 py-2.5 items-center hover:bg-[#FAFBFC] transition-colors group"
-            >
-              {/* Reorder Buttons */}
-              <div className="flex flex-col gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => moveOption(index, 'up')}
-                  disabled={index === 0}
-                  className={`w-6 h-5 flex items-center justify-center rounded transition-colors ${
-                    index === 0 
-                      ? 'text-[#D1D5DB] cursor-not-allowed' 
-                      : 'text-[#94A3B8] hover:text-[#64748B] hover:bg-[#F1F5F9]'
-                  }`}
-                  title="Move up"
-                >
-                  <IconChevronUp size={14} stroke={2} />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => moveOption(index, 'down')}
-                  disabled={index === options.length - 1}
-                  className={`w-6 h-5 flex items-center justify-center rounded transition-colors ${
-                    index === options.length - 1 
-                      ? 'text-[#D1D5DB] cursor-not-allowed' 
-                      : 'text-[#94A3B8] hover:text-[#64748B] hover:bg-[#F1F5F9]'
-                  }`}
-                  title="Move down"
-                >
-                  <IconChevronDown size={14} stroke={2} />
-                </button>
-              </div>
-
-              {/* Image */}
-              <OptionImageUpload
-                imageUrl={option.imageUrl}
-                onUpload={(url) => updateOption(option.id, 'imageUrl', url)}
-                onRemove={() => updateOption(option.id, 'imageUrl', null)}
-              />
-
-              {/* Name */}
-              <div className="flex flex-col gap-1">
-                <input
-                  type="text"
-                  value={option.name}
-                  onChange={(e) => updateOption(option.id, 'name', e.target.value)}
-                  placeholder="e.g., Charcoal"
-                  maxLength={MAX_NAME_LENGTH}
-                  className={`h-[34px] px-3 border rounded-md text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none transition-colors bg-white ${
-                    nameErrors[option.id] 
-                      ? 'border-[#EF4444] focus:border-[#EF4444]' 
-                      : 'border-[#E2E8F0] focus:border-[#94A3B8]'
-                  }`}
-                />
-                {nameErrors[option.id] && (
-                  <div className="flex items-center gap-1 text-[11px] text-[#EF4444]">
-                    <IconAlertCircle size={12} />
-                    {nameErrors[option.id]}
-                  </div>
-                )}
-                {option.name.length > MAX_NAME_LENGTH - 20 && (
-                  <span className="text-[11px] text-[#94A3B8]">
-                    {option.name.length}/{MAX_NAME_LENGTH}
-                  </span>
-                )}
-              </div>
-
-              {/* Available Toggle */}
-              <div className="flex items-center">
-                <ToggleSwitch
-                  checked={option.available}
-                  onChange={(val) => updateOption(option.id, 'available', val)}
-                />
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center justify-center">
-                <button
-                  type="button"
-                  onClick={() => removeOption(option.id)}
-                  className="w-8 h-8 flex items-center justify-center rounded-md text-[#94A3B8] hover:text-[#EF4444] hover:bg-[#FEE2E2] transition-colors opacity-0 group-hover:opacity-100"
-                >
-                  <IconTrash size={16} />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Add Option Button */}
-      <div className="mt-3 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={addOption}
-          disabled={isAtLimit}
-          className={`h-[32px] px-3 flex items-center gap-1.5 text-[13px] font-medium rounded-md transition-colors ${
-            isAtLimit 
-              ? 'text-[#94A3B8] cursor-not-allowed' 
-              : 'text-[#2563EB] hover:bg-[#EFF6FF]'
-          }`}
+        {/* Table Body with Drag and Drop */}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
         >
-          <IconPlus size={14} stroke={2.5} />
-          Add Option
-        </button>
-        {isAtLimit && (
-          <span className="text-[12px] text-[#94A3B8]">
-            Maximum {MAX_OPTIONS} options reached
-          </span>
-        )}
-        {!isAtLimit && (
-          <span className="text-[12px] text-[#94A3B8]">
-            {options.length} of {MAX_OPTIONS} options
-          </span>
-        )}
+          <SortableContext
+            items={options.map(opt => opt.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <div className="divide-y divide-[#E2E8F0]">
+              {options.map((option) => (
+                <SortableOptionRow
+                  key={option.id}
+                  option={option}
+                  updateOption={updateOption}
+                  removeOption={removeOption}
+                  nameErrors={nameErrors}
+                  MAX_NAME_LENGTH={MAX_NAME_LENGTH}
+                />
+              ))}
+            </div>
+          </SortableContext>
+        </DndContext>
       </div>
 
       {/* Customer Selection Toggle */}
@@ -823,6 +811,21 @@ function NewPartServicePage({ onCancel, onSave }) {
 
   const handleSave = () => {
     onSave?.(formData);
+  };
+
+  // Add new option handler
+  const handleAddOption = () => {
+    const MAX_OPTIONS = 20;
+    if (formData.options.length >= MAX_OPTIONS) return;
+    
+    const newOption = {
+      id: `option-${Date.now()}`,
+      name: '',
+      imageUrl: null,
+      available: true,
+      sortOrder: formData.options.length,
+    };
+    handleChange('options', [...formData.options, newOption]);
   };
 
   return (
@@ -1031,7 +1034,21 @@ function NewPartServicePage({ onCancel, onSave }) {
             </CollapsibleSection>
 
             {/* Options (Color/Variant Picker) */}
-            <CollapsibleSection title="Options" icon={IconPalette} defaultExpanded={true}>
+            <CollapsibleSection 
+              title={`Options${formData.options.length > 0 ? ` (${formData.options.length})` : ''}`}
+              icon={IconPalette} 
+              defaultExpanded={true}
+              headerRight={
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleAddOption(); }}
+                  className="h-[31.5px] px-[15px] flex items-center gap-[7px] border border-[#E2E8F0] text-[#334155] rounded-[5px] text-[13px] font-medium hover:bg-[#F8FAFC] transition-colors"
+                >
+                  <IconPlus size={12} stroke={2} />
+                  Add
+                </button>
+              }
+            >
               <OptionsSection
                 options={formData.options}
                 onOptionsChange={(options) => handleChange('options', options)}

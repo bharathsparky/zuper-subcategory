@@ -20,32 +20,30 @@ import {
   IconCheck,
 } from '@tabler/icons-react';
 
-// Sample data with sub-category support
-// Items can have: category only (parent), or category + subCategory (hierarchy)
+// Sample data with sub-category support - Roofing Products & Services
 const sampleProducts = [
-  // Labor category with sub-categories
-  { id: 1, name: 'Materials Delivery 01-10 mi.', partNo: 'DELIV74', createdOn: '09/02/2025 02:44 AM', type: 'SERVICE', category: 'Labor', subCategory: 'Delivery Charges', brand: '', specification: '', quantity: '1 Deliveries', unitPrice: '$110.00', createdBy: 'Eric Taylor' },
-  { id: 2, name: 'Travel Expense 11-30 mi.', partNo: '88', createdOn: '09/02/2025 02:44 AM', type: 'SERVICE', category: 'Labor', subCategory: 'Travel Expenses', brand: '', specification: '', quantity: '1 Each', unitPrice: '$500.00', createdBy: 'Eric Taylor' },
-  { id: 3, name: 'Travel Expense 31-50 mi.', partNo: '89', createdOn: '09/02/2025 02:44 AM', type: 'SERVICE', category: 'Labor', subCategory: 'Travel Expenses', brand: '', specification: '', quantity: '1 Each', unitPrice: '$1,000.00', createdBy: 'Eric Taylor' },
-  { id: 4, name: 'Travel Expense 51-70 mi.', partNo: '91', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Labor', subCategory: 'Travel Expenses', brand: '', specification: '', quantity: '1 Each', unitPrice: '$1,500.00', createdBy: 'Eric Taylor' },
-  { id: 5, name: 'Travel Expense 71+ mi.', partNo: '92', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Labor', subCategory: 'Travel Expenses', brand: '', specification: '', quantity: '1 Each', unitPrice: '$2,000.00', createdBy: 'Eric Taylor' },
-  { id: 6, name: 'Materials Delivery 11-20 mi.', partNo: 'DELIV94', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Labor', subCategory: 'Delivery Charges', brand: '', specification: '', quantity: '1 Deliveries', unitPrice: '$175.00', createdBy: 'Eric Taylor' },
-  { id: 7, name: 'Materials Delivery 21-30 mi.', partNo: 'DELIV95', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Labor', subCategory: 'Delivery Charges', brand: '', specification: '', quantity: '1 Deliveries', unitPrice: '$225.00', createdBy: 'Eric Taylor' },
-  // Services category (no sub-category - flat)
-  { id: 8, name: 'General Inspection Fee', partNo: 'SERV001', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Services', subCategory: null, brand: '', specification: '', quantity: '1 Each', unitPrice: '$250.00', createdBy: 'Eric Taylor' },
-  { id: 9, name: 'Emergency Call-Out', partNo: 'SERV002', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Services', subCategory: null, brand: '', specification: '', quantity: '1 Each', unitPrice: '$375.00', createdBy: 'Eric Taylor' },
-  // Internal Costs with sub-category
-  { id: 10, name: 'Service Finance - Deposit', partNo: '108', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Internal Costs', subCategory: 'Finance Fees', brand: 'Service Finance, LLC', specification: '', quantity: '1 Dollars', unitPrice: '$1.00', createdBy: 'Eric Taylor' },
-  { id: 11, name: 'Crate Charge for Metal', partNo: 'RSS111', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Installation Supplies', subCategory: 'Handling Fees', brand: '', specification: '', quantity: '1 Charge(s)', unitPrice: '$70.00', createdBy: 'Eric Taylor' },
-  // Fasteners with sub-categories
-  { id: 12, name: '7/16 Crown Staples 2"', partNo: 'RSS45', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Fasteners', subCategory: 'Staples', brand: '', specification: '2 inch, galvanized', quantity: '0 Box(es)', unitPrice: '$100.11', createdBy: 'Eric Taylor' },
-  { id: 13, name: 'Black Jack Roof Cement', partNo: 'RSS46', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Fasteners', subCategory: 'Sealants & Adhesives', brand: 'Black Jack', specification: '', quantity: '0 Tube(s)', unitPrice: '$4.49', createdBy: 'Eric Taylor' },
-  { id: 14, name: '1" Roof Coil Nails', partNo: 'RSS47', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Fasteners', subCategory: 'Nails', brand: '', specification: '1 inch coil', quantity: '0 Box(es)', unitPrice: '$61.25', createdBy: 'Eric Taylor' },
-  // Shingles with sub-categories
-  { id: 15, name: 'Valley VAL Shingles', partNo: 'VAL001', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Shingles', subCategory: 'Valley', brand: 'GAF', specification: '', quantity: '0 Bundle(s)', unitPrice: '$45.99', createdBy: 'Eric Taylor' },
-  { id: 16, name: 'Underlayments UND Premium', partNo: 'UND001', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Shingles', subCategory: 'Underlayments', brand: 'Owens Corning', specification: '', quantity: '0 Roll(s)', unitPrice: '$89.99', createdBy: 'Eric Taylor' },
-  { id: 17, name: 'Asphalt Architectural Shingles', partNo: 'SHG001', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Shingles', subCategory: 'Asphalt Shingles', brand: 'GAF', specification: 'Timberline HDZ', quantity: '0 Bundle(s)', unitPrice: '$45.99', createdBy: 'Eric Taylor' },
-  { id: 18, name: 'Metal Roofing Panel', partNo: 'MTL001', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Shingles', subCategory: 'Metal Shingles', brand: 'Fabral', specification: '', quantity: '0 Panel(s)', unitPrice: '$125.00', createdBy: 'Eric Taylor' },
+  // Shingles - Main roofing products
+  { id: 1, name: 'GAF Timberline HDZ Shingles', partNo: 'SHG001', createdOn: '09/02/2025 02:44 AM', type: 'PARTS', category: 'Shingles', subCategory: 'Asphalt Shingles', brand: 'GAF', specification: 'Lifetime Warranty', quantity: '25 Bundle(s)', unitPrice: '$42.99', createdBy: 'Eric Taylor' },
+  { id: 2, name: 'Owens Corning Duration Shingles', partNo: 'SHG002', createdOn: '09/02/2025 02:44 AM', type: 'PARTS', category: 'Shingles', subCategory: 'Asphalt Shingles', brand: 'Owens Corning', specification: 'SureNail Technology', quantity: '18 Bundle(s)', unitPrice: '$45.99', createdBy: 'Eric Taylor' },
+  { id: 3, name: 'CertainTeed Landmark Pro', partNo: 'SHG003', createdOn: '09/02/2025 02:44 AM', type: 'PARTS', category: 'Shingles', subCategory: 'Asphalt Shingles', brand: 'CertainTeed', specification: 'Max Def Colors', quantity: '12 Bundle(s)', unitPrice: '$48.50', createdBy: 'Eric Taylor' },
+  { id: 4, name: 'Standing Seam Metal Panel 16"', partNo: 'MTL001', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Shingles', subCategory: 'Metal Shingles', brand: 'Fabral', specification: '26 Gauge Steel', quantity: '0 Panel(s)', unitPrice: '$125.00', createdBy: 'Eric Taylor' },
+  { id: 5, name: 'GAF FeltBuster Underlayment', partNo: 'UND001', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Shingles', subCategory: 'Underlayments', brand: 'GAF', specification: '4 sq per roll', quantity: '15 Roll(s)', unitPrice: '$89.99', createdBy: 'Eric Taylor' },
+  { id: 6, name: 'Ice & Water Shield', partNo: 'UND002', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Shingles', subCategory: 'Underlayments', brand: 'Grace', specification: '2 sq per roll', quantity: '8 Roll(s)', unitPrice: '$145.00', createdBy: 'Eric Taylor' },
+  // Fasteners
+  { id: 7, name: '1-1/4" Coil Roofing Nails', partNo: 'NL001', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Fasteners', subCategory: 'Nails', brand: 'Grip-Rite', specification: 'Electro-Galvanized', quantity: '30 Box(es)', unitPrice: '$45.00', createdBy: 'Eric Taylor' },
+  { id: 8, name: '7/16" Crown Staples 1-1/2"', partNo: 'ST001', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Fasteners', subCategory: 'Staples', brand: 'Bostitch', specification: 'Galvanized', quantity: '20 Box(es)', unitPrice: '$38.50', createdBy: 'Eric Taylor' },
+  { id: 9, name: 'Geocel Tripolymer Sealant', partNo: 'SL001', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Fasteners', subCategory: 'Sealants & Adhesives', brand: 'Geocel', specification: 'Clear, 10.3 oz', quantity: '48 Tube(s)', unitPrice: '$8.99', createdBy: 'Eric Taylor' },
+  { id: 10, name: 'Black Jack Roof Cement', partNo: 'SL002', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Fasteners', subCategory: 'Sealants & Adhesives', brand: 'Black Jack', specification: '10.1 oz tube', quantity: '24 Tube(s)', unitPrice: '$4.49', createdBy: 'Eric Taylor' },
+  // Ventilation
+  { id: 11, name: 'Ridge Vent 4ft Section', partNo: 'VNT001', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Ventilation', subCategory: null, brand: 'Air Vent', specification: 'Shingle-Over', quantity: '50 Each', unitPrice: '$18.75', createdBy: 'Eric Taylor' },
+  { id: 12, name: 'Turbine Vent 12"', partNo: 'VNT002', createdOn: '09/02/2025 02:45 AM', type: 'PARTS', category: 'Ventilation', subCategory: null, brand: 'Lomanco', specification: 'Galvanized', quantity: '12 Each', unitPrice: '$42.00', createdBy: 'Eric Taylor' },
+  // Labor - Services
+  { id: 13, name: 'Roof Installation Labor', partNo: 'LBR001', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Labor', subCategory: 'Installation', brand: '', specification: 'Per Square', quantity: '1 Square(s)', unitPrice: '$75.00', createdBy: 'Eric Taylor' },
+  { id: 14, name: 'Tear-Off & Disposal', partNo: 'LBR002', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Labor', subCategory: 'Installation', brand: '', specification: 'Per Square', quantity: '1 Square(s)', unitPrice: '$45.00', createdBy: 'Eric Taylor' },
+  { id: 15, name: 'Materials Delivery 0-15 mi.', partNo: 'DEL001', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Labor', subCategory: 'Delivery Charges', brand: '', specification: '', quantity: '1 Trip', unitPrice: '$125.00', createdBy: 'Eric Taylor' },
+  { id: 16, name: 'Roof Inspection Service', partNo: 'SRV001', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Services', subCategory: null, brand: '', specification: 'Detailed Report', quantity: '1 Each', unitPrice: '$250.00', createdBy: 'Eric Taylor' },
+  { id: 17, name: 'Emergency Leak Repair', partNo: 'SRV002', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Services', subCategory: null, brand: '', specification: '24/7 Available', quantity: '1 Each', unitPrice: '$375.00', createdBy: 'Eric Taylor' },
+  { id: 18, name: 'Gutter Cleaning Service', partNo: 'SRV003', createdOn: '09/02/2025 02:45 AM', type: 'SERVICE', category: 'Services', subCategory: null, brand: '', specification: 'Up to 200 LF', quantity: '1 Each', unitPrice: '$175.00', createdBy: 'Eric Taylor' },
 ];
 
 // Filter type options
