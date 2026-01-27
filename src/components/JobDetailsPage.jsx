@@ -498,6 +498,7 @@ function EditLineItemModal({ isOpen, onClose, item, onSave }) {
     location: '',
     selectedOption: null,
     optionSearch: '',
+    allowCustomerSelection: true,
   });
   const [previewOption, setPreviewOption] = useState(null);
 
@@ -516,6 +517,7 @@ function EditLineItemModal({ isOpen, onClose, item, onSave }) {
         location: item.location || '',
         selectedOption: item.selectedOption || null,
         optionSearch: '',
+        allowCustomerSelection: item.allowCustomerSelection !== false,
       });
     }
   }, [item]);
@@ -573,6 +575,31 @@ function EditLineItemModal({ isOpen, onClose, item, onSave }) {
                     <span className="font-medium text-[#334155]">{formData.selectedOption.name}</span>
                   </div>
                 )}
+              </div>
+              
+              {/* Allow Customer Selection Toggle */}
+              <div className="flex items-center justify-between mb-[12px] p-[12px] bg-[#F8FAFC] rounded-[6px] border border-[#E2E8F0]">
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-medium text-[#334155]">Allow customer to select option</span>
+                  <span className="text-[12px] text-[#64748B]">
+                    {formData.allowCustomerSelection 
+                      ? 'Customer can choose from available options' 
+                      : 'Option selection is disabled for customer'}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, allowCustomerSelection: !prev.allowCustomerSelection }))}
+                  className={`relative w-[44px] h-[24px] rounded-full transition-colors duration-200 ${
+                    formData.allowCustomerSelection ? 'bg-[#2563EB]' : 'bg-[#CBD5E1]'
+                  }`}
+                >
+                  <span 
+                    className={`absolute top-[2px] w-[20px] h-[20px] bg-white rounded-full shadow-sm transition-transform duration-200 ${
+                      formData.allowCustomerSelection ? 'left-[22px]' : 'left-[2px]'
+                    }`}
+                  />
+                </button>
               </div>
               
               {/* Search for options - only show if more than 6 options */}

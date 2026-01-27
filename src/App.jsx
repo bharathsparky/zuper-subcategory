@@ -10,12 +10,18 @@ import JobDetailsPage from './components/JobDetailsPage'
 import JobChecklistPage from './components/JobChecklistPage'
 import ReportsPage from './components/ReportsPage'
 import MobileCategoryPage from './components/MobileCategoryPage'
+import JobsListingPage from './components/JobsListingPage'
 
 function App() {
-  // Check if we're on the /mobile route
+  // Check if we're on the /mobile or /listing route
   const [isMobileRoute, setIsMobileRoute] = useState(() => {
     const path = window.location.pathname
     return path === '/mobile' || path === '/mobile/'
+  })
+  
+  const [isListingRoute, setIsListingRoute] = useState(() => {
+    const path = window.location.pathname
+    return path === '/listing' || path === '/listing/'
   })
   
   // 'workspace' = Products listing, 'settings' = Category Settings, 'product-details' = Product details, 'new-part-service' = New Part/Service form, 'job-details' = Job Details, 'job-checklist' = Job Checklist, 'reports' = Reports
@@ -26,29 +32,75 @@ function App() {
     const checkRoute = () => {
       const path = window.location.pathname
       setIsMobileRoute(path === '/mobile' || path === '/mobile/')
+      setIsListingRoute(path === '/listing' || path === '/listing/')
     }
     window.addEventListener('popstate', checkRoute)
     return () => window.removeEventListener('popstate', checkRoute)
   }, [])
+
+  // Navigation functions
+  const navigateToWorkspace = () => {
+    setSelectedProduct(null)
+    setIsListingRoute(false)
+    window.history.pushState({}, '', '/')
+    setCurrentView('workspace')
+  }
+  const navigateToSettings = () => {
+    setIsListingRoute(false)
+    window.history.pushState({}, '', '/')
+    setCurrentView('settings')
+  }
+  const navigateToProductDetails = (product) => {
+    setSelectedProduct(product)
+    setCurrentView('product-details')
+  }
+  const navigateToNewPartService = () => setCurrentView('new-part-service')
+  const navigateToJobDetails = () => {
+    setIsListingRoute(false)
+    window.history.pushState({}, '', '/')
+    setCurrentView('job-details')
+  }
+  const navigateToJobChecklist = () => setCurrentView('job-checklist')
+  const navigateToReports = () => {
+    setIsListingRoute(false)
+    window.history.pushState({}, '', '/')
+    setCurrentView('reports')
+  }
+  const navigateToJobsListing = () => {
+    window.history.pushState({}, '', '/listing')
+    setIsListingRoute(true)
+  }
 
   // If on mobile route, render the mobile page
   if (isMobileRoute) {
     return <MobileCategoryPage />
   }
 
-  const navigateToWorkspace = () => {
-    setSelectedProduct(null)
-    setCurrentView('workspace')
+  // If on listing route, render the jobs listing page
+  if (isListingRoute) {
+    return (
+      <div className="flex h-screen overflow-hidden">
+        <WorkspaceSidebar 
+          onNavigateToSettings={navigateToSettings} 
+          onNavigateToJobDetails={navigateToJobDetails}
+          onNavigateToWorkspace={navigateToWorkspace}
+          onNavigateToReports={navigateToReports}
+          onNavigateToJobsListing={navigateToJobsListing}
+          currentView="jobs-listing"
+        />
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <Header currentView="jobs-listing" onNavigateToSettings={navigateToSettings} />
+          <main className="flex-1 overflow-hidden bg-white">
+            <JobsListingPage 
+              onJobClick={(job) => {
+                navigateToJobDetails()
+              }}
+            />
+          </main>
+        </div>
+      </div>
+    )
   }
-  const navigateToSettings = () => setCurrentView('settings')
-  const navigateToProductDetails = (product) => {
-    setSelectedProduct(product)
-    setCurrentView('product-details')
-  }
-  const navigateToNewPartService = () => setCurrentView('new-part-service')
-  const navigateToJobDetails = () => setCurrentView('job-details')
-  const navigateToJobChecklist = () => setCurrentView('job-checklist')
-  const navigateToReports = () => setCurrentView('reports')
 
   if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service' || currentView === 'job-details' || currentView === 'reports') {
     // Workspace view: Full-height sidebar on left, header + content on right
@@ -60,6 +112,7 @@ function App() {
           onNavigateToJobDetails={navigateToJobDetails}
           onNavigateToWorkspace={navigateToWorkspace}
           onNavigateToReports={navigateToReports}
+          onNavigateToJobsListing={navigateToJobsListing}
           currentView={currentView}
         />
         
