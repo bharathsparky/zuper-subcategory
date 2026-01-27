@@ -201,6 +201,27 @@ const LINE_ITEMS_DATA = [
     options: [],
   },
   {
+    id: 10,
+    itemId: '#RF-UND-002',
+    name: 'Synthetic Underlayment',
+    availableQty: 30,
+    unit: 'Rolls',
+    category: 'Underlayment',
+    productType: 'Material',
+    location: 'Main Warehouse',
+    serialNo: 'N/A',
+    unitCost: '85.00',
+    markup: '20',
+    unitSellingPrice: '102.00',
+    hasOptions: true,
+    options: [
+      { id: 'und-1', name: 'Standard Gray', color: '#6B7280' },
+      { id: 'und-2', name: 'Premium Black', color: '#1F2937' },
+      { id: 'und-3', name: 'High-Temp White', color: '#F3F4F6' },
+      { id: 'und-4', name: 'Ice & Water Shield', color: '#3B82F6' },
+    ],
+  },
+  {
     id: 3,
     itemId: '#RF-RDG-001',
     name: 'Ridge Cap Shingles',
@@ -499,6 +520,7 @@ function EditLineItemModal({ isOpen, onClose, item, onSave }) {
     selectedOption: null,
     optionSearch: '',
     allowCustomerSelection: true,
+    optionDropdownOpen: false,
   });
   const [previewOption, setPreviewOption] = useState(null);
 
@@ -518,6 +540,7 @@ function EditLineItemModal({ isOpen, onClose, item, onSave }) {
         selectedOption: item.selectedOption || null,
         optionSearch: '',
         allowCustomerSelection: item.allowCustomerSelection !== false,
+        optionDropdownOpen: false,
       });
     }
   }, [item]);
@@ -561,147 +584,173 @@ function EditLineItemModal({ isOpen, onClose, item, onSave }) {
           {/* Option Selector - Only show if product has options */}
           {hasOptions && (
             <div className="mb-[20px]">
-              <div className="flex items-center justify-between mb-[8px]">
-                <label className="text-[13px] font-medium text-[#334155]">
-                  Option <span className="text-[#94A3B8] font-normal">({availableOptions.length} available)</span>
-                </label>
-                {formData.selectedOption && (
-                  <div className="flex items-center gap-[6px] text-[12px] text-[#64748B]">
-                    <span>Selected:</span>
-                    <div 
-                      className="w-[14px] h-[14px] rounded-[3px] border border-[#E2E8F0]"
-                      style={{ backgroundColor: formData.selectedOption.color }}
-                    />
-                    <span className="font-medium text-[#334155]">{formData.selectedOption.name}</span>
-                  </div>
-                )}
-              </div>
-              
-              {/* Allow Customer Selection Toggle */}
-              <div className="flex items-center justify-between mb-[12px] p-[12px] bg-[#F8FAFC] rounded-[6px] border border-[#E2E8F0]">
-                <div className="flex flex-col">
-                  <span className="text-[13px] font-medium text-[#334155]">Allow customer to select option</span>
-                  <span className="text-[12px] text-[#64748B]">
-                    {formData.allowCustomerSelection 
-                      ? 'Customer can choose from available options' 
-                      : 'Option selection is disabled for customer'}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, allowCustomerSelection: !prev.allowCustomerSelection }))}
-                  className={`relative w-[44px] h-[24px] rounded-full transition-colors duration-200 ${
-                    formData.allowCustomerSelection ? 'bg-[#2563EB]' : 'bg-[#CBD5E1]'
-                  }`}
-                >
-                  <span 
-                    className={`absolute top-[2px] w-[20px] h-[20px] bg-white rounded-full shadow-sm transition-transform duration-200 ${
-                      formData.allowCustomerSelection ? 'left-[22px]' : 'left-[2px]'
-                    }`}
-                  />
-                </button>
-              </div>
-              
-              {/* Search for options - only show if more than 6 options */}
-              {availableOptions.length > 6 && (
-                <div className="mb-[10px]">
-                  <div className="h-[36px] flex items-center gap-[8px] px-[10px] border border-[#E2E8F0] rounded-[6px] bg-white">
-                    <IconSearch size={16} stroke={1.5} className="text-[#94A3B8]" />
-                    <input
-                      type="text"
-                      placeholder="Search options..."
-                      value={formData.optionSearch || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, optionSearch: e.target.value }))}
-                      className="flex-1 text-[13px] text-[#334155] placeholder-[#94A3B8] outline-none bg-transparent"
-                    />
-                    {formData.optionSearch && (
-                      <button 
-                        onClick={() => setFormData(prev => ({ ...prev, optionSearch: '' }))}
-                        className="text-[#94A3B8] hover:text-[#64748B]"
-                      >
-                        <IconX size={14} stroke={2} />
-                      </button>
+              {/* Show Customer Selection only for second item (UND-002) - for proposal flow demo */}
+              {/* First item (SHG-001) represents job edit flow without customer selection */}
+              {/* Second item (UND-002) represents proposal edit flow with customer selection */}
+              <div className={`grid gap-[16px] ${item?.itemCode === '#RF-UND-002' ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                {/* Option Dropdown */}
+                <div>
+                  <label className="block text-[13px] font-medium text-[#334155] mb-[8px]">
+                    Option <span className="text-[#94A3B8] font-normal">({availableOptions.length} available)</span>
+                  </label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, optionDropdownOpen: !prev.optionDropdownOpen }))}
+                      className="w-full h-[40px] flex items-center gap-[10px] px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white hover:bg-[#F8FAFC] transition-colors"
+                    >
+                      {formData.selectedOption ? (
+                        <>
+                          {formData.selectedOption.image ? (
+                            <img 
+                              src={formData.selectedOption.image} 
+                              alt={formData.selectedOption.name}
+                              className="w-[24px] h-[24px] rounded-[4px] object-cover border border-[#E2E8F0] flex-shrink-0"
+                            />
+                          ) : formData.selectedOption.color ? (
+                            <div 
+                              className="w-[24px] h-[24px] rounded-[4px] border border-[#E2E8F0] flex-shrink-0"
+                              style={{ backgroundColor: formData.selectedOption.color }}
+                            />
+                          ) : (
+                            <div className="w-[24px] h-[24px] rounded-[4px] border border-[#E2E8F0] bg-[#F1F5F9] flex items-center justify-center flex-shrink-0">
+                              <IconPhoto size={14} stroke={1.5} className="text-[#94A3B8]" />
+                            </div>
+                          )}
+                          <span className="text-[14px] text-[#334155] truncate flex-1 text-left">{formData.selectedOption.name}</span>
+                        </>
+                      ) : (
+                        <span className="text-[14px] text-[#94A3B8]">Select an option</span>
+                      )}
+                      <IconChevronDown size={16} stroke={1.5} className="text-[#94A3B8] flex-shrink-0" />
+                    </button>
+
+                    {formData.optionDropdownOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setFormData(prev => ({ ...prev, optionDropdownOpen: false }))} />
+                        <div className="absolute top-full left-0 mt-1 w-full bg-white border border-[#E2E8F0] rounded-[6px] shadow-lg z-50 max-h-[280px] overflow-hidden">
+                          {/* Search in dropdown */}
+                          {availableOptions.length > 6 && (
+                            <div className="p-[8px] border-b border-[#E2E8F0]">
+                              <div className="h-[32px] flex items-center gap-[8px] px-[10px] border border-[#E2E8F0] rounded-[4px] bg-[#F8FAFC]">
+                                <IconSearch size={14} stroke={1.5} className="text-[#94A3B8]" />
+                                <input
+                                  type="text"
+                                  placeholder="Search options..."
+                                  value={formData.optionSearch || ''}
+                                  onChange={(e) => setFormData(prev => ({ ...prev, optionSearch: e.target.value }))}
+                                  className="flex-1 text-[13px] text-[#334155] placeholder-[#94A3B8] outline-none bg-transparent"
+                                />
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Options list */}
+                          <div className="max-h-[220px] overflow-y-auto py-[4px]">
+                            {availableOptions
+                              .filter(opt => 
+                                !formData.optionSearch || 
+                                opt.name.toLowerCase().includes((formData.optionSearch || '').toLowerCase())
+                              )
+                              .map((option) => (
+                              <div
+                                key={option.id}
+                                className={`flex items-center gap-[10px] px-[12px] py-[8px] hover:bg-[#F8FAFC] transition-colors cursor-pointer ${
+                                  formData.selectedOption?.id === option.id ? 'bg-[#EFF6FF]' : ''
+                                }`}
+                              >
+                                {/* Preview button */}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPreviewOption(option);
+                                  }}
+                                  className="group relative flex-shrink-0"
+                                  title="Click to preview"
+                                >
+                                  {option.image ? (
+                                    <img 
+                                      src={option.image} 
+                                      alt={option.name}
+                                      className="w-[32px] h-[32px] rounded-[4px] object-cover border border-[#E2E8F0] group-hover:ring-2 group-hover:ring-[#3B82F6]"
+                                    />
+                                  ) : option.color ? (
+                                    <div 
+                                      className="w-[32px] h-[32px] rounded-[4px] border border-[#E2E8F0] group-hover:ring-2 group-hover:ring-[#3B82F6] transition-all"
+                                      style={{ backgroundColor: option.color }}
+                                    />
+                                  ) : (
+                                    <div className="w-[32px] h-[32px] rounded-[4px] border border-[#E2E8F0] bg-[#F1F5F9] flex items-center justify-center group-hover:ring-2 group-hover:ring-[#3B82F6]">
+                                      <IconPhoto size={16} stroke={1.5} className="text-[#94A3B8]" />
+                                    </div>
+                                  )}
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-[4px] opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2">
+                                      <path d="M6 1H1v5M15 1h-5M1 10v5h5M10 15h5v-5" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                  </div>
+                                </button>
+                                
+                                {/* Option name - click to select */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleOptionSelect(option);
+                                    setFormData(prev => ({ ...prev, optionDropdownOpen: false }));
+                                  }}
+                                  className="flex-1 flex items-center justify-between text-left"
+                                >
+                                  <span className="text-[13px] text-[#334155]">{option.name}</span>
+                                  {formData.selectedOption?.id === option.id && (
+                                    <IconCheck size={16} stroke={2} className="text-[#2563EB]" />
+                                  )}
+                                </button>
+                              </div>
+                            ))}
+                            
+                            {/* No results */}
+                            {formData.optionSearch && availableOptions.filter(opt => 
+                              opt.name.toLowerCase().includes((formData.optionSearch || '').toLowerCase())
+                            ).length === 0 && (
+                              <div className="text-center py-[16px] text-[13px] text-[#94A3B8]">
+                                No options match "{formData.optionSearch}"
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </>
                     )}
                   </div>
                 </div>
-              )}
-              
-              {/* Options Grid - scrollable if many options */}
-              <div className={`grid gap-[8px] ${
-                availableOptions.length > 6 
-                  ? 'grid-cols-4 max-h-[200px] overflow-y-auto pr-[4px]' 
-                  : 'grid-cols-4'
-              }`}>
-                {availableOptions
-                  .filter(opt => 
-                    !formData.optionSearch || 
-                    opt.name.toLowerCase().includes((formData.optionSearch || '').toLowerCase())
-                  )
-                  .map((option) => (
-                  <div
-                    key={option.id}
-                    className={`rounded-[6px] border transition-all ${
-                      formData.selectedOption?.id === option.id
-                        ? 'border-[#2563EB] bg-[#EFF6FF] ring-1 ring-[#2563EB]'
-                        : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1] hover:bg-[#F8FAFC]'
-                    }`}
-                  >
-                    <div className="p-[8px] flex flex-col items-center gap-[6px]">
-                      {/* Clickable Image/Color - Opens Preview */}
+
+                {/* Allow Customer Selection Toggle - Only for proposal flow (second item demo) */}
+                {item?.itemCode === '#RF-UND-002' && (
+                  <div>
+                    <label className="block text-[13px] font-medium text-[#334155] mb-[8px]">
+                      Customer Selection
+                    </label>
+                    <div className="h-[40px] flex items-center justify-between px-[12px] bg-[#F8FAFC] rounded-[6px] border border-[#E2E8F0]">
+                      <span className="text-[13px] text-[#64748B]">
+                        {formData.allowCustomerSelection ? 'Enabled' : 'Disabled'}
+                      </span>
                       <button
                         type="button"
-                        onClick={() => setPreviewOption(option)}
-                        className="group relative"
-                        title="Click to preview"
+                        onClick={() => setFormData(prev => ({ ...prev, allowCustomerSelection: !prev.allowCustomerSelection }))}
+                        className={`relative w-[36px] h-[20px] rounded-full transition-colors duration-200 ${
+                          formData.allowCustomerSelection ? 'bg-[#2563EB]' : 'bg-[#CBD5E1]'
+                        }`}
                       >
-                        {option.image ? (
-                          <img 
-                            src={option.image} 
-                            alt={option.name}
-                            className="w-[48px] h-[48px] rounded-[6px] object-cover border border-[#E2E8F0] group-hover:ring-2 group-hover:ring-[#3B82F6] transition-all"
-                          />
-                        ) : (
-                          <div 
-                            className="w-[48px] h-[48px] rounded-[6px] border border-[#E2E8F0] group-hover:ring-2 group-hover:ring-[#3B82F6] transition-all"
-                            style={{ backgroundColor: option.color }}
-                          />
-                        )}
-                        {/* Expand icon on hover */}
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-[6px] opacity-0 group-hover:opacity-100 transition-opacity">
-                          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2">
-                            <path d="M6 1H1v5M15 1h-5M1 10v5h5M10 15h5v-5" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
-                      </button>
-                      
-                      {/* Option Name - Clickable to Select */}
-                      <button
-                        type="button"
-                        onClick={() => handleOptionSelect(option)}
-                        className="flex items-center gap-[4px] w-full justify-center"
-                      >
-                        <span className={`text-[11px] truncate ${
-                          formData.selectedOption?.id === option.id ? 'text-[#1E40AF] font-medium' : 'text-[#334155]'
-                        }`}>
-                          {option.name}
-                        </span>
-                        {formData.selectedOption?.id === option.id && (
-                          <IconCheck size={12} stroke={2} className="text-[#2563EB] flex-shrink-0" />
-                        )}
+                        <span 
+                          className={`absolute top-[2px] w-[16px] h-[16px] bg-white rounded-full shadow-sm transition-transform duration-200 ${
+                            formData.allowCustomerSelection ? 'left-[18px]' : 'left-[2px]'
+                          }`}
+                        />
                       </button>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
-              
-              {/* No results message */}
-              {formData.optionSearch && availableOptions.filter(opt => 
-                opt.name.toLowerCase().includes((formData.optionSearch || '').toLowerCase())
-              ).length === 0 && (
-                <div className="text-center py-[16px] text-[13px] text-[#94A3B8]">
-                  No options match "{formData.optionSearch}"
-                </div>
-              )}
             </div>
           )}
 
