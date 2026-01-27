@@ -11,6 +11,8 @@ import JobChecklistPage from './components/JobChecklistPage'
 import ReportsPage from './components/ReportsPage'
 import MobileCategoryPage from './components/MobileCategoryPage'
 import JobsListingPage from './components/JobsListingPage'
+import NewQuotePage from './components/NewQuotePage'
+import QuoteDetailsPage from './components/QuoteDetailsPage'
 
 function App() {
   // Check if we're on the /mobile or /listing route
@@ -70,6 +72,16 @@ function App() {
     window.history.pushState({}, '', '/listing')
     setIsListingRoute(true)
   }
+  const navigateToNewQuote = () => {
+    setIsListingRoute(false)
+    window.history.pushState({}, '', '/')
+    setCurrentView('new-quote')
+  }
+  const navigateToQuoteDetails = () => {
+    setIsListingRoute(false)
+    window.history.pushState({}, '', '/')
+    setCurrentView('quote-details')
+  }
 
   // If on mobile route, render the mobile page
   if (isMobileRoute) {
@@ -86,6 +98,7 @@ function App() {
           onNavigateToWorkspace={navigateToWorkspace}
           onNavigateToReports={navigateToReports}
           onNavigateToJobsListing={navigateToJobsListing}
+          onNavigateToNewQuote={navigateToNewQuote}
           currentView="jobs-listing"
         />
         <div className="flex flex-col flex-1 overflow-hidden">
@@ -102,7 +115,7 @@ function App() {
     )
   }
 
-  if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service' || currentView === 'job-details' || currentView === 'reports') {
+  if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service' || currentView === 'job-details' || currentView === 'reports' || currentView === 'new-quote' || currentView === 'quote-details') {
     // Workspace view: Full-height sidebar on left, header + content on right
     return (
       <div className="flex h-screen overflow-hidden">
@@ -113,6 +126,7 @@ function App() {
           onNavigateToWorkspace={navigateToWorkspace}
           onNavigateToReports={navigateToReports}
           onNavigateToJobsListing={navigateToJobsListing}
+          onNavigateToNewQuote={navigateToNewQuote}
           currentView={currentView}
         />
         
@@ -120,7 +134,16 @@ function App() {
         <div className="flex flex-col flex-1 overflow-hidden">
           <Header currentView={currentView} onNavigateToSettings={navigateToSettings} />
 <main className="flex-1 overflow-hidden bg-white">
-                {currentView === 'reports' ? (
+                {currentView === 'quote-details' ? (
+                  <QuoteDetailsPage 
+                    onBack={navigateToNewQuote}
+                  />
+                ) : currentView === 'new-quote' ? (
+                  <NewQuotePage 
+                    onBack={navigateToWorkspace}
+                    onSaveAndSend={navigateToQuoteDetails}
+                  />
+                ) : currentView === 'reports' ? (
                   <ReportsPage 
                     onBack={navigateToWorkspace}
                   />
@@ -163,7 +186,7 @@ function App() {
       >
         <Header currentView={currentView} />
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar onNavigateToWorkspace={navigateToWorkspace} onNavigateToJobChecklist={navigateToJobChecklist} onNavigateToSettings={navigateToSettings} currentView={currentView} />
+          <Sidebar onNavigateToWorkspace={navigateToWorkspace} onNavigateToJobChecklist={navigateToJobChecklist} onNavigateToSettings={navigateToSettings} onNavigateToNewQuote={navigateToNewQuote} currentView={currentView} />
           <main className="flex-1 overflow-hidden bg-white">
             <JobChecklistPage onBack={navigateToSettings} />
           </main>
@@ -180,7 +203,7 @@ function App() {
     >
       <Header currentView={currentView} />
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar onNavigateToWorkspace={navigateToWorkspace} onNavigateToJobChecklist={navigateToJobChecklist} onNavigateToSettings={navigateToSettings} currentView={currentView} />
+        <Sidebar onNavigateToWorkspace={navigateToWorkspace} onNavigateToJobChecklist={navigateToJobChecklist} onNavigateToSettings={navigateToSettings} onNavigateToNewQuote={navigateToNewQuote} currentView={currentView} />
         <main className="flex-1 overflow-hidden bg-white">
           <CategorySettings />
         </main>

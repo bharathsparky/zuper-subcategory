@@ -35,7 +35,7 @@ const moduleItems = [
   { id: 'purchasing', label: 'Purchasing', icon: ShoppingBagIcon },
 ];
 
-function Sidebar({ onNavigateToWorkspace, onNavigateToJobChecklist, onNavigateToSettings, currentView }) {
+function Sidebar({ onNavigateToWorkspace, onNavigateToJobChecklist, onNavigateToSettings, onNavigateToNewQuote, currentView }) {
   const [modulesExpanded, setModulesExpanded] = useState(true);
   const [dataAdminExpanded, setDataAdminExpanded] = useState(false);
 
@@ -101,6 +101,8 @@ function Sidebar({ onNavigateToWorkspace, onNavigateToJobChecklist, onNavigateTo
                   onNavigateToJobChecklist();
                 } else if (item.id === 'parts' && onNavigateToSettings) {
                   onNavigateToSettings();
+                } else if (item.id === 'quotes' && onNavigateToNewQuote) {
+                  onNavigateToNewQuote();
                 }
               };
               

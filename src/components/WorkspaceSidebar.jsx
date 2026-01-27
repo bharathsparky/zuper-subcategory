@@ -38,12 +38,13 @@ const sidebarItems = [
   { id: 'workflow', icon: SIDEBAR_ICONS.workflow, label: 'Workflow' },
 ];
 
-function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavigateToWorkspace, onNavigateToReports, onNavigateToJobsListing, currentView }) {
+function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavigateToWorkspace, onNavigateToReports, onNavigateToJobsListing, onNavigateToNewQuote, currentView }) {
   // Determine which item should be active based on current view
   const getActiveItemId = () => {
     if (currentView === 'jobs-listing') return 'jobs';
     if (currentView === 'job-details') return 'briefcase';
     if (currentView === 'reports') return 'pieChart';
+    if (currentView === 'new-quote') return 'table';
     if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service') return 'tag';
     return 'tag';
   };
@@ -74,6 +75,8 @@ function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavi
               onNavigateToWorkspace();
             } else if (item.id === 'pieChart' && onNavigateToReports) {
               onNavigateToReports();
+            } else if (item.id === 'table' && onNavigateToNewQuote) {
+              onNavigateToNewQuote();
             }
           };
           return (
