@@ -10,15 +10,21 @@ import JobDetailsPage from './components/JobDetailsPage'
 import JobChecklistPage from './components/JobChecklistPage'
 import ReportsPage from './components/ReportsPage'
 import MobileCategoryPage from './components/MobileCategoryPage'
+import MobileQuoteDetailsPage from './components/MobileQuoteDetailsPage'
 import JobsListingPage from './components/JobsListingPage'
 import NewQuotePage from './components/NewQuotePage'
 import QuoteDetailsPage from './components/QuoteDetailsPage'
 
 function App() {
-  // Check if we're on the /mobile or /listing route
+  // Check if we're on the /mobile, /mobile/quote, or /listing route
   const [isMobileRoute, setIsMobileRoute] = useState(() => {
     const path = window.location.pathname
     return path === '/mobile' || path === '/mobile/'
+  })
+  
+  const [isMobileQuoteRoute, setIsMobileQuoteRoute] = useState(() => {
+    const path = window.location.pathname
+    return path === '/mobile/quote' || path === '/mobile/quote/'
   })
   
   const [isListingRoute, setIsListingRoute] = useState(() => {
@@ -34,6 +40,7 @@ function App() {
     const checkRoute = () => {
       const path = window.location.pathname
       setIsMobileRoute(path === '/mobile' || path === '/mobile/')
+      setIsMobileQuoteRoute(path === '/mobile/quote' || path === '/mobile/quote/')
       setIsListingRoute(path === '/listing' || path === '/listing/')
     }
     window.addEventListener('popstate', checkRoute)
@@ -81,6 +88,11 @@ function App() {
     setIsListingRoute(false)
     window.history.pushState({}, '', '/')
     setCurrentView('quote-details')
+  }
+
+  // If on mobile quote route, render the mobile quote details page
+  if (isMobileQuoteRoute) {
+    return <MobileQuoteDetailsPage />
   }
 
   // If on mobile route, render the mobile page

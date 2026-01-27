@@ -185,16 +185,6 @@ const EmailIcon = () => (
   </svg>
 );
 
-// QR Code icon
-const QRCodeIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="1" y="1" width="5" height="5" rx="1" stroke="#64748B" strokeWidth="1.5"/>
-    <rect x="8" y="1" width="5" height="5" rx="1" stroke="#64748B" strokeWidth="1.5"/>
-    <rect x="1" y="8" width="5" height="5" rx="1" stroke="#64748B" strokeWidth="1.5"/>
-    <rect x="8.5" y="8.5" width="4" height="4" stroke="#64748B" strokeWidth="1.5"/>
-  </svg>
-);
-
 function QuoteDetailsPage({ onBack, quoteData }) {
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(QUOTE_DATA.status);
@@ -413,13 +403,6 @@ function QuoteDetailsPage({ onBack, quoteData }) {
                     <span className="text-[13px] text-[#64748B]">Quote Sold By</span>
                     <span className="text-[13px] text-[#334155] text-right">{QUOTE_DATA.quoteSoldBy}</span>
                   </div>
-
-                  {/* QR Code Button */}
-                  <div className="flex justify-end mt-[7px]">
-                    <button className="w-[37px] h-[37px] flex items-center justify-center border border-[#E2E8F0] rounded-[4px] hover:bg-[#F8FAFC] transition-colors">
-                      <QRCodeIcon />
-                    </button>
-                  </div>
                 </div>
               </div>
             </div>
@@ -634,6 +617,7 @@ function QuoteDetailsPage({ onBack, quoteData }) {
           </div>
         </div>
       </div>
+
     </div>
   );
 }
