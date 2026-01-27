@@ -384,42 +384,42 @@ function QuoteDetailsPage({ onBack, quoteData }) {
               </div>
 
               {/* Right - Total Amount & Details */}
-              <div className="flex-1 ml-[21px]">
+              <div className="flex-1 ml-[21px] border border-[#E2E8F0] rounded-[4px]">
                 {/* Total Amount Header */}
-                <div className="bg-[#F1F5F9] rounded-[4px] p-[10.5px] text-center mb-[13.5px]">
+                <div className="bg-[#F1F5F9] p-[14px] text-center border-b border-[#E2E8F0]">
                   <div className="text-[12px] text-[#3B82F6] font-medium uppercase tracking-wide">Total Amount</div>
-                  <div className="text-[18px] font-semibold text-[#1E293B]">{QUOTE_DATA.summary.total}</div>
+                  <div className="text-[20px] font-semibold text-[#1E293B]">{QUOTE_DATA.summary.total}</div>
                 </div>
 
                 {/* Quote Details */}
-                <div className="space-y-[0px]">
+                <div className="p-[14px]">
                   <div className="flex justify-between py-[7px]">
                     <span className="text-[13px] text-[#64748B]">Quote No</span>
-                    <span className="text-[13px] text-[#334155]">{QUOTE_DATA.quoteNo}</span>
+                    <span className="text-[13px] text-[#334155] text-right">{QUOTE_DATA.quoteNo}</span>
                   </div>
                   <div className="flex justify-between py-[7px]">
                     <span className="text-[13px] text-[#64748B]">Quote Date</span>
-                    <span className="text-[13px] text-[#334155]">{QUOTE_DATA.quoteDate}</span>
+                    <span className="text-[13px] text-[#334155] text-right">{QUOTE_DATA.quoteDate}</span>
                   </div>
                   <div className="flex justify-between py-[7px]">
                     <span className="text-[13px] text-[#64748B]">Expiry Date</span>
-                    <span className="text-[13px] text-[#334155]">{QUOTE_DATA.expiryDate}</span>
+                    <span className="text-[13px] text-[#334155] text-right">{QUOTE_DATA.expiryDate}</span>
                   </div>
                   <div className="flex justify-between py-[7px]">
                     <span className="text-[13px] text-[#64748B]">Created By</span>
-                    <span className="text-[13px] text-[#334155]">{QUOTE_DATA.createdBy}</span>
+                    <span className="text-[13px] text-[#334155] text-right">{QUOTE_DATA.createdBy}</span>
                   </div>
                   <div className="flex justify-between py-[7px]">
                     <span className="text-[13px] text-[#64748B]">Quote Sold By</span>
-                    <span className="text-[13px] text-[#334155]">{QUOTE_DATA.quoteSoldBy}</span>
+                    <span className="text-[13px] text-[#334155] text-right">{QUOTE_DATA.quoteSoldBy}</span>
                   </div>
-                </div>
 
-                {/* QR Code Button */}
-                <div className="flex justify-end mt-[14px]">
-                  <button className="w-[37px] h-[37px] flex items-center justify-center border border-[#E2E8F0] rounded-[4px] hover:bg-[#F8FAFC] transition-colors">
-                    <QRCodeIcon />
-                  </button>
+                  {/* QR Code Button */}
+                  <div className="flex justify-end mt-[7px]">
+                    <button className="w-[37px] h-[37px] flex items-center justify-center border border-[#E2E8F0] rounded-[4px] hover:bg-[#F8FAFC] transition-colors">
+                      <QRCodeIcon />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
