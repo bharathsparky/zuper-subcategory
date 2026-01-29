@@ -15,6 +15,7 @@ import JobsListingPage from './components/JobsListingPage'
 import NewQuotePage from './components/NewQuotePage'
 import QuoteDetailsPage from './components/QuoteDetailsPage'
 import VendorDetailsPage from './components/VendorDetailsPage'
+import NewPurchaseOrderPage from './components/NewPurchaseOrderPage'
 
 function App() {
   // Check if we're on the /mobile, /mobile/quote, or /listing route
@@ -95,6 +96,11 @@ function App() {
     window.history.pushState({}, '', '/')
     setCurrentView('vendor-details')
   }
+  const navigateToPurchaseOrders = () => {
+    setIsListingRoute(false)
+    window.history.pushState({}, '', '/')
+    setCurrentView('purchase-orders')
+  }
 
   // If on mobile quote route, render the mobile quote details page
   if (isMobileQuoteRoute) {
@@ -118,6 +124,7 @@ function App() {
           onNavigateToJobsListing={navigateToJobsListing}
           onNavigateToNewQuote={navigateToNewQuote}
           onNavigateToVendorDetails={navigateToVendorDetails}
+          onNavigateToPurchaseOrders={navigateToPurchaseOrders}
           currentView="jobs-listing"
         />
         <div className="flex flex-col flex-1 overflow-hidden">
@@ -134,7 +141,7 @@ function App() {
     )
   }
 
-  if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service' || currentView === 'job-details' || currentView === 'reports' || currentView === 'new-quote' || currentView === 'quote-details' || currentView === 'vendor-details') {
+  if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service' || currentView === 'job-details' || currentView === 'reports' || currentView === 'new-quote' || currentView === 'quote-details' || currentView === 'vendor-details' || currentView === 'purchase-orders') {
     // Workspace view: Full-height sidebar on left, header + content on right
     return (
       <div className="flex h-screen overflow-hidden">
@@ -147,6 +154,7 @@ function App() {
           onNavigateToJobsListing={navigateToJobsListing}
           onNavigateToNewQuote={navigateToNewQuote}
           onNavigateToVendorDetails={navigateToVendorDetails}
+          onNavigateToPurchaseOrders={navigateToPurchaseOrders}
           currentView={currentView}
         />
         
@@ -154,7 +162,11 @@ function App() {
         <div className="flex flex-col flex-1 overflow-hidden">
           <Header currentView={currentView} onNavigateToSettings={navigateToSettings} />
 <main className="flex-1 overflow-hidden bg-white">
-                {currentView === 'vendor-details' ? (
+                {currentView === 'purchase-orders' ? (
+                  <NewPurchaseOrderPage 
+                    onNavigateBack={navigateToWorkspace}
+                  />
+                ) : currentView === 'vendor-details' ? (
                   <VendorDetailsPage 
                     onBack={navigateToWorkspace}
                   />
