@@ -336,12 +336,7 @@ function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS S
       if (!item.quantity || parseFloat(item.quantity) <= 0) {
         errors[`qty_${index}`] = 'Required';
       }
-      // Check option if SKU has options
-      const part = VENDOR_CATALOG_DATA.find(p => p.id === item.partId);
-      const sku = part?.skus.find(s => s.id === item.skuId);
-      if (sku && sku.options && sku.options.length > 0 && !item.optionId) {
-        errors[`opt_${index}`] = 'Select an option';
-      }
+      // Option selection is optional - no validation needed for options
     });
 
     if (Object.keys(errors).length > 0) {
@@ -455,9 +450,34 @@ function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS S
                           // For SKUs with options, show each line item as a row
                           <>
                             {skuLineItems.length === 0 ? (
-                              // No line items yet - show placeholder row
+                              // No line items yet - show placeholder row with checkbox
                               <div className="grid grid-cols-[40px_1fr_120px_180px_120px_1fr] gap-[8px] px-[12px] py-[12px] items-center hover:bg-[#FAFAFA]">
-                                <div></div>
+                                <div className="flex items-center justify-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={false}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        // Add a new line item without option selected
+                                        setLineItems(prev => [...prev, {
+                                          partId: part.id,
+                                          partNumber: part.partId,
+                                          partName: part.partName,
+                                          image: part.image,
+                                          skuId: sku.id,
+                                          vendorSku: sku.vendorSku,
+                                          unitCost: sku.unitCost,
+                                          optionId: null,
+                                          optionName: null,
+                                          optionColor: null,
+                                          quantity: '',
+                                          remarks: ''
+                                        }]);
+                                      }
+                                    }}
+                                    className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
+                                  />
+                                </div>
                                 <div className="text-[13px] text-[#1E293B]">{sku.vendorSku}</div>
                                 <div className="text-[13px] text-[#1E293B]">
                                   <div className="flex items-center gap-[4px] px-[8px] py-[6px] bg-[#F1F5F9] rounded-[4px] w-fit">
@@ -467,25 +487,19 @@ function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS S
                                 </div>
                                 <div>
                                   <select
-                                    className="w-full h-[36px] px-[10px] pr-[28px] bg-white border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] focus:outline-none focus:border-[#3B82F6] appearance-none cursor-pointer"
+                                    className="w-full h-[36px] px-[10px] pr-[28px] bg-[#F8FAFC] border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#94A3B8] focus:outline-none appearance-none cursor-not-allowed"
                                     style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}
-                                    onChange={(e) => {
-                                      const option = sku.options.find(o => o.id === e.target.value);
-                                      if (option) handleOptionSelect(part, sku, option);
-                                    }}
+                                    disabled
                                     value=""
                                   >
                                     <option value="">Select option</option>
-                                    {getAvailableOptionsForSku(part, sku).map(opt => (
-                                      <option key={opt.id} value={opt.id}>{opt.name}</option>
-                                    ))}
                                   </select>
                                 </div>
                                 <div>
                                   <input
                                     type="text"
                                     placeholder="Ex: 10"
-                                    className="w-full h-[36px] px-[10px] bg-white border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6]"
+                                    className="w-full h-[36px] px-[10px] bg-[#F8FAFC] border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none cursor-not-allowed"
                                     disabled
                                   />
                                 </div>
@@ -493,7 +507,7 @@ function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS S
                                   <input
                                     type="text"
                                     placeholder="Remarks"
-                                    className="w-full h-[36px] px-[10px] bg-white border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6]"
+                                    className="w-full h-[36px] px-[10px] bg-[#F8FAFC] border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none cursor-not-allowed"
                                     disabled
                                   />
                                 </div>
@@ -503,7 +517,6 @@ function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS S
                               skuLineItems.map((lineItem, idx) => {
                                 const lineItemGlobalIndex = lineItems.findIndex(li => li === lineItem);
                                 const hasQtyError = validationErrors[`qty_${lineItemGlobalIndex}`];
-                                const hasOptError = validationErrors[`opt_${lineItemGlobalIndex}`];
                                 
                                 return (
                                   <div key={`${lineItem.skuId}_${lineItem.optionId || idx}`} className="grid grid-cols-[40px_1fr_120px_180px_120px_1fr_40px] gap-[8px] px-[12px] py-[12px] items-center hover:bg-[#FAFAFA]">
@@ -524,7 +537,7 @@ function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS S
                                     </div>
                                     <div>
                                       <select
-                                        className={`w-full h-[36px] px-[10px] pr-[28px] bg-white border rounded-[6px] text-[13px] text-[#1E293B] focus:outline-none appearance-none cursor-pointer ${hasOptError ? 'border-red-500' : 'border-[#E2E8F0] focus:border-[#3B82F6]'}`}
+                                        className="w-full h-[36px] px-[10px] pr-[28px] bg-white border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] focus:outline-none focus:border-[#3B82F6] appearance-none cursor-pointer"
                                         style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}
                                         value={lineItem.optionId || ''}
                                         onChange={(e) => {
@@ -533,11 +546,6 @@ function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS S
                                             setLineItems(prev => prev.map((item, i) => 
                                               i === lineItemGlobalIndex ? { ...item, optionId: option.id, optionName: option.name, optionColor: option.color } : item
                                             ));
-                                            setValidationErrors(prev => {
-                                              const newErrors = { ...prev };
-                                              delete newErrors[`opt_${lineItemGlobalIndex}`];
-                                              return newErrors;
-                                            });
                                           }
                                         }}
                                       >
