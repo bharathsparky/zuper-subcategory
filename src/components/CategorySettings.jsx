@@ -177,7 +177,7 @@ function RowActionsMenu({ onEdit, onDelete, onAddSubCategory, onMove, isParent =
                 } text-[#1E293B]`}
               >
                 <IconCornerDownRight size={15} className="text-[#64748B]" stroke={2} />
-                Move to Category
+                {isParent ? 'Convert to Subcategory' : 'Change Parent'}
               </button>
             )}
           </Menu.Item>
@@ -742,7 +742,7 @@ function DeleteConfirmModal({ isOpen, onClose, onConfirm, category, hasSubCatego
 }
 
 // ============================================
-// Move Category Modal
+// Convert/Change Parent Modal
 // ============================================
 
 function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
@@ -833,7 +833,7 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Move Category"
+      title={isSubCategory ? "Change Parent Category" : "Convert to Subcategory"}
       maxWidth="max-w-[520px]"
       footer={
         <>
@@ -845,7 +845,7 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
             onClick={handleMove}
             disabled={selectedTargetId === null}
           >
-            Move
+            {isSubCategory ? 'Change' : 'Convert'}
           </Button>
         </>
       }
@@ -854,8 +854,8 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
         {/* Info */}
         <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3">
           <p className="text-[13px] text-[#475569]">
-            Moving <strong className="text-[#1E293B]">"{category?.name}"</strong>
-            {isSubCategory ? ' (sub-category)' : ''}
+            {isSubCategory ? 'Changing parent of' : 'Converting'} <strong className="text-[#1E293B]">"{category?.name}"</strong>
+            {isSubCategory ? '' : ' to a subcategory'}
           </p>
           {currentTradeType && (
             <div className="flex items-center gap-2 mt-2">
@@ -867,7 +867,7 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
           )}
           {hasSubCategories && (
             <p className="text-[12px] text-[#94A3B8] mt-1">
-              This will also move {category?.subCategories?.length} sub-categories.
+              This will also include {category?.subCategories?.length} sub-categories.
             </p>
           )}
         </div>
@@ -952,7 +952,7 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
                     )}
                   </div>
                   <p className="text-[11px] text-[#94A3B8] mt-0.5">
-                    {isSubCategory ? 'Move as sub-category' : 'Move as sub-category under this'}
+                    {isSubCategory ? 'Set as new parent category' : 'Will become subcategory under this'}
                   </p>
                 </div>
               </div>
@@ -963,7 +963,7 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
         {/* Trade Type Inheritance Warning */}
         {hasTradeTypeMismatch && selectedTarget && (
           <div className="bg-[#FEF3C7] border border-[#FCD34D] rounded-lg p-3 text-[12px] text-[#92400E]">
-            <strong>Trade Type Change:</strong> The moved category will inherit the trade type from the new parent category.
+            <strong>Trade Type Change:</strong> {isSubCategory ? 'This subcategory' : 'The converted category'} will inherit the trade type from the new parent.
             <div className="mt-2 flex items-center gap-2">
               <span className="text-[11px]">Current:</span>
               <span className="font-medium">{currentTradeType?.name || 'None'}</span>
@@ -977,7 +977,7 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
         {/* Warning for parent categories with sub-categories */}
         {hasSubCategories && selectedTargetId && !hasTradeTypeMismatch && (
           <div className="bg-[#FEF3C7] border border-[#FCD34D] rounded-lg p-3 text-[12px] text-[#92400E]">
-            <strong>Note:</strong> Moving this category will also move its {category?.subCategories?.length} sub-categories. 
+            <strong>Note:</strong> Converting this category will also include its {category?.subCategories?.length} sub-categories. 
             They will become nested under the new parent.
           </div>
         )}
@@ -985,7 +985,7 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
         {/* Combined warning when both conditions are true */}
         {hasSubCategories && selectedTargetId && hasTradeTypeMismatch && (
           <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-lg p-3 text-[12px] text-[#991B1B]">
-            <strong>Note:</strong> Moving this category will also move its {category?.subCategories?.length} sub-categories. 
+            <strong>Note:</strong> Converting this category will also include its {category?.subCategories?.length} sub-categories. 
             All items will inherit the new trade type.
           </div>
         )}
