@@ -421,6 +421,7 @@ function CategoryModal({
   const [tradeTypeSearch, setTradeTypeSearch] = useState('');
   const [selectedParentId, setSelectedParentId] = useState(null);
   const [parentDropdownOpen, setParentDropdownOpen] = useState(false);
+  const [parentCategorySearch, setParentCategorySearch] = useState('');
 
   // Reset form when modal opens
   React.useEffect(() => {
@@ -433,6 +434,7 @@ function CategoryModal({
       setTradeTypeSearch('');
       setTradeTypeDropdownOpen(false);
       setParentDropdownOpen(false);
+      setParentCategorySearch('');
     }
   }, [isOpen, initialData]);
 
@@ -712,58 +714,89 @@ function CategoryModal({
               
               {/* Parent Category Dropdown */}
               {parentDropdownOpen && (
-                <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-[#E2E8F0] rounded-lg shadow-lg max-h-[240px] overflow-y-auto">
-                  {/* None option - make it top-level */}
-                  <div
-                    className={`px-3 py-2.5 hover:bg-[#F8FAFC] cursor-pointer flex items-center justify-between ${
-                      selectedParentId === null ? 'bg-[#EFF6FF]' : ''
-                    }`}
-                    onClick={(e) => { e.stopPropagation(); setSelectedParentId(null); setParentDropdownOpen(false); }}
-                  >
-                    <span className="text-[13px] text-[#1E293B]">None (Top-level category)</span>
-                    {selectedParentId === null && <IconCheck size={16} className="text-[#2563EB]" stroke={2} />}
+                <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-[#E2E8F0] rounded-lg shadow-lg max-h-[300px] overflow-hidden">
+                  {/* Search */}
+                  <div className="p-2 border-b border-[#E2E8F0]">
+                    <div className="relative">
+                      <IconSearch 
+                        size={14} 
+                        className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" 
+                        stroke={2} 
+                      />
+                      <input
+                        type="text"
+                        placeholder="Search categories..."
+                        value={parentCategorySearch}
+                        onChange={(e) => setParentCategorySearch(e.target.value)}
+                        className="w-full h-[32px] pl-8 pr-3 text-[13px] text-[#1E293B] placeholder-[#94A3B8] border border-[#E2E8F0] rounded bg-white focus:outline-none focus:border-[#94A3B8]"
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    </div>
                   </div>
                   
-                  <div className="border-t border-[#E2E8F0]" />
-                  
-                  {/* Available parent categories */}
-                  {allCategories
-                    .filter(cat => {
-                      // Exclude self
-                      if (cat.id === initialData?.id) return false;
-                      // Exclude own children (if this is a parent being edited)
-                      if (initialData?.subCategories?.some(sub => sub.id === cat.id)) return false;
-                      return true;
-                    })
-                    .map(cat => {
-                      const willChangeTradeType = initialData?.tradeType?.id !== cat.tradeType?.id;
-                      return (
+                  <div className="max-h-[220px] overflow-y-auto">
+                    {/* None option - make it top-level */}
+                    {(!parentCategorySearch || 'none top-level'.includes(parentCategorySearch.toLowerCase())) && (
+                      <div
+                        className={`px-3 py-2.5 hover:bg-[#F8FAFC] cursor-pointer flex items-center justify-between ${
+                          selectedParentId === null ? 'bg-[#EFF6FF]' : ''
+                        }`}
+                        onClick={(e) => { e.stopPropagation(); setSelectedParentId(null); setParentDropdownOpen(false); setParentCategorySearch(''); }}
+                      >
+                        <span className="text-[13px] text-[#1E293B]">None (Top-level category)</span>
+                        {selectedParentId === null && <IconCheck size={16} className="text-[#2563EB]" stroke={2} />}
+                      </div>
+                    )}
+                    
+                    {(!parentCategorySearch || 'none top-level'.includes(parentCategorySearch.toLowerCase())) && (
+                      <div className="border-t border-[#E2E8F0]" />
+                    )}
+                    
+                    {/* Available parent categories */}
+                    {(() => {
+                      const filteredCategories = allCategories.filter(cat => {
+                        // Exclude self
+                        if (cat.id === initialData?.id) return false;
+                        // Exclude own children (if this is a parent being edited)
+                        if (initialData?.subCategories?.some(sub => sub.id === cat.id)) return false;
+                        // Search filter
+                        if (parentCategorySearch) {
+                          const searchLower = parentCategorySearch.toLowerCase();
+                          return cat.name.toLowerCase().includes(searchLower) ||
+                                 cat.tradeType?.name?.toLowerCase().includes(searchLower);
+                        }
+                        return true;
+                      });
+                      
+                      if (filteredCategories.length === 0 && parentCategorySearch) {
+                        return (
+                          <div className="px-3 py-4 text-center text-[13px] text-[#94A3B8]">
+                            No categories found
+                          </div>
+                        );
+                      }
+                      
+                      return filteredCategories.map(cat => (
                         <div
                           key={cat.id}
-                          className={`px-3 py-2.5 hover:bg-[#F8FAFC] cursor-pointer ${
+                          className={`px-3 py-2.5 hover:bg-[#F8FAFC] cursor-pointer flex items-center justify-between ${
                             selectedParentId === cat.id ? 'bg-[#EFF6FF]' : ''
                           }`}
-                          onClick={(e) => { e.stopPropagation(); setSelectedParentId(cat.id); setParentDropdownOpen(false); }}
+                          onClick={(e) => { e.stopPropagation(); setSelectedParentId(cat.id); setParentDropdownOpen(false); setParentCategorySearch(''); }}
                         >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[13px] text-[#1E293B]">{cat.name}</span>
-                              {cat.tradeType && (
-                                <span className="text-[10px] px-1.5 py-0.5 bg-[#F1F5F9] text-[#64748B] rounded">
-                                  {cat.tradeType.name}
-                                </span>
-                              )}
-                            </div>
-                            {selectedParentId === cat.id && <IconCheck size={16} className="text-[#2563EB]" stroke={2} />}
+                          <div className="flex items-center gap-2">
+                            <span className="text-[13px] text-[#1E293B]">{cat.name}</span>
+                            {cat.tradeType && (
+                              <span className="text-[10px] px-1.5 py-0.5 bg-[#F1F5F9] text-[#64748B] rounded">
+                                {cat.tradeType.name}
+                              </span>
+                            )}
                           </div>
-                          {willChangeTradeType && selectedParentId !== cat.id && (
-                            <p className="text-[11px] text-[#F59E0B] mt-1">
-                              Will inherit {cat.tradeType?.name || 'no'} trade type
-                            </p>
-                          )}
+                          {selectedParentId === cat.id && <IconCheck size={16} className="text-[#2563EB]" stroke={2} />}
                         </div>
-                      );
-                    })}
+                      ));
+                    })()}
+                  </div>
                 </div>
               )}
             </div>
