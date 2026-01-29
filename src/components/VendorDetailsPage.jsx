@@ -6,9 +6,9 @@ import {
   IconFileText,
   IconHome, 
   IconTag, 
-  IconFileInvoice, 
-  IconNote, 
-  IconClock,
+  IconShoppingCartCopy,
+  IconClipboardText, 
+  IconHistory,
   IconSearch,
   IconChevronLeft,
   IconChevronRight,
@@ -81,9 +81,9 @@ function VendorDetailsPage({ onBack }) {
   const navItems = [
     { id: 'details', label: 'Details', icon: IconHome, count: null },
     { id: 'product-catalog', label: 'Product Catalog', icon: IconTag, count: 161 },
-    { id: 'purchase-orders', label: 'Purchase Orders', icon: IconFileInvoice, count: 17 },
-    { id: 'notes', label: 'Notes', icon: IconNote, count: null },
-    { id: 'activity', label: 'Activity', icon: IconClock, count: null },
+    { id: 'purchase-orders', label: 'Purchase Orders', icon: IconShoppingCartCopy, count: 17 },
+    { id: 'notes', label: 'Notes', icon: IconClipboardText, count: null },
+    { id: 'activity', label: 'Activity', icon: IconHistory, count: null },
   ];
 
   return (
