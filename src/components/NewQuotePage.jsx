@@ -24,7 +24,7 @@ import {
   IconGripVertical,
   IconDotsVertical,
   IconTrash,
-  IconColumns,
+  IconColumns2,
 } from '@tabler/icons-react';
 
 // Searchable User Dropdown Component
@@ -1058,7 +1058,7 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
                         : 'border-[#E2E8F0] hover:bg-[#F8FAFC]'
                     }`}
                   >
-                    <IconColumns size={14} stroke={1.5} className={isColumnDropdownOpen ? 'text-[#3B82F6]' : 'text-[#64748B]'} />
+                    <IconColumns2 size={14} stroke={1.5} className={isColumnDropdownOpen ? 'text-[#3B82F6]' : 'text-[#64748B]'} />
                   </button>
                   
                   {/* Column Customization Dropdown */}
