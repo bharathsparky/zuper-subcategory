@@ -1150,7 +1150,7 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
                         <div className="flex-1 min-w-0">
                           <div className="text-[13px] font-medium text-[#1E293B]">{item.itemId} - {item.name}</div>
                           <div className="text-[12px] text-[#64748B] mt-[4px] line-clamp-2">{item.description}</div>
-                          <button className="text-[12px] text-[#E44A19] font-medium mt-[4px]">Read More</button>
+                          <button className="text-[12px] text-[#3B82F6] font-medium mt-[4px]">Read More</button>
                         </div>
                       </div>
                     </div>
