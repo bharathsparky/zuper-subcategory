@@ -24,7 +24,8 @@ import {
   IconNotes,
   IconX,
   IconPackage,
-  IconTrash
+  IconTrash,
+  IconPencil
 } from '@tabler/icons-react';
 
 // Line Item Picker Data (simplified for vendor)
@@ -698,18 +699,50 @@ const SHINGLE_IMAGE = 'data:image/svg+xml,' + encodeURIComponent(`
 </svg>
 `);
 
+// Shingle color options available in Part Master
+const SHINGLE_OPTIONS = [
+  { id: 'opt1', name: 'Charcoal', color: '#36454F', available: true },
+  { id: 'opt2', name: 'Weathered Wood', color: '#A0826D', available: true },
+  { id: 'opt3', name: 'Desert Tan', color: '#C4A77D', available: true },
+  { id: 'opt4', name: 'Dual Black', color: '#1a1a1a', available: true },
+  { id: 'opt5', name: 'Slate', color: '#708090', available: true },
+  { id: 'opt6', name: 'Driftwood', color: '#B8A082', available: true },
+  { id: 'opt7', name: 'Barkwood', color: '#6B4423', available: true },
+  { id: 'opt8', name: 'Estate Gray', color: '#5A5A5A', available: true },
+];
+
 // Mock data for products
 const MOCK_PRODUCTS = [
-  { id: 1, sku: '#12345 - PLACEHOLDER', category: 'Sidewall SWA', image: null, vendorSku: 'PLACEHOLDER', unitCost: '$0.00', remarks: '---' },
-  { id: 2, sku: '#ASP.SHI.24109 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
-  { id: 3, sku: '#ASP.SHI.40918 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
-  { id: 4, sku: '#ASP.SHI.74824 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
-  { id: 5, sku: '#ASP.SHI.95785 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
-  { id: 6, sku: '#ASP.SHI.48522 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
-  { id: 7, sku: '#ASP.SHI.73459 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
-  { id: 8, sku: '#ASP.SHI.86264 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
-  { id: 9, sku: '#ASP.SHI.31413 - IKO - Architectural - Cambridge...', category: 'Shingles SHI', image: null, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
-  { id: 10, sku: '#ASP.SHI.74281 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
+  { id: 1, sku: '#12345 - PLACEHOLDER', category: 'Sidewall SWA', image: null, vendorSku: 'PLACEHOLDER', unitCost: '$0.00', remarks: '---', options: null, selectedOptionIds: null },
+  { 
+    id: 2, 
+    sku: '#ASP.SHI.24109 - IKO - Architectural - Cambridg...', 
+    category: 'Shingles SHI', 
+    image: SHINGLE_IMAGE, 
+    vendorSku: 'IKOCABEN', 
+    unitCost: '$32.67', 
+    remarks: '---',
+    options: SHINGLE_OPTIONS,
+    selectedOptionIds: ['opt1', 'opt2', 'opt4', 'opt7'] // 4 of 8 colors available from this vendor
+  },
+  { 
+    id: 3, 
+    sku: '#ASP.SHI.40918 - IKO - Architectural - Cambridg...', 
+    category: 'Shingles SHI', 
+    image: SHINGLE_IMAGE, 
+    vendorSku: 'IKOCABEN', 
+    unitCost: '$32.67', 
+    remarks: '---',
+    options: SHINGLE_OPTIONS,
+    selectedOptionIds: ['opt1', 'opt2', 'opt3', 'opt4', 'opt5', 'opt6', 'opt7', 'opt8'] // All 8 colors
+  },
+  { id: 4, sku: '#ASP.SHI.74824 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
+  { id: 5, sku: '#ASP.SHI.95785 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
+  { id: 6, sku: '#ASP.SHI.48522 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
+  { id: 7, sku: '#ASP.SHI.73459 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
+  { id: 8, sku: '#ASP.SHI.86264 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
+  { id: 9, sku: '#ASP.SHI.31413 - IKO - Architectural - Cambridge...', category: 'Shingles SHI', image: null, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
+  { id: 10, sku: '#ASP.SHI.74281 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
 ];
 
 // Vendor data
@@ -720,13 +753,193 @@ const VENDOR_DATA = {
   address: '2318 North 23rd Street, Wilmington, North Carolina, United States, 28405',
 };
 
+// Edit Options Modal Component
+function EditOptionsModal({ isOpen, onClose, product, onSave }) {
+  const [selectedOptionIds, setSelectedOptionIds] = useState([]);
+  const [validationError, setValidationError] = useState('');
+
+  // Initialize selected options when modal opens
+  React.useEffect(() => {
+    if (isOpen && product) {
+      setSelectedOptionIds(product.selectedOptionIds || []);
+      setValidationError('');
+    }
+  }, [isOpen, product]);
+
+  if (!isOpen || !product) return null;
+
+  const availableOptions = (product.options || []).filter(opt => opt.available);
+  const selectedCount = selectedOptionIds.length;
+  const totalCount = availableOptions.length;
+
+  const toggleOption = (optionId) => {
+    setSelectedOptionIds(prev => {
+      if (prev.includes(optionId)) {
+        return prev.filter(id => id !== optionId);
+      } else {
+        return [...prev, optionId];
+      }
+    });
+    setValidationError('');
+  };
+
+  const selectAll = () => {
+    setSelectedOptionIds(availableOptions.map(opt => opt.id));
+    setValidationError('');
+  };
+
+  const clearAll = () => {
+    setSelectedOptionIds([]);
+  };
+
+  const handleSave = () => {
+    if (selectedOptionIds.length === 0) {
+      setValidationError('Select at least one option');
+      return;
+    }
+    onSave(product.id, selectedOptionIds);
+    onClose();
+  };
+
+  // Get product name from SKU
+  const productName = product.sku.split(' - ').slice(1).join(' - ') || product.sku;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-[8px] w-[95vw] max-w-[700px] max-h-[90vh] flex flex-col shadow-xl">
+        {/* Header */}
+        <div className="h-[56px] px-[24px] flex items-center justify-between border-b border-[#E2E8F0] shrink-0">
+          <h2 className="text-[18px] font-semibold text-[#1E293B]">Edit Options</h2>
+          <button
+            onClick={onClose}
+            className="w-[32px] h-[32px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors"
+          >
+            <IconX size={20} stroke={1.5} className="text-[#64748B]" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-auto min-h-0 p-[24px]">
+          {/* Product Info */}
+          <div className="mb-[16px]">
+            <div className="text-[14px] font-medium text-[#1E293B] truncate">{product.sku}</div>
+          </div>
+
+          {/* Options Header */}
+          <div className="flex items-center justify-between mb-[16px]">
+            <div className="flex items-center gap-[8px]">
+              <span className="text-[13px] font-medium text-[#334155]">
+                Select options available from this vendor
+              </span>
+              <span className="text-[12px] text-[#64748B]">
+                ({selectedCount} of {totalCount} selected)
+              </span>
+            </div>
+          </div>
+
+          {/* Options Grid */}
+          <div className="grid grid-cols-4 gap-[12px] mb-[16px]">
+            {availableOptions.map((option) => {
+              const isSelected = selectedOptionIds.includes(option.id);
+              return (
+                <div
+                  key={option.id}
+                  onClick={() => toggleOption(option.id)}
+                  className={`
+                    relative p-[12px] rounded-[8px] border cursor-pointer transition-all
+                    ${isSelected 
+                      ? 'border-[#E44A19] bg-[#FEF7F5]' 
+                      : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1]'
+                    }
+                  `}
+                >
+                  {/* Checkbox */}
+                  <div className="absolute top-[8px] left-[8px]">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => {}}
+                      className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
+                    />
+                  </div>
+                  
+                  {/* Option Color Swatch */}
+                  <div 
+                    className="w-[48px] h-[48px] mx-auto mb-[8px] rounded-[6px] overflow-hidden border border-[#E2E8F0]"
+                    style={{ backgroundColor: option.color || '#CBD5E1' }}
+                  />
+                  
+                  {/* Option Name */}
+                  <div className="text-[12px] text-center text-[#334155] font-medium truncate">
+                    {option.name}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex items-center gap-[16px]">
+            <button
+              onClick={selectAll}
+              className="text-[13px] text-[#3B82F6] hover:text-[#2563EB] font-medium transition-colors"
+            >
+              Select All
+            </button>
+            <button
+              onClick={clearAll}
+              className="text-[13px] text-[#64748B] hover:text-[#334155] font-medium transition-colors"
+            >
+              Clear All
+            </button>
+          </div>
+
+          {/* Validation Error */}
+          {validationError && (
+            <div className="mt-[12px] text-[13px] text-[#EF4444]">
+              {validationError}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="h-[64px] px-[24px] flex items-center justify-end gap-[12px] border-t border-[#E2E8F0] shrink-0 bg-white">
+          <button
+            onClick={onClose}
+            className="h-[40px] px-[20px] border border-[#E2E8F0] rounded-[6px] text-[14px] font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors bg-white"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="h-[40px] px-[20px] bg-[#E44A19] rounded-[6px] text-[14px] font-medium text-white hover:bg-[#D13D0F] transition-colors"
+          >
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function VendorDetailsPage({ onBack }) {
   const [activeTab, setActiveTab] = useState('product-catalog');
   const [searchQuery, setSearchQuery] = useState('');
   const [isLineItemPickerOpen, setIsLineItemPickerOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedRows, setExpandedRows] = useState([2]); // Default expanded row 2 like in Figma
+  const [products, setProducts] = useState(MOCK_PRODUCTS); // State for products to enable editing
+  const [editOptionsProduct, setEditOptionsProduct] = useState(null); // Product being edited
   const totalPages = 17;
+
+  // Handle saving options from edit modal
+  const handleSaveOptions = (productId, selectedOptionIds) => {
+    setProducts(prev => prev.map(p => 
+      p.id === productId 
+        ? { ...p, selectedOptionIds } 
+        : p
+    ));
+  };
   
   const toggleRowExpand = (productId) => {
     setExpandedRows(prev => 
@@ -912,8 +1125,18 @@ function VendorDetailsPage({ onBack }) {
               </div>
 
               {/* Table Body */}
-              {MOCK_PRODUCTS.map((product) => {
+              {products.map((product) => {
                 const isExpanded = expandedRows.includes(product.id);
+                // Get available options for this product
+                const availableOptions = (product.options || []).filter(opt => opt.available);
+                const selectedOptions = availableOptions.filter(opt => 
+                  (product.selectedOptionIds || []).includes(opt.id)
+                );
+                const hasOptions = availableOptions.length > 0;
+                const maxVisibleSwatches = 6;
+                const visibleOptions = selectedOptions.slice(0, maxVisibleSwatches);
+                const overflowCount = selectedOptions.length - maxVisibleSwatches;
+                
                 return (
                   <div key={product.id} className="border-b border-[#E2E8F0]">
                     <div 
@@ -965,6 +1188,62 @@ function VendorDetailsPage({ onBack }) {
                           <div className="w-[33%] py-[10px] px-[14px]">{product.unitCost}</div>
                           <div className="w-[34%] py-[10px] px-[14px]">{product.remarks}</div>
                         </div>
+
+                        {/* Options Row - Only show for products with options */}
+                        {hasOptions && (
+                          <div className="flex items-center py-[12px] px-[14px] pl-[35px] border-t border-[#E2E8F0] bg-[#FAFAFA]">
+                            {/* Label and Counter */}
+                            <div className="flex items-center gap-[8px] min-w-[120px]">
+                              <span className="text-[13px] font-medium text-[#64748B]">Options</span>
+                              <span className="text-[12px] text-[#94A3B8]">
+                                ({selectedOptions.length} of {availableOptions.length})
+                              </span>
+                            </div>
+
+                            {/* Swatches */}
+                            <div className="flex items-center gap-[6px] flex-1 ml-[16px]">
+                              {visibleOptions.map((option) => (
+                                <div
+                                  key={option.id}
+                                  className="relative group"
+                                >
+                                  <div 
+                                    className="w-[28px] h-[28px] rounded-[4px] border border-[#E2E8F0] cursor-default"
+                                    style={{ backgroundColor: option.color || '#CBD5E1' }}
+                                  />
+                                  {/* Tooltip */}
+                                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-[6px] px-[8px] py-[4px] bg-[#1E293B] text-white text-[11px] rounded-[4px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                    {option.name}
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1E293B]" />
+                                  </div>
+                                </div>
+                              ))}
+                              
+                              {/* Overflow indicator */}
+                              {overflowCount > 0 && (
+                                <div className="relative group">
+                                  <div className="w-[28px] h-[28px] rounded-[4px] border border-[#E2E8F0] bg-[#F1F5F9] flex items-center justify-center text-[11px] font-medium text-[#64748B] cursor-default">
+                                    +{overflowCount}
+                                  </div>
+                                  {/* Overflow Tooltip */}
+                                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-[6px] px-[8px] py-[6px] bg-[#1E293B] text-white text-[11px] rounded-[4px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 max-w-[200px]">
+                                    {selectedOptions.slice(maxVisibleSwatches).map(opt => opt.name).join(', ')}
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1E293B]" />
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Edit Button */}
+                            <button
+                              onClick={() => setEditOptionsProduct(product)}
+                              className="w-[28px] h-[28px] flex items-center justify-center rounded-[4px] hover:bg-[#F1F5F9] transition-colors ml-auto"
+                              title="Edit options"
+                            >
+                              <IconPencil size={16} stroke={1.5} className="text-[#64748B]" />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1054,6 +1333,14 @@ function VendorDetailsPage({ onBack }) {
         onAddProduct={() => {
           console.log('Adding product to vendor...');
         }}
+      />
+
+      {/* Edit Options Modal */}
+      <EditOptionsModal
+        isOpen={!!editOptionsProduct}
+        onClose={() => setEditOptionsProduct(null)}
+        product={editOptionsProduct}
+        onSave={handleSaveOptions}
       />
     </div>
   );
