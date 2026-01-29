@@ -20,10 +20,6 @@ import {
   IconPencil,
   IconTrash,
   IconPaperclip,
-  IconSearch,
-  IconBell,
-  IconMessage,
-  IconUsers,
   IconFileDescription,
   IconPackage,
   IconTruck,
@@ -32,7 +28,6 @@ import {
 } from '@tabler/icons-react';
 
 // Asset paths from Figma
-const COMPANY_LOGO = '/assets/f1a06e847c1b53f8a7f6b25ada971ea15f95132b.png';
 const LOCATION_PREVIEW = '/assets/5e8b95356d01faaee0e40c41704ee724c45dd548.png';
 
 // SVG Icons from Figma
@@ -155,64 +150,7 @@ const NewPurchaseOrderPage = ({ onNavigateBack }) => {
   };
 
   return (
-    <div className="flex flex-col w-full h-screen bg-[#F1F5F9]" style={{ fontFamily: "'Inter', sans-serif" }}>
-      {/* Top Header Bar */}
-      <div className="h-[49px] bg-white border-b border-[#E2E8F0] flex items-center justify-between px-[21px]">
-        {/* Left side - Company Logo & New button */}
-        <div className="flex items-center gap-[7px]">
-          <img src={COMPANY_LOGO} alt="Company Logo" className="h-[30px]" />
-          <button className="flex items-center gap-[7px] px-[14px] py-[14px] rounded-[5.25px] hover:bg-gray-50">
-            <span className="text-[12.6px] font-medium text-[#334155]">New</span>
-            <IconChevronDown size={13} className="text-[#334155]" />
-          </button>
-        </div>
-        
-        {/* Center - Search */}
-        <div className="flex-1 flex justify-center max-w-[392px] mx-auto">
-          <div className="relative w-full">
-            <IconSearch size={17.5} className="absolute left-[10.5px] top-1/2 -translate-y-1/2 text-[#94A3B8]" />
-            <input
-              type="text"
-              placeholder="Search"
-              className="w-full h-[36px] pl-[36px] pr-[12px] bg-white border border-[#CBD5E1] rounded-[5.25px] text-[14px] text-[#334155] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6]"
-            />
-          </div>
-        </div>
-        
-        {/* Right side - Icons */}
-        <div className="flex items-center gap-0">
-          <button className="relative p-[7px] rounded-full hover:bg-gray-50">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 5H7C6.46957 5 5.96086 5.21071 5.58579 5.58579C5.21071 5.96086 5 6.46957 5 7V19C5 19.5304 5.21071 20.0391 5.58579 20.4142C5.96086 20.7893 6.46957 21 7 21H17C17.5304 21 18.0391 20.7893 18.4142 20.4142C18.7893 20.0391 19 19.5304 19 19V7C19 6.46957 18.7893 5.96086 18.4142 5.58579C18.0391 5.21071 17.5304 5 17 5H15" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M9 5C9 4.46957 9.21071 3.96086 9.58579 3.58579C9.96086 3.21071 10.4696 3 11 3H13C13.5304 3 14.0391 3.21071 14.4142 3.58579C14.7893 3.96086 15 4.46957 15 5C15 5.53043 14.7893 6.03914 14.4142 6.41421C14.0391 6.78929 13.5304 7 13 7H11C10.4696 7 9.96086 6.78929 9.58579 6.41421C9.21071 6.03914 9 5.53043 9 5Z" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <div className="absolute top-0 right-0 flex items-center justify-center min-w-[14px] h-[14px] px-[3.5px] bg-[#4F46E5] rounded-full">
-              <span className="text-[8.8px] font-medium text-[#EEF2FF]">32</span>
-            </div>
-          </button>
-          <button className="p-[7px] rounded-full hover:bg-gray-50">
-            <IconMessage size={24} className="text-[#64748B]" />
-          </button>
-          <button className="relative p-[7px] rounded-full hover:bg-gray-50">
-            <IconUsers size={24} className="text-[#64748B]" />
-            <div className="absolute top-0 right-0 flex items-center justify-center min-w-[14px] h-[14px] px-[3.5px] bg-[#4F46E5] rounded-full">
-              <span className="text-[8.8px] font-medium text-[#EEF2FF]">25</span>
-            </div>
-          </button>
-          <button className="relative p-[7px] rounded-full hover:bg-gray-50">
-            <IconBell size={24} className="text-[#64748B]" />
-            <div className="absolute top-0 right-0 flex items-center justify-center min-w-[14px] h-[14px] px-[3.5px] bg-[#4F46E5] rounded-full">
-              <span className="text-[8.8px] font-medium text-[#EEF2FF]">7</span>
-            </div>
-          </button>
-          <button className="p-[2.5px] rounded-full hover:bg-gray-50">
-            <div className="w-[35px] h-[35px] bg-[#E2E8F0] rounded-full flex items-center justify-center">
-              <span className="text-[28px] text-[#475569] uppercase">M</span>
-            </div>
-          </button>
-        </div>
-      </div>
-      
+    <div className="flex flex-col w-full h-full bg-[#F1F5F9]" style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* Breadcrumb & Action Bar */}
       <div className="h-[49px] bg-white border-b border-[#E2E8F0] flex items-center justify-between px-[21px]">
         {/* Breadcrumb */}
