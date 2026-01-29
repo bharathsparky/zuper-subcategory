@@ -33,7 +33,9 @@ import {
   IconX,
   IconArrowRight,
   IconCornerDownRight,
-  IconFilter
+  IconFilter,
+  IconInfoCircle,
+  IconAlertTriangle
 } from '@tabler/icons-react';
 import { 
   Modal, 
@@ -801,20 +803,36 @@ function CategoryModal({
               )}
             </div>
             
-            {/* Trade type change warning */}
+            {/* Warnings */}
             {selectedParentId && (() => {
               const newParent = allCategories.find(c => c.id === selectedParentId);
               const willChangeTradeType = initialData?.tradeType?.id !== newParent?.tradeType?.id;
-              if (willChangeTradeType) {
-                return (
-                  <div className="mt-2 p-2 bg-[#FFFBEB] border border-[#FCD34D] rounded-lg">
-                    <p className="text-[12px] text-[#92400E]">
-                      <strong>Note:</strong> Trade type will change from <strong>{initialData?.tradeType?.name || 'none'}</strong> to <strong>{newParent?.tradeType?.name || 'none'}</strong>
-                    </p>
-                  </div>
-                );
-              }
-              return null;
+              const hasSubCategories = initialData?.subCategories?.length > 0;
+              const subCategoryCount = initialData?.subCategories?.length || 0;
+              
+              return (
+                <div className="mt-2 space-y-2">
+                  {/* Sub-categories will move warning */}
+                  {hasSubCategories && (
+                    <div className="p-2 bg-[#EFF6FF] border border-[#BFDBFE] rounded-lg flex items-start gap-2">
+                      <IconInfoCircle size={16} className="text-[#2563EB] flex-shrink-0 mt-0.5" stroke={2} />
+                      <p className="text-[12px] text-[#1E40AF]">
+                        {subCategoryCount} sub-categor{subCategoryCount === 1 ? 'y' : 'ies'} will also move with this category.
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Trade type change warning */}
+                  {willChangeTradeType && (
+                    <div className="p-2 bg-[#FFFBEB] border border-[#FCD34D] rounded-lg flex items-start gap-2">
+                      <IconAlertTriangle size={16} className="text-[#D97706] flex-shrink-0 mt-0.5" stroke={2} />
+                      <p className="text-[12px] text-[#92400E]">
+                        Trade type will change from <strong>{initialData?.tradeType?.name || 'none'}</strong> to <strong>{newParent?.tradeType?.name || 'none'}</strong>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
             })()}
           </div>
         )}
