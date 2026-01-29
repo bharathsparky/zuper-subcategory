@@ -32,7 +32,8 @@ import {
   IconCheck,
   IconX,
   IconArrowRight,
-  IconCornerDownRight
+  IconCornerDownRight,
+  IconFilter
 } from '@tabler/icons-react';
 import { 
   Modal, 
@@ -898,50 +899,84 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
           )}
         </div>
 
-        {/* Search */}
-        <div className="relative">
-          <IconSearch 
-            size={15} 
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" 
-            stroke={2} 
-          />
-          <input
-            type="text"
-            placeholder="Search categories..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full h-[36px] pl-9 pr-3 text-[13px] text-[#1E293B] placeholder-[#94A3B8] border border-[#E2E8F0] rounded-lg bg-white focus:outline-none focus:border-[#94A3B8]"
-          />
-        </div>
-
-        {/* Trade Type Filter */}
-        {uniqueTradeTypes.length > 1 && (
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setSelectedTradeTypeFilter(null)}
-              className={`px-3 py-1.5 text-[12px] font-medium rounded-full transition-colors ${
-                selectedTradeTypeFilter === null
-                  ? 'bg-[#1E293B] text-white'
-                  : 'bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0]'
-              }`}
-            >
-              All
-            </button>
-            {uniqueTradeTypes.map(tradeType => (
-              <button
-                key={tradeType.id}
-                onClick={() => setSelectedTradeTypeFilter(tradeType.id)}
-                className={`px-3 py-1.5 text-[12px] font-medium rounded-full transition-colors ${
-                  selectedTradeTypeFilter === tradeType.id
-                    ? 'bg-[#1E293B] text-white'
-                    : 'bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0]'
-                }`}
-              >
-                {tradeType.name}
-              </button>
-            ))}
+        {/* Search and Filter */}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <IconSearch 
+              size={15} 
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" 
+              stroke={2} 
+            />
+            <input
+              type="text"
+              placeholder="Search categories..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full h-[36px] pl-9 pr-3 text-[13px] text-[#1E293B] placeholder-[#94A3B8] border border-[#E2E8F0] rounded-lg bg-white focus:outline-none focus:border-[#94A3B8]"
+            />
           </div>
-        )}
+          
+          {/* Trade Type Filter Dropdown */}
+          {uniqueTradeTypes.length > 1 && (
+            <Menu as="div" className="relative">
+              <Menu.Button className={`h-[36px] px-3 flex items-center gap-2 border rounded-lg text-[13px] transition-colors ${
+                selectedTradeTypeFilter 
+                  ? 'border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]' 
+                  : 'border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#F8FAFC]'
+              }`}>
+                <IconFilter size={16} stroke={2} />
+                <span className="max-w-[100px] truncate">
+                  {selectedTradeTypeFilter 
+                    ? uniqueTradeTypes.find(t => t.id === selectedTradeTypeFilter)?.name 
+                    : 'All Types'}
+                </span>
+                <IconChevronDown size={14} stroke={2} />
+              </Menu.Button>
+              
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-100"
+                enterFrom="transform opacity-0 scale-95"
+                enterTo="transform opacity-100 scale-100"
+                leave="transition ease-in duration-75"
+                leaveFrom="transform opacity-100 scale-100"
+                leaveTo="transform opacity-0 scale-95"
+              >
+                <Menu.Items className="absolute right-0 mt-1 w-48 bg-white border border-[#E2E8F0] rounded-lg shadow-lg z-20 py-1 max-h-[240px] overflow-y-auto">
+                  <Menu.Item>
+                    {({ active }) => (
+                      <button
+                        onClick={() => setSelectedTradeTypeFilter(null)}
+                        className={`w-full px-3 py-2 text-left text-[13px] flex items-center justify-between ${
+                          active ? 'bg-[#F8FAFC]' : ''
+                        } ${selectedTradeTypeFilter === null ? 'text-[#2563EB] font-medium' : 'text-[#1E293B]'}`}
+                      >
+                        All Types
+                        {selectedTradeTypeFilter === null && <IconCheck size={16} className="text-[#2563EB]" stroke={2} />}
+                      </button>
+                    )}
+                  </Menu.Item>
+                  <div className="border-t border-[#E2E8F0] my-1" />
+                  {uniqueTradeTypes.map(tradeType => (
+                    <Menu.Item key={tradeType.id}>
+                      {({ active }) => (
+                        <button
+                          onClick={() => setSelectedTradeTypeFilter(tradeType.id)}
+                          className={`w-full px-3 py-2 text-left text-[13px] flex items-center justify-between ${
+                            active ? 'bg-[#F8FAFC]' : ''
+                          } ${selectedTradeTypeFilter === tradeType.id ? 'text-[#2563EB] font-medium' : 'text-[#1E293B]'}`}
+                        >
+                          {tradeType.name}
+                          {selectedTradeTypeFilter === tradeType.id && <IconCheck size={16} className="text-[#2563EB]" stroke={2} />}
+                        </button>
+                      )}
+                    </Menu.Item>
+                  ))}
+                </Menu.Items>
+              </Transition>
+            </Menu>
+          )}
+        </div>
 
         {/* Target Selection */}
         <div className="border border-[#E2E8F0] rounded-lg overflow-hidden max-h-[280px] overflow-y-auto">
