@@ -716,9 +716,9 @@ function CategoryModal({
                 />
               </div>
               
-              {/* Parent Category Dropdown */}
+              {/* Parent Category Dropdown - Opens upward since it's at bottom of modal */}
               {parentDropdownOpen && (
-                <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-[#E2E8F0] rounded-lg shadow-lg max-h-[340px] overflow-hidden">
+                <div className="absolute z-10 left-0 right-0 bottom-full mb-1 bg-white border border-[#E2E8F0] rounded-lg shadow-lg max-h-[280px] overflow-hidden">
                   {/* Search + Filter */}
                   <div className="p-2 border-b border-[#E2E8F0]">
                     <div className="flex gap-2">
@@ -738,30 +738,26 @@ function CategoryModal({
                         />
                       </div>
                       
-                      {/* Trade Type Filter - Native Select */}
-                      <div className="relative flex items-center">
-                        <IconFilter size={14} className="absolute left-2 text-[#94A3B8] pointer-events-none" stroke={2} />
-                        <select
-                          value={parentTradeTypeFilter}
-                          onChange={(e) => { e.stopPropagation(); setParentTradeTypeFilter(e.target.value); }}
-                          onClick={(e) => e.stopPropagation()}
-                          className={`h-[32px] pl-7 pr-6 text-[12px] border rounded appearance-none cursor-pointer focus:outline-none ${
-                            parentTradeTypeFilter !== 'all' 
-                              ? 'border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]' 
-                              : 'border-[#E2E8F0] text-[#64748B] bg-white hover:border-[#94A3B8]'
-                          }`}
-                        >
-                          <option value="all">All Types</option>
-                          {TRADE_TYPES.map(t => (
-                            <option key={t.id} value={t.name}>{t.name}</option>
-                          ))}
-                        </select>
-                        <IconChevronDown size={12} className="absolute right-2 text-[#94A3B8] pointer-events-none" stroke={2} />
-                      </div>
+                      {/* Trade Type Filter */}
+                      <select
+                        value={parentTradeTypeFilter}
+                        onChange={(e) => { e.stopPropagation(); setParentTradeTypeFilter(e.target.value); }}
+                        onClick={(e) => e.stopPropagation()}
+                        className={`h-[32px] px-3 text-[12px] border rounded cursor-pointer focus:outline-none ${
+                          parentTradeTypeFilter !== 'all' 
+                            ? 'border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]' 
+                            : 'border-[#E2E8F0] text-[#64748B] bg-white hover:border-[#94A3B8]'
+                        }`}
+                      >
+                        <option value="all">All Types</option>
+                        {TRADE_TYPES.map(t => (
+                          <option key={t.id} value={t.name}>{t.name}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
                   
-                  <div className="max-h-[260px] overflow-y-auto">
+                  <div className="max-h-[200px] overflow-y-auto">
                     {/* None option - make it top-level (hide when trade type filter active) */}
                     {parentTradeTypeFilter === 'all' && (!parentCategorySearch || 'none top-level'.includes(parentCategorySearch.toLowerCase())) && (
                       <div
