@@ -21,6 +21,10 @@ import {
   IconX,
   IconPackage,
   IconCheck,
+  IconGripVertical,
+  IconDotsVertical,
+  IconTrash,
+  IconLayoutGrid,
 } from '@tabler/icons-react';
 
 // Searchable User Dropdown Component
@@ -608,6 +612,33 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
   const [isOtherDetailsExpanded, setIsOtherDetailsExpanded] = useState(true);
   const [isTestExpanded, setIsTestExpanded] = useState(true);
   const [isLineItemPickerOpen, setIsLineItemPickerOpen] = useState(false);
+  
+  // Parts & Services items state
+  const [partsItems, setPartsItems] = useState([
+    {
+      id: 1,
+      itemId: 'MQ67DFR1',
+      name: 'LG Refrigeration Compressors',
+      description: 'The LG Scroll compressor has been designed for high efficiency and reliability...',
+      image: 'https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=80&h=80&fit=crop',
+      unitCost: 7550.00,
+      markup: null,
+      taxPreference: 'Taxable',
+      location: 'Redmond Warehouse',
+      brand: null,
+      specification: null,
+      quantity: 1,
+      unit: 'Mtrs',
+      tax: 'GST',
+      option: null,
+    }
+  ]);
+  const [taxItems, setTaxItems] = useState([
+    { id: 1, name: 'GST', percentage: 5, amount: 0 },
+    { id: 2, name: 'test', percentage: 2, amount: 0 },
+  ]);
+  const [depositAmount, setDepositAmount] = useState('1575');
+  const [remarks, setRemarks] = useState('Wifi Fitting');
 
   // Form state
   const [formData, setFormData] = useState({
@@ -962,10 +993,11 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
 
           {/* Parts & Services Section */}
           <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px]">
+            {/* Header */}
             <div className="h-[46px] flex items-center justify-between px-[21px] border-b border-[#E2E8F0]">
               <div className="flex items-center gap-[14px]">
                 <h3 className="text-[14px] font-semibold text-[#1E293B]">Parts & Services</h3>
-                <span className="w-[28px] h-[26px] flex items-center justify-center bg-[#F1F5F9] rounded-full text-[12px] font-medium text-[#64748B]">0</span>
+                <span className="w-[28px] h-[26px] flex items-center justify-center bg-[#3B82F6] rounded-full text-[12px] font-medium text-white">{partsItems.length}</span>
               </div>
               <div className="flex items-center gap-[10px]">
                 <div className="relative">
@@ -984,14 +1016,178 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
                   <IconPlus size={14} stroke={2} />
                   <span>Add</span>
                 </button>
+                <button className="w-[29px] h-[32px] flex items-center justify-center border border-[#E2E8F0] rounded-[4px] hover:bg-[#F8FAFC] transition-colors">
+                  <IconLayoutGrid size={14} stroke={1.5} className="text-[#64748B]" />
+                </button>
               </div>
             </div>
-            {/* Empty State */}
-            <div className="py-[21px] flex flex-col items-center">
-              <PartsEmptyIcon />
-              <h4 className="mt-[21px] text-[16px] font-semibold text-[#1E293B]">Add Parts / Services</h4>
-              <p className="mt-[4px] text-[13px] text-[#64748B]">Add any parts or services or any custom line item to this Quote</p>
-            </div>
+
+            {partsItems.length === 0 ? (
+              /* Empty State */
+              <div className="py-[21px] flex flex-col items-center">
+                <PartsEmptyIcon />
+                <h4 className="mt-[21px] text-[16px] font-semibold text-[#1E293B]">Add Parts / Services</h4>
+                <p className="mt-[4px] text-[13px] text-[#64748B]">Add any parts or services or any custom line item to this Quote</p>
+              </div>
+            ) : (
+              /* Parts Table */
+              <div className="overflow-x-auto">
+                {/* Table Header */}
+                <div className="grid grid-cols-[40px_40px_240px_100px_80px_100px_140px_100px_120px_100px_60px] gap-0 border-b border-[#E2E8F0] bg-[#F8FAFC]">
+                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">#</div>
+                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase"></div>
+                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Product / Service</div>
+                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Unit Cost</div>
+                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Markup</div>
+                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Tax Preference</div>
+                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Location</div>
+                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Option</div>
+                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Specification</div>
+                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Price</div>
+                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Action</div>
+                </div>
+
+                {/* Table Body */}
+                {partsItems.map((item, index) => (
+                  <div key={item.id} className="grid grid-cols-[40px_40px_240px_100px_80px_100px_140px_100px_120px_100px_60px] gap-0 border-b border-[#E2E8F0] hover:bg-[#F8FAFC]">
+                    {/* Drag Handle */}
+                    <div className="px-[12px] py-[16px] flex items-start">
+                      <IconGripVertical size={16} className="text-[#CBD5E1] cursor-grab" />
+                    </div>
+                    {/* Checkbox */}
+                    <div className="px-[12px] py-[16px] flex items-start">
+                      <input type="checkbox" className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#3B82F6] focus:ring-[#3B82F6]" />
+                    </div>
+                    {/* Product / Service */}
+                    <div className="px-[12px] py-[16px]">
+                      <div className="flex gap-[12px]">
+                        <img 
+                          src={item.image} 
+                          alt={item.name}
+                          className="w-[56px] h-[56px] rounded-[4px] object-cover flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[13px] font-medium text-[#1E293B]">{item.itemId} - {item.name}</div>
+                          <div className="text-[12px] text-[#64748B] mt-[4px] line-clamp-2">{item.description}</div>
+                          <button className="text-[12px] text-[#E44A19] font-medium mt-[4px]">Read More</button>
+                        </div>
+                      </div>
+                    </div>
+                    {/* Unit Cost */}
+                    <div className="px-[12px] py-[16px]">
+                      <span className="text-[13px] text-[#1E293B]">${item.unitCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    {/* Markup */}
+                    <div className="px-[12px] py-[16px]">
+                      <span className="text-[13px] text-[#64748B]">{item.markup || '-'}</span>
+                    </div>
+                    {/* Tax Preference */}
+                    <div className="px-[12px] py-[16px]">
+                      <span className="text-[13px] text-[#1E293B]">{item.taxPreference}</span>
+                    </div>
+                    {/* Location */}
+                    <div className="px-[12px] py-[16px]">
+                      <span className="text-[13px] text-[#1E293B]">{item.location}</span>
+                    </div>
+                    {/* Option */}
+                    <div className="px-[12px] py-[16px]">
+                      {item.option ? (
+                        <div className="flex items-center gap-[6px]">
+                          <div 
+                            className="w-[16px] h-[16px] rounded-[3px] border border-[#E2E8F0] flex-shrink-0"
+                            style={{ backgroundColor: item.option.color }}
+                          />
+                          <span className="text-[13px] text-[#1E293B] truncate">{item.option.name}</span>
+                        </div>
+                      ) : (
+                        <span className="text-[13px] text-[#64748B]">---</span>
+                      )}
+                    </div>
+                    {/* Specification */}
+                    <div className="px-[12px] py-[16px]">
+                      <span className="text-[13px] text-[#64748B]">{item.specification || '---'}</span>
+                    </div>
+                    {/* Price / Qty */}
+                    <div className="px-[12px] py-[16px]">
+                      <div className="text-[13px] text-[#1E293B]">{item.quantity}</div>
+                      <div className="text-[12px] text-[#64748B]">{item.unit}</div>
+                      <div className="text-[12px] text-[#64748B]">{item.tax}</div>
+                    </div>
+                    {/* Actions */}
+                    <div className="px-[12px] py-[16px]">
+                      <button className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9]">
+                        <IconDotsVertical size={16} className="text-[#64748B]" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Summary Section */}
+                <div className="px-[21px] py-[21px] bg-[#F8FAFC]">
+                  <div className="flex justify-end">
+                    <div className="w-[320px]">
+                      {/* Sub-Total */}
+                      <div className="flex justify-between items-center py-[8px]">
+                        <span className="text-[14px] font-medium text-[#1E293B]">Sub-Total</span>
+                        <span className="text-[14px] text-[#1E293B]">${partsItems.reduce((sum, item) => sum + (item.unitCost * item.quantity), 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      
+                      {/* Tax Items */}
+                      {taxItems.map((tax) => (
+                        <div key={tax.id} className="flex justify-between items-center py-[8px]">
+                          <span className="text-[14px] text-[#1E293B]">{tax.name} ({tax.percentage}%)</span>
+                          <div className="flex items-center gap-[12px]">
+                            <span className="text-[14px] text-[#1E293B]">${tax.amount.toFixed(2)}</span>
+                            <button 
+                              onClick={() => setTaxItems(taxItems.filter(t => t.id !== tax.id))}
+                              className="text-[#EF4444] hover:text-[#DC2626]"
+                            >
+                              <IconTrash size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {/* Add Fee */}
+                      <div className="py-[8px]">
+                        <button className="text-[14px] text-[#3B82F6] font-medium hover:text-[#2563EB]">Add Fee?</button>
+                      </div>
+                      
+                      {/* Total */}
+                      <div className="flex justify-between items-center py-[8px] border-t border-[#E2E8F0] mt-[8px]">
+                        <span className="text-[14px] font-semibold text-[#1E293B]">Total</span>
+                        <span className="text-[14px] font-semibold text-[#1E293B]">${partsItems.reduce((sum, item) => sum + (item.unitCost * item.quantity), 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      
+                      {/* Deposit */}
+                      <div className="flex justify-between items-center py-[8px]">
+                        <span className="text-[14px] text-[#1E293B]">Deposit</span>
+                        <div className="flex items-center border border-[#E2E8F0] rounded-[4px] overflow-hidden">
+                          <span className="px-[12px] py-[8px] bg-[#F1F5F9] text-[13px] text-[#64748B] border-r border-[#E2E8F0]">USD</span>
+                          <input 
+                            type="text"
+                            value={depositAmount}
+                            onChange={(e) => setDepositAmount(e.target.value)}
+                            className="w-[80px] px-[12px] py-[8px] text-[13px] text-[#1E293B] outline-none"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Remarks */}
+                  <div className="mt-[21px]">
+                    <label className="block text-[14px] font-medium text-[#1E293B] mb-[8px]">Remarks</label>
+                    <textarea 
+                      value={remarks}
+                      onChange={(e) => setRemarks(e.target.value)}
+                      className="w-full h-[100px] px-[14px] py-[12px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#1E293B] outline-none focus:border-[#3B82F6] resize-y"
+                      placeholder="Add any remarks..."
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Other Details Section */}
