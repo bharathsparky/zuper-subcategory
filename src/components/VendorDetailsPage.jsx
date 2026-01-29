@@ -1028,7 +1028,7 @@ function EditSkuModal({ isOpen, onClose, product, onSave }) {
           </div>
 
           {/* SKU Details Fields */}
-          <div className="grid grid-cols-3 gap-[16px] mb-[20px]">
+          <div className="grid grid-cols-3 gap-[24px] mb-[24px]">
             {/* Vendor SKU */}
             <div>
               <label className="block text-[13px] font-medium text-[#334155] mb-[6px]">
@@ -1131,8 +1131,11 @@ function EditSkuModal({ isOpen, onClose, product, onSave }) {
                 </div>
               )}
 
-              {/* Options Grid - Compact chips */}
-              <div className="flex flex-wrap gap-[8px] mb-[12px]">
+              {/* Options Grid - Compact chips with scrollable container for many options */}
+              <div className={`
+                flex flex-wrap gap-[10px] p-[12px] rounded-[8px] border border-[#E2E8F0] bg-[#FAFAFA]
+                ${selectableOptions.length > 8 ? 'max-h-[180px] overflow-y-auto' : ''}
+              `}>
                 {selectableOptions.map((option) => {
                   const isSelected = selectedOptionIds.includes(option.id);
                   return (
@@ -1140,10 +1143,10 @@ function EditSkuModal({ isOpen, onClose, product, onSave }) {
                       key={option.id}
                       onClick={() => toggleOption(option.id)}
                       className={`
-                        flex items-center gap-[8px] px-[10px] py-[6px] rounded-[6px] border cursor-pointer transition-all
+                        flex items-center gap-[8px] px-[12px] py-[8px] rounded-[6px] border cursor-pointer transition-all
                         ${isSelected 
-                          ? 'border-[#E44A19] bg-[#FEF7F5]' 
-                          : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1]'
+                          ? 'border-[#E44A19] bg-white shadow-sm' 
+                          : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1] hover:shadow-sm'
                         }
                       `}
                     >
@@ -1151,10 +1154,10 @@ function EditSkuModal({ isOpen, onClose, product, onSave }) {
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => {}}
-                        className="w-[14px] h-[14px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
+                        className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
                       />
                       <div 
-                        className="w-[20px] h-[20px] rounded-[4px] border border-[#E2E8F0] flex-shrink-0"
+                        className="w-[22px] h-[22px] rounded-[4px] border border-[#E2E8F0] flex-shrink-0"
                         style={{ backgroundColor: option.color || '#CBD5E1' }}
                       />
                       <span className="text-[13px] text-[#334155] font-medium whitespace-nowrap">
@@ -1164,10 +1167,17 @@ function EditSkuModal({ isOpen, onClose, product, onSave }) {
                   );
                 })}
               </div>
+              
+              {/* Scroll hint for many options */}
+              {selectableOptions.length > 8 && (
+                <div className="mt-[8px] text-[11px] text-[#94A3B8] text-center">
+                  Scroll to see all {selectableOptions.length} options
+                </div>
+              )}
 
               {/* Options Validation Error */}
               {validationErrors.options && (
-                <div className="text-[12px] text-[#EF4444]">{validationErrors.options}</div>
+                <div className="mt-[8px] text-[12px] text-[#EF4444]">{validationErrors.options}</div>
               )}
             </>
           )}
