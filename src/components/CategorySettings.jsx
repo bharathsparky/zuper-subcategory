@@ -54,7 +54,7 @@ const initialCategories = [
     name: 'Roofing', 
     description: 'Roofing services and repairs',
     visibility: { technicians: true, customerPortal: true },
-    tradeTypes: [{ id: 4, name: 'Roofing' }, { id: 5, name: 'Exteriors' }],
+    tradeType: { id: 4, name: 'Roofing' },
     subCategories: [
       { id: 101, name: 'Installation', description: 'New roof installation services', visibility: { technicians: true, customerPortal: true } },
       { id: 102, name: 'Repair', description: 'Roof repair and patching', visibility: { technicians: true, customerPortal: true } },
@@ -66,7 +66,7 @@ const initialCategories = [
     name: 'Plumbing', 
     description: 'Plumbing services and installations',
     visibility: { technicians: true, customerPortal: true },
-    tradeTypes: [{ id: 1, name: 'Plumbing' }],
+    tradeType: { id: 1, name: 'Plumbing' },
     subCategories: []
   },
   { 
@@ -74,7 +74,7 @@ const initialCategories = [
     name: 'Electrical', 
     description: 'Electrical services and wiring',
     visibility: { technicians: true, customerPortal: false },
-    tradeTypes: [{ id: 6, name: 'Electrical' }],
+    tradeType: { id: 6, name: 'Electrical' },
     subCategories: [
       { id: 301, name: 'Installation', description: 'New electrical installations', visibility: { technicians: true, customerPortal: false } },
       { id: 302, name: 'Maintenance', description: 'Electrical system maintenance', visibility: { technicians: true, customerPortal: false } },
@@ -85,7 +85,7 @@ const initialCategories = [
     name: 'HVAC', 
     description: 'Heating, ventilation, and air conditioning',
     visibility: { technicians: true, customerPortal: true },
-    tradeTypes: [{ id: 8, name: 'HVAC' }],
+    tradeType: { id: 8, name: 'HVAC' },
     subCategories: []
   },
   { 
@@ -93,7 +93,7 @@ const initialCategories = [
     name: 'Landscaping', 
     description: 'Lawn care and landscaping services',
     visibility: { technicians: true, customerPortal: true },
-    tradeTypes: [{ id: 5, name: 'Exteriors' }],
+    tradeType: { id: 5, name: 'Exteriors' },
     subCategories: []
   },
   { 
@@ -101,7 +101,7 @@ const initialCategories = [
     name: 'General Labor', 
     description: 'General labor and handyman services',
     visibility: { technicians: false, customerPortal: true },
-    tradeTypes: [{ id: 9, name: 'Other' }],
+    tradeType: { id: 9, name: 'Other' },
     subCategories: [
       { id: 601, name: 'Hourly Labor', description: 'Standard hourly labor charges', visibility: { technicians: false, customerPortal: true } },
       { id: 602, name: 'Emergency Services', description: 'After-hours emergency services', visibility: { technicians: false, customerPortal: true } },
@@ -113,7 +113,7 @@ const initialCategories = [
     name: 'Internal Costs', 
     description: 'Internal cost tracking (hidden from customers)',
     visibility: { technicians: false, customerPortal: false },
-    tradeTypes: [{ id: 9, name: 'Other' }],
+    tradeType: { id: 9, name: 'Other' },
     subCategories: []
   },
   { 
@@ -121,7 +121,7 @@ const initialCategories = [
     name: 'Painting', 
     description: 'Interior and exterior painting services',
     visibility: { technicians: true, customerPortal: true },
-    tradeTypes: [{ id: 7, name: 'Interiors' }, { id: 5, name: 'Exteriors' }],
+    tradeType: { id: 7, name: 'Interiors' },
     subCategories: []
   },
 ];
@@ -757,16 +757,16 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
     }
   }, [isOpen]);
 
-  // Get current category's trade types
-  const currentTradeTypes = useMemo(() => {
-    if (!category) return [];
+  // Get current category's trade type (single)
+  const currentTradeType = useMemo(() => {
+    if (!category) return null;
     
     if (category.isSubCategory) {
       // Sub-categories inherit from parent
       const parent = categories.find(cat => cat.id === category.parentId);
-      return parent?.tradeTypes || [];
+      return parent?.tradeType || null;
     }
-    return category.tradeTypes || [];
+    return category.tradeType || null;
   }, [category, categories]);
 
   // Determine available targets based on whether it's a parent or sub-category
@@ -782,7 +782,7 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
           name: cat.name,
           type: 'parent',
           subCount: cat.subCategories?.length || 0,
-          tradeTypes: cat.tradeTypes || []
+          tradeType: cat.tradeType || null
         }));
     } else {
       // For parent categories: can only move as sub-category under another parent
@@ -793,7 +793,7 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
           name: cat.name,
           type: 'parent',
           subCount: cat.subCategories?.length || 0,
-          tradeTypes: cat.tradeTypes || []
+          tradeType: cat.tradeType || null
         }));
     }
   }, [category, categories]);
@@ -813,18 +813,12 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
     return availableTargets.find(t => t.id === selectedTargetId);
   }, [selectedTargetId, availableTargets]);
 
-  // Check if trade types are different
+  // Check if trade type is different
   const hasTradeTypeMismatch = useMemo(() => {
-    if (!selectedTarget || !currentTradeTypes.length) return false;
-    const targetTradeTypeIds = new Set(selectedTarget.tradeTypes.map(t => t.id));
-    const currentTradeTypeIds = new Set(currentTradeTypes.map(t => t.id));
-    
-    // Check if all current trade types exist in target
-    for (const id of currentTradeTypeIds) {
-      if (!targetTradeTypeIds.has(id)) return true;
-    }
-    return false;
-  }, [selectedTarget, currentTradeTypes]);
+    if (!selectedTarget || !currentTradeType) return false;
+    if (!selectedTarget.tradeType) return true; // Target has no trade type
+    return selectedTarget.tradeType.id !== currentTradeType.id;
+  }, [selectedTarget, currentTradeType]);
 
   const handleMove = () => {
     if (selectedTargetId !== null) {
@@ -834,12 +828,6 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
 
   const isSubCategory = category?.isSubCategory;
   const hasSubCategories = !isSubCategory && category?.subCategories?.length > 0;
-
-  // Helper to format trade types as string
-  const formatTradeTypes = (tradeTypes) => {
-    if (!tradeTypes || tradeTypes.length === 0) return 'None';
-    return tradeTypes.map(t => t.name).join(', ');
-  };
 
   return (
     <Modal
@@ -869,19 +857,12 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
             Moving <strong className="text-[#1E293B]">"{category?.name}"</strong>
             {isSubCategory ? ' (sub-category)' : ''}
           </p>
-          {currentTradeTypes.length > 0 && (
+          {currentTradeType && (
             <div className="flex items-center gap-2 mt-2">
               <span className="text-[11px] text-[#64748B]">Trade Type:</span>
-              <div className="flex flex-wrap gap-1">
-                {currentTradeTypes.map(t => (
-                  <span 
-                    key={t.id} 
-                    className="text-[10px] px-1.5 py-0.5 bg-[#E0E7FF] text-[#4338CA] rounded font-medium"
-                  >
-                    {t.name}
-                  </span>
-                ))}
-              </div>
+              <span className="text-[11px] px-2 py-0.5 bg-[#E0E7FF] text-[#4338CA] rounded font-medium">
+                {currentTradeType.name}
+              </span>
             </div>
           )}
           {hasSubCategories && (
@@ -959,25 +940,17 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[13px] font-medium text-[#1E293B] truncate">{target.name}</span>
+                    {target.tradeType && (
+                      <span className="text-[10px] px-1.5 py-0.5 bg-[#F1F5F9] text-[#64748B] rounded font-medium">
+                        {target.tradeType.name}
+                      </span>
+                    )}
                     {target.subCount > 0 && (
                       <span className="text-[10px] text-[#94A3B8] flex-shrink-0">
                         ({target.subCount} sub)
                       </span>
                     )}
                   </div>
-                  {/* Trade Types */}
-                  {target.tradeTypes.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {target.tradeTypes.map(t => (
-                        <span 
-                          key={t.id} 
-                          className="text-[9px] px-1.5 py-0.5 bg-[#F1F5F9] text-[#64748B] rounded font-medium"
-                        >
-                          {t.name}
-                        </span>
-                      ))}
-                    </div>
-                  )}
                   <p className="text-[11px] text-[#94A3B8] mt-0.5">
                     {isSubCategory ? 'Move as sub-category' : 'Move as sub-category under this'}
                   </p>
@@ -990,13 +963,13 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
         {/* Trade Type Inheritance Warning */}
         {hasTradeTypeMismatch && selectedTarget && (
           <div className="bg-[#FEF3C7] border border-[#FCD34D] rounded-lg p-3 text-[12px] text-[#92400E]">
-            <strong>Trade Type Change:</strong> The moved category will inherit the trade type(s) from the new parent category.
+            <strong>Trade Type Change:</strong> The moved category will inherit the trade type from the new parent category.
             <div className="mt-2 flex items-center gap-2">
               <span className="text-[11px]">Current:</span>
-              <span className="font-medium">{formatTradeTypes(currentTradeTypes)}</span>
+              <span className="font-medium">{currentTradeType?.name || 'None'}</span>
               <IconArrowRight size={14} className="text-[#D97706]" />
               <span className="text-[11px]">New:</span>
-              <span className="font-medium">{formatTradeTypes(selectedTarget.tradeTypes)}</span>
+              <span className="font-medium">{selectedTarget.tradeType?.name || 'None'}</span>
             </div>
           </div>
         )}
