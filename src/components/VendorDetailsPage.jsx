@@ -16,13 +16,15 @@ import {
   IconPlayerSkipForward,
   IconDotsVertical,
   IconChevronDown,
+  IconChevronUp,
   IconBuildingBank,
   IconPaperclip,
   IconChevronRight as IconBreadcrumbArrow,
   IconBox,
   IconNotes,
   IconX,
-  IconPackage
+  IconPackage,
+  IconTrash
 } from '@tabler/icons-react';
 
 // Line Item Picker Data (simplified for vendor)
@@ -39,7 +41,96 @@ const LINE_ITEMS_DATA = [
 function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [step, setStep] = useState(1); // Step 1: Select items, Step 2: Enter details
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [expandedItems, setExpandedItems] = useState({});
+  const [itemDetails, setItemDetails] = useState({});
   const totalPages = 80;
+
+  const handleItemSelect = (item, checked) => {
+    if (checked) {
+      setSelectedItems(prev => [...prev, item]);
+      // Initialize item details with default values
+      setItemDetails(prev => ({
+        ...prev,
+        [item.id]: {
+          vendorSku: '',
+          unitPurchaseCost: item.unitCost.toString(),
+          remarks: ''
+        }
+      }));
+      setExpandedItems(prev => ({ ...prev, [item.id]: true }));
+    } else {
+      setSelectedItems(prev => prev.filter(i => i.id !== item.id));
+      setItemDetails(prev => {
+        const newDetails = { ...prev };
+        delete newDetails[item.id];
+        return newDetails;
+      });
+      setExpandedItems(prev => {
+        const newExpanded = { ...prev };
+        delete newExpanded[item.id];
+        return newExpanded;
+      });
+    }
+  };
+
+  const handleRemoveItem = (itemId) => {
+    setSelectedItems(prev => prev.filter(i => i.id !== itemId));
+    setItemDetails(prev => {
+      const newDetails = { ...prev };
+      delete newDetails[itemId];
+      return newDetails;
+    });
+    setExpandedItems(prev => {
+      const newExpanded = { ...prev };
+      delete newExpanded[itemId];
+      return newExpanded;
+    });
+  };
+
+  const toggleItemExpanded = (itemId) => {
+    setExpandedItems(prev => ({ ...prev, [itemId]: !prev[itemId] }));
+  };
+
+  const updateItemDetail = (itemId, field, value) => {
+    setItemDetails(prev => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        [field]: value
+      }
+    }));
+  };
+
+  const handleNext = () => {
+    if (selectedItems.length > 0) {
+      setStep(2);
+    }
+  };
+
+  const handleBack = () => {
+    setStep(1);
+  };
+
+  const handleAddItem = () => {
+    onAddProduct && onAddProduct(selectedItems, itemDetails);
+    onClose();
+    // Reset state
+    setStep(1);
+    setSelectedItems([]);
+    setItemDetails({});
+    setExpandedItems({});
+  };
+
+  const handleClose = () => {
+    onClose();
+    // Reset state
+    setStep(1);
+    setSelectedItems([]);
+    setItemDetails({});
+    setExpandedItems({});
+  };
 
   if (!isOpen) return null;
 
@@ -51,127 +142,255 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
           <h2 className="text-[18px] font-semibold text-[#1E293B]">Add Item</h2>
         </div>
 
-        {/* Filters */}
-        <div className="px-[24px] py-[16px] flex items-center gap-[12px] border-b border-[#E2E8F0] shrink-0">
-          {/* Search */}
-          <div className="w-[280px] h-[40px] flex items-center gap-[8px] px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white">
-            <IconSearch size={18} stroke={1.5} className="text-[#94A3B8]" />
-            <input
-              type="text"
-              placeholder="Search Item"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-1 text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none bg-transparent"
-            />
-          </div>
+        {step === 1 ? (
+          <>
+            {/* Step 1: Item Selection */}
+            {/* Filters */}
+            <div className="px-[24px] py-[16px] flex items-center gap-[12px] border-b border-[#E2E8F0] shrink-0">
+              {/* Search */}
+              <div className="w-[280px] h-[40px] flex items-center gap-[8px] px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white">
+                <IconSearch size={18} stroke={1.5} className="text-[#94A3B8]" />
+                <input
+                  type="text"
+                  placeholder="Search Item"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="flex-1 text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none bg-transparent"
+                />
+              </div>
 
-          {/* Product Type Dropdown */}
-          <div className="w-[180px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
-            <span className="text-[14px] text-[#94A3B8]">Product Type</span>
-            <IconChevronDown size={16} stroke={1.5} className="text-[#94A3B8]" />
-          </div>
+              {/* Product Type Dropdown */}
+              <div className="w-[180px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
+                <span className="text-[14px] text-[#94A3B8]">Product Type</span>
+                <IconChevronDown size={16} stroke={1.5} className="text-[#94A3B8]" />
+              </div>
 
-          {/* Category Dropdown */}
-          <div className="w-[180px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
-            <span className="text-[14px] text-[#94A3B8]">Category</span>
-            <IconChevronDown size={16} stroke={1.5} className="text-[#94A3B8]" />
-          </div>
+              {/* Category Dropdown */}
+              <div className="w-[180px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
+                <span className="text-[14px] text-[#94A3B8]">Category</span>
+                <IconChevronDown size={16} stroke={1.5} className="text-[#94A3B8]" />
+              </div>
 
-          {/* Pagination */}
-          <div className="ml-auto flex items-center gap-[8px]">
-            <span className="text-[14px] text-[#64748B]">Page {currentPage} of {totalPages}</span>
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors disabled:opacity-50"
-              disabled={currentPage === 1}
-            >
-              <IconChevronLeft size={16} stroke={1.5} className="text-[#64748B]" />
-            </button>
-            <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors disabled:opacity-50"
-              disabled={currentPage === totalPages}
-            >
-              <IconChevronRight size={16} stroke={1.5} className="text-[#64748B]" />
-            </button>
-          </div>
-        </div>
+              {/* Pagination */}
+              <div className="ml-auto flex items-center gap-[8px]">
+                <span className="text-[14px] text-[#64748B]">Page {currentPage} of {totalPages}</span>
+                <button
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors disabled:opacity-50"
+                  disabled={currentPage === 1}
+                >
+                  <IconChevronLeft size={16} stroke={1.5} className="text-[#64748B]" />
+                </button>
+                <button
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors disabled:opacity-50"
+                  disabled={currentPage === totalPages}
+                >
+                  <IconChevronRight size={16} stroke={1.5} className="text-[#64748B]" />
+                </button>
+              </div>
+            </div>
 
-        {/* Table */}
-        <div className="flex-1 overflow-auto min-h-0">
-          <table className="w-full border-collapse">
-            <thead className="bg-white sticky top-0 z-10">
-              <tr className="border-b border-[#E2E8F0]">
-                <th className="w-[40px] text-left px-[16px] py-[14px] bg-white"></th>
-                <th className="text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Item</th>
-                <th className="w-[150px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Category</th>
-                <th className="w-[100px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Type</th>
-                <th className="w-[200px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Unit Purchase Price/Unit Cost (in USD)</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white">
-              {LINE_ITEMS_DATA.filter(item => 
-                item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                item.itemId.toLowerCase().includes(searchTerm.toLowerCase())
-              ).map((item) => (
-                <tr key={item.id} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC]">
-                  <td className="px-[16px] py-[16px]">
-                    <input
-                      type="checkbox"
-                      className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
-                    />
-                  </td>
-                  <td className="px-[12px] py-[16px]">
-                    <div className="flex items-center gap-[12px]">
-                      <div className="w-[44px] h-[44px] bg-[#F1F5F9] rounded-[6px] flex items-center justify-center flex-shrink-0 overflow-hidden">
-                        {item.image ? (
-                          <img src={item.image} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <IconPackage size={22} stroke={1.5} className="text-[#94A3B8]" />
-                        )}
-                      </div>
-                      <div>
-                        <div className="text-[13px] font-medium text-[#1E293B]">
-                          {item.itemId} - {item.name}
-                        </div>
-                        <div className="text-[12px] text-[#64748B]">
-                          Available Qty: {item.availableQty}{item.unit ? ` ${item.unit}` : ''}
-                        </div>
-                        {item.minQty !== null && (
-                          <div className="text-[12px] text-[#64748B]">
-                            Minimum Qty: {item.minQty}
+            {/* Table */}
+            <div className="flex-1 overflow-auto min-h-0">
+              <table className="w-full border-collapse">
+                <thead className="bg-white sticky top-0 z-10">
+                  <tr className="border-b border-[#E2E8F0]">
+                    <th className="w-[40px] text-left px-[16px] py-[14px] bg-white"></th>
+                    <th className="text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Item</th>
+                    <th className="w-[150px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Category</th>
+                    <th className="w-[100px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Type</th>
+                    <th className="w-[200px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Unit Purchase Price/Unit Cost (in USD)</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white">
+                  {LINE_ITEMS_DATA.filter(item => 
+                    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    item.itemId.toLowerCase().includes(searchTerm.toLowerCase())
+                  ).map((item) => (
+                    <tr key={item.id} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC]">
+                      <td className="px-[16px] py-[16px]">
+                        <input
+                          type="checkbox"
+                          checked={selectedItems.some(i => i.id === item.id)}
+                          onChange={(e) => handleItemSelect(item, e.target.checked)}
+                          className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
+                        />
+                      </td>
+                      <td className="px-[12px] py-[16px]">
+                        <div className="flex items-center gap-[12px]">
+                          <div className="w-[44px] h-[44px] bg-[#F1F5F9] rounded-[6px] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            {item.image ? (
+                              <img src={item.image} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <IconPackage size={22} stroke={1.5} className="text-[#94A3B8]" />
+                            )}
                           </div>
-                        )}
+                          <div>
+                            <div className="text-[13px] font-medium text-[#1E293B]">
+                              {item.itemId} - {item.name}
+                            </div>
+                            <div className="text-[12px] text-[#64748B]">
+                              Available Qty: {item.availableQty}{item.unit ? ` ${item.unit}` : ''}
+                            </div>
+                            {item.minQty !== null && (
+                              <div className="text-[12px] text-[#64748B]">
+                                Minimum Qty: {item.minQty}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-[12px] py-[16px] text-[13px] text-[#1E293B]">{item.category}</td>
+                      <td className="px-[12px] py-[16px] text-[13px] text-[#1E293B]">{item.type}</td>
+                      <td className="px-[12px] py-[16px] text-[13px] text-[#1E293B]">{item.unitCost}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Footer */}
+            <div className="h-[64px] px-[24px] flex items-center justify-end gap-[12px] border-t border-[#E2E8F0] shrink-0 bg-white">
+              <button
+                onClick={handleClose}
+                className="h-[40px] px-[20px] border border-[#E2E8F0] rounded-[6px] text-[14px] font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors bg-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleNext}
+                disabled={selectedItems.length === 0}
+                className="h-[40px] px-[20px] bg-[#E44A19] rounded-[6px] text-[14px] font-medium text-white hover:bg-[#D13D0F] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Step 2: Enter Item Details */}
+            <div className="flex-1 overflow-auto min-h-0 p-[24px]">
+              <div className="space-y-[16px]">
+                {selectedItems.map((item) => (
+                  <div key={item.id} className="border border-[#E2E8F0] rounded-[8px] overflow-hidden">
+                    {/* Item Header */}
+                    <div className="px-[16px] py-[12px] flex items-center justify-between bg-white">
+                      <div className="flex items-center gap-[12px]">
+                        <div className="w-[44px] h-[44px] bg-[#F1F5F9] rounded-[6px] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                          {item.image ? (
+                            <img src={item.image} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <IconPackage size={22} stroke={1.5} className="text-[#94A3B8]" />
+                          )}
+                        </div>
+                        <span className="text-[14px] font-medium text-[#1E293B]">
+                          {item.itemId} - {item.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-[8px]">
+                        <button
+                          onClick={() => handleRemoveItem(item.id)}
+                          className="w-[32px] h-[32px] flex items-center justify-center rounded hover:bg-[#FEF2F2] transition-colors"
+                        >
+                          <IconTrash size={18} stroke={1.5} className="text-[#EF4444]" />
+                        </button>
+                        <button
+                          onClick={() => toggleItemExpanded(item.id)}
+                          className="w-[32px] h-[32px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors"
+                        >
+                          {expandedItems[item.id] ? (
+                            <IconChevronUp size={18} stroke={1.5} className="text-[#64748B]" />
+                          ) : (
+                            <IconChevronDown size={18} stroke={1.5} className="text-[#64748B]" />
+                          )}
+                        </button>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-[12px] py-[16px] text-[13px] text-[#1E293B]">{item.category}</td>
-                  <td className="px-[12px] py-[16px] text-[13px] text-[#1E293B]">{item.type}</td>
-                  <td className="px-[12px] py-[16px] text-[13px] text-[#1E293B]">{item.unitCost}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
 
-        {/* Footer */}
-        <div className="h-[64px] px-[24px] flex items-center justify-end gap-[12px] border-t border-[#E2E8F0] shrink-0 bg-white">
-          <button
-            onClick={onClose}
-            className="h-[40px] px-[20px] border border-[#E2E8F0] rounded-[6px] text-[14px] font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors bg-white"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              onAddProduct && onAddProduct();
-              onClose();
-            }}
-            className="h-[40px] px-[20px] bg-[#E44A19] rounded-[6px] text-[14px] font-medium text-white hover:bg-[#D13D0F] transition-colors"
-          >
-            Next
-          </button>
-        </div>
+                    {/* Item Details Form */}
+                    {expandedItems[item.id] && (
+                      <div className="px-[16px] pb-[16px] bg-white">
+                        {/* Labels Row */}
+                        <div className="grid grid-cols-3 gap-[16px] mb-[8px]">
+                          <div>
+                            <label className="text-[13px] font-medium text-[#334155]">
+                              Vendor SKU <span className="text-[#EF4444]">*</span>
+                            </label>
+                          </div>
+                          <div>
+                            <label className="text-[13px] font-medium text-[#334155]">
+                              Unit Purchase Cost <span className="text-[#EF4444]">*</span>
+                            </label>
+                          </div>
+                          <div>
+                            <label className="text-[13px] font-medium text-[#334155]">
+                              Remarks
+                            </label>
+                          </div>
+                        </div>
+
+                        {/* Input Fields Row */}
+                        <div className="grid grid-cols-3 gap-[16px] mb-[12px]">
+                          <div>
+                            <input
+                              type="text"
+                              placeholder="Eg: 1234"
+                              value={itemDetails[item.id]?.vendorSku || ''}
+                              onChange={(e) => updateItemDetail(item.id, 'vendorSku', e.target.value)}
+                              className="w-full h-[40px] px-[12px] border border-[#E2E8F0] rounded-[6px] text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6]"
+                            />
+                          </div>
+                          <div className="flex">
+                            <div className="h-[40px] px-[12px] flex items-center bg-[#F8FAFC] border border-r-0 border-[#E2E8F0] rounded-l-[6px] text-[14px] text-[#64748B]">
+                              USD
+                            </div>
+                            <input
+                              type="text"
+                              value={itemDetails[item.id]?.unitPurchaseCost || ''}
+                              onChange={(e) => updateItemDetail(item.id, 'unitPurchaseCost', e.target.value)}
+                              className="flex-1 h-[40px] px-[12px] border border-[#E2E8F0] rounded-r-[6px] text-[14px] text-[#334155] outline-none focus:border-[#3B82F6]"
+                            />
+                          </div>
+                          <div>
+                            <input
+                              type="text"
+                              value={itemDetails[item.id]?.remarks || ''}
+                              onChange={(e) => updateItemDetail(item.id, 'remarks', e.target.value)}
+                              className="w-full h-[40px] px-[12px] border border-[#E2E8F0] rounded-[6px] text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6]"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Add SKU Button */}
+                        <button className="flex items-center gap-[6px] text-[13px] font-medium text-[#64748B] hover:text-[#334155] transition-colors">
+                          <IconPlus size={16} stroke={2} />
+                          Add SKU
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="h-[64px] px-[24px] flex items-center justify-end gap-[12px] border-t border-[#E2E8F0] shrink-0 bg-white">
+              <button
+                onClick={handleClose}
+                className="h-[40px] px-[20px] border border-[#E2E8F0] rounded-[6px] text-[14px] font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors bg-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddItem}
+                className="h-[40px] px-[20px] bg-[#E44A19] rounded-[6px] text-[14px] font-medium text-white hover:bg-[#D13D0F] transition-colors"
+              >
+                Add Item
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
