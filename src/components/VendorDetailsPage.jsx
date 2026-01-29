@@ -911,10 +911,13 @@ const VENDOR_DATA = {
   address: '2318 North 23rd Street, Wilmington, North Carolina, United States, 28405',
 };
 
-// Edit Options Modal Component - Now works with SKU-specific options
-function EditOptionsModal({ isOpen, onClose, product, onSave }) {
+// Edit SKU Modal Component - Edit SKU, Price, Remarks, and Options
+function EditSkuModal({ isOpen, onClose, product, onSave }) {
+  const [vendorSku, setVendorSku] = useState('');
+  const [unitCost, setUnitCost] = useState('');
+  const [remarks, setRemarks] = useState('');
   const [selectedOptionIds, setSelectedOptionIds] = useState([]);
-  const [validationError, setValidationError] = useState('');
+  const [validationErrors, setValidationErrors] = useState({});
 
   // Get the SKU being edited
   const editingSkuId = product?.editingSkuId;
@@ -928,17 +931,21 @@ function EditOptionsModal({ isOpen, onClose, product, onSave }) {
       .flatMap(s => s.optionIds || []);
   };
 
-  // Initialize selected options when modal opens
+  // Initialize form when modal opens
   React.useEffect(() => {
     if (isOpen && product && editingSku) {
+      setVendorSku(editingSku.vendorSku || '');
+      setUnitCost(editingSku.unitCost?.replace('$', '') || '');
+      setRemarks(editingSku.remarks || '');
       setSelectedOptionIds(editingSku.optionIds || []);
-      setValidationError('');
+      setValidationErrors({});
     }
   }, [isOpen, product, editingSku]);
 
   if (!isOpen || !product || !editingSku) return null;
 
   const availableOptions = (product.options || []).filter(opt => opt.available);
+  const hasOptions = availableOptions.length > 0;
   const otherSkuOptionIds = getOtherSkuOptionIds();
   // Options available for this SKU (not assigned to other SKUs OR already in this SKU)
   const selectableOptions = availableOptions.filter(
@@ -955,12 +962,12 @@ function EditOptionsModal({ isOpen, onClose, product, onSave }) {
         return [...prev, optionId];
       }
     });
-    setValidationError('');
+    setValidationErrors(prev => ({ ...prev, options: null }));
   };
 
   const selectAll = () => {
     setSelectedOptionIds(selectableOptions.map(opt => opt.id));
-    setValidationError('');
+    setValidationErrors(prev => ({ ...prev, options: null }));
   };
 
   const clearAll = () => {
@@ -968,23 +975,43 @@ function EditOptionsModal({ isOpen, onClose, product, onSave }) {
   };
 
   const handleSave = () => {
-    if (selectedOptionIds.length === 0) {
-      setValidationError('Select at least one option');
+    const errors = {};
+    
+    // Validate Vendor SKU
+    if (!vendorSku.trim()) {
+      errors.vendorSku = 'Vendor SKU is required';
+    }
+    
+    // Validate Unit Cost
+    if (!unitCost.trim()) {
+      errors.unitCost = 'Unit cost is required';
+    }
+    
+    // Validate options if product has options
+    if (hasOptions && selectedOptionIds.length === 0) {
+      errors.options = 'Select at least one option';
+    }
+    
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
       return;
     }
-    onSave(product.id, editingSkuId, selectedOptionIds);
+    
+    onSave(product.id, editingSkuId, {
+      vendorSku: vendorSku.trim(),
+      unitCost: `$${unitCost}`,
+      remarks: remarks.trim() || '---',
+      optionIds: selectedOptionIds
+    });
     onClose();
   };
-
-  // Get product name from SKU
-  const productName = product.sku.split(' - ').slice(1).join(' - ') || product.sku;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-[8px] w-[95vw] max-w-[700px] max-h-[90vh] flex flex-col shadow-xl">
         {/* Header */}
         <div className="h-[56px] px-[24px] flex items-center justify-between border-b border-[#E2E8F0] shrink-0">
-          <h2 className="text-[18px] font-semibold text-[#1E293B]">Edit Options</h2>
+          <h2 className="text-[18px] font-semibold text-[#1E293B]">Edit SKU Details</h2>
           <button
             onClick={onClose}
             className="w-[32px] h-[32px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors"
@@ -995,97 +1022,154 @@ function EditOptionsModal({ isOpen, onClose, product, onSave }) {
 
         {/* Content */}
         <div className="flex-1 overflow-auto min-h-0 p-[24px]">
-          {/* Product & SKU Info */}
-          <div className="mb-[16px] p-[12px] bg-[#F8FAFC] rounded-[6px]">
-            <div className="text-[14px] font-medium text-[#1E293B] truncate mb-[4px]">{product.sku}</div>
-            <div className="flex items-center gap-[8px] text-[13px]">
-              <span className="text-[#64748B]">Editing options for SKU:</span>
-              <span className="font-semibold text-[#334155]">{editingSku.vendorSku}</span>
-              <span className="text-[#94A3B8]">({editingSku.unitCost})</span>
-            </div>
+          {/* Product Info */}
+          <div className="mb-[20px] p-[12px] bg-[#F8FAFC] rounded-[6px]">
+            <div className="text-[14px] font-medium text-[#1E293B] truncate">{product.sku}</div>
           </div>
 
-          {/* Options Header */}
-          <div className="flex items-center justify-between mb-[16px]">
-            <div className="flex items-center gap-[8px]">
-              <span className="text-[13px] font-medium text-[#334155]">
-                Select options for this SKU
-              </span>
-              <span className="text-[12px] text-[#64748B]">
-                ({selectedCount} of {totalCount} selected)
-              </span>
+          {/* SKU Details Fields */}
+          <div className="grid grid-cols-3 gap-[16px] mb-[20px]">
+            {/* Vendor SKU */}
+            <div>
+              <label className="block text-[13px] font-medium text-[#334155] mb-[6px]">
+                Vendor SKU <span className="text-[#EF4444]">*</span>
+              </label>
+              <input
+                type="text"
+                value={vendorSku}
+                onChange={(e) => {
+                  setVendorSku(e.target.value);
+                  setValidationErrors(prev => ({ ...prev, vendorSku: null }));
+                }}
+                placeholder="Eg: IKOCAMB-STD"
+                className={`w-full h-[40px] px-[12px] border rounded-[6px] text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] ${
+                  validationErrors.vendorSku ? 'border-[#EF4444]' : 'border-[#E2E8F0]'
+                }`}
+              />
+              {validationErrors.vendorSku && (
+                <div className="mt-[4px] text-[12px] text-[#EF4444]">{validationErrors.vendorSku}</div>
+              )}
             </div>
-          </div>
-
-          {/* Info about other SKU assignments */}
-          {otherSkuOptionIds.length > 0 && (
-            <div className="mb-[12px] text-[12px] text-[#94A3B8]">
-              {otherSkuOptionIds.length} option(s) assigned to other SKUs are not shown
-            </div>
-          )}
-
-          {/* Options Grid */}
-          <div className="grid grid-cols-4 gap-[12px] mb-[16px]">
-            {selectableOptions.map((option) => {
-              const isSelected = selectedOptionIds.includes(option.id);
-              return (
-                <div
-                  key={option.id}
-                  onClick={() => toggleOption(option.id)}
-                  className={`
-                    relative p-[12px] rounded-[8px] border cursor-pointer transition-all
-                    ${isSelected 
-                      ? 'border-[#E44A19] bg-[#FEF7F5]' 
-                      : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1]'
-                    }
-                  `}
-                >
-                  {/* Checkbox */}
-                  <div className="absolute top-[8px] left-[8px]">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => {}}
-                      className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
-                    />
-                  </div>
-                  
-                  {/* Option Color Swatch */}
-                  <div 
-                    className="w-[48px] h-[48px] mx-auto mb-[8px] rounded-[6px] overflow-hidden border border-[#E2E8F0]"
-                    style={{ backgroundColor: option.color || '#CBD5E1' }}
-                  />
-                  
-                  {/* Option Name */}
-                  <div className="text-[12px] text-center text-[#334155] font-medium truncate">
-                    {option.name}
-                  </div>
+            
+            {/* Unit Purchase Cost */}
+            <div>
+              <label className="block text-[13px] font-medium text-[#334155] mb-[6px]">
+                Unit Purchase Cost <span className="text-[#EF4444]">*</span>
+              </label>
+              <div className="flex">
+                <div className="h-[40px] px-[12px] flex items-center bg-[#F8FAFC] border border-r-0 border-[#E2E8F0] rounded-l-[6px] text-[14px] text-[#64748B]">
+                  USD
                 </div>
-              );
-            })}
-          </div>
-
-          {/* Quick Actions */}
-          <div className="flex items-center gap-[16px]">
-            <button
-              onClick={selectAll}
-              className="text-[13px] text-[#3B82F6] hover:text-[#2563EB] font-medium transition-colors"
-            >
-              Select All
-            </button>
-            <button
-              onClick={clearAll}
-              className="text-[13px] text-[#64748B] hover:text-[#334155] font-medium transition-colors"
-            >
-              Clear All
-            </button>
-          </div>
-
-          {/* Validation Error */}
-          {validationError && (
-            <div className="mt-[12px] text-[13px] text-[#EF4444]">
-              {validationError}
+                <input
+                  type="text"
+                  value={unitCost}
+                  onChange={(e) => {
+                    setUnitCost(e.target.value);
+                    setValidationErrors(prev => ({ ...prev, unitCost: null }));
+                  }}
+                  placeholder="0.00"
+                  className={`flex-1 h-[40px] px-[12px] border rounded-r-[6px] text-[14px] text-[#334155] outline-none focus:border-[#3B82F6] ${
+                    validationErrors.unitCost ? 'border-[#EF4444]' : 'border-[#E2E8F0]'
+                  }`}
+                />
+              </div>
+              {validationErrors.unitCost && (
+                <div className="mt-[4px] text-[12px] text-[#EF4444]">{validationErrors.unitCost}</div>
+              )}
             </div>
+            
+            {/* Remarks */}
+            <div>
+              <label className="block text-[13px] font-medium text-[#334155] mb-[6px]">
+                Remarks
+              </label>
+              <input
+                type="text"
+                value={remarks}
+                onChange={(e) => setRemarks(e.target.value)}
+                placeholder="Notes..."
+                className="w-full h-[40px] px-[12px] border border-[#E2E8F0] rounded-[6px] text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6]"
+              />
+            </div>
+          </div>
+
+          {/* Options Section - Only show if product has options */}
+          {hasOptions && (
+            <>
+              <div className="border-t border-dashed border-[#E2E8F0] my-[20px]" />
+              
+              {/* Options Header */}
+              <div className="flex items-center justify-between mb-[16px]">
+                <div className="flex items-center gap-[8px]">
+                  <span className="text-[13px] font-medium text-[#334155]">
+                    Options for this SKU
+                  </span>
+                  <span className="text-[12px] text-[#64748B]">
+                    ({selectedCount} of {totalCount} selected)
+                  </span>
+                </div>
+                <div className="flex items-center gap-[12px]">
+                  <button
+                    onClick={selectAll}
+                    className="text-[12px] text-[#3B82F6] hover:text-[#2563EB] font-medium transition-colors"
+                  >
+                    Select All
+                  </button>
+                  <button
+                    onClick={clearAll}
+                    className="text-[12px] text-[#64748B] hover:text-[#334155] font-medium transition-colors"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+
+              {/* Info about other SKU assignments */}
+              {otherSkuOptionIds.length > 0 && (
+                <div className="mb-[12px] text-[12px] text-[#94A3B8]">
+                  {otherSkuOptionIds.length} option(s) assigned to other SKUs are not shown
+                </div>
+              )}
+
+              {/* Options Grid - Compact chips */}
+              <div className="flex flex-wrap gap-[8px] mb-[12px]">
+                {selectableOptions.map((option) => {
+                  const isSelected = selectedOptionIds.includes(option.id);
+                  return (
+                    <div
+                      key={option.id}
+                      onClick={() => toggleOption(option.id)}
+                      className={`
+                        flex items-center gap-[8px] px-[10px] py-[6px] rounded-[6px] border cursor-pointer transition-all
+                        ${isSelected 
+                          ? 'border-[#E44A19] bg-[#FEF7F5]' 
+                          : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1]'
+                        }
+                      `}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {}}
+                        className="w-[14px] h-[14px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
+                      />
+                      <div 
+                        className="w-[20px] h-[20px] rounded-[4px] border border-[#E2E8F0] flex-shrink-0"
+                        style={{ backgroundColor: option.color || '#CBD5E1' }}
+                      />
+                      <span className="text-[13px] text-[#334155] font-medium whitespace-nowrap">
+                        {option.name}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Options Validation Error */}
+              {validationErrors.options && (
+                <div className="text-[12px] text-[#EF4444]">{validationErrors.options}</div>
+              )}
+            </>
           )}
         </div>
 
@@ -1119,14 +1203,14 @@ function VendorDetailsPage({ onBack }) {
   const [editOptionsProduct, setEditOptionsProduct] = useState(null); // Product being edited
   const totalPages = 17;
 
-  // Handle saving options from edit modal - now updates specific SKU's options
-  const handleSaveOptions = (productId, skuId, selectedOptionIds) => {
+  // Handle saving SKU details from edit modal - updates SKU, price, remarks, and options
+  const handleSaveSkuDetails = (productId, skuId, updatedData) => {
     setProducts(prev => prev.map(p => {
       if (p.id !== productId) return p;
       return {
         ...p,
         skuEntries: (p.skuEntries || []).map(sku =>
-          sku.id === skuId ? { ...sku, optionIds: selectedOptionIds } : sku
+          sku.id === skuId ? { ...sku, ...updatedData } : sku
         )
       };
     }));
@@ -1431,7 +1515,7 @@ function VendorDetailsPage({ onBack }) {
                                     <button
                                       onClick={() => setEditOptionsProduct({ ...product, editingSkuId: sku.id })}
                                       className="w-[24px] h-[24px] flex items-center justify-center rounded-[4px] hover:bg-[#E2E8F0] transition-colors ml-auto flex-shrink-0"
-                                      title="Edit options"
+                                      title="Edit SKU details"
                                     >
                                       <IconPencil size={14} stroke={1.5} className="text-[#64748B]" />
                                     </button>
@@ -1548,12 +1632,12 @@ function VendorDetailsPage({ onBack }) {
         }}
       />
 
-      {/* Edit Options Modal */}
-      <EditOptionsModal
+      {/* Edit SKU Modal - Edit SKU, Price, Remarks, and Options */}
+      <EditSkuModal
         isOpen={!!editOptionsProduct}
         onClose={() => setEditOptionsProduct(null)}
         product={editOptionsProduct}
-        onSave={handleSaveOptions}
+        onSave={handleSaveSkuDetails}
       />
     </div>
   );
