@@ -424,6 +424,8 @@ function CategoryModal({
   const [selectedParentId, setSelectedParentId] = useState(null);
   const [parentDropdownOpen, setParentDropdownOpen] = useState(false);
   const [parentCategorySearch, setParentCategorySearch] = useState('');
+  const [parentTradeTypeFilter, setParentTradeTypeFilter] = useState('all');
+  const [tradeTypeFilterOpen, setTradeTypeFilterOpen] = useState(false);
 
   // Reset form when modal opens
   React.useEffect(() => {
@@ -437,6 +439,8 @@ function CategoryModal({
       setTradeTypeDropdownOpen(false);
       setParentDropdownOpen(false);
       setParentCategorySearch('');
+      setParentTradeTypeFilter('all');
+      setTradeTypeFilterOpen(false);
     }
   }, [isOpen, initialData]);
 
@@ -716,41 +720,86 @@ function CategoryModal({
               
               {/* Parent Category Dropdown */}
               {parentDropdownOpen && (
-                <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-[#E2E8F0] rounded-lg shadow-lg max-h-[300px] overflow-hidden">
-                  {/* Search */}
+                <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-[#E2E8F0] rounded-lg shadow-lg max-h-[340px] overflow-hidden">
+                  {/* Search + Filter */}
                   <div className="p-2 border-b border-[#E2E8F0]">
-                    <div className="relative">
-                      <IconSearch 
-                        size={14} 
-                        className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" 
-                        stroke={2} 
-                      />
-                      <input
-                        type="text"
-                        placeholder="Search categories..."
-                        value={parentCategorySearch}
-                        onChange={(e) => setParentCategorySearch(e.target.value)}
-                        className="w-full h-[32px] pl-8 pr-3 text-[13px] text-[#1E293B] placeholder-[#94A3B8] border border-[#E2E8F0] rounded bg-white focus:outline-none focus:border-[#94A3B8]"
-                        onClick={(e) => e.stopPropagation()}
-                      />
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <IconSearch 
+                          size={14} 
+                          className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#94A3B8]" 
+                          stroke={2} 
+                        />
+                        <input
+                          type="text"
+                          placeholder="Search..."
+                          value={parentCategorySearch}
+                          onChange={(e) => setParentCategorySearch(e.target.value)}
+                          className="w-full h-[32px] pl-8 pr-3 text-[13px] text-[#1E293B] placeholder-[#94A3B8] border border-[#E2E8F0] rounded bg-white focus:outline-none focus:border-[#94A3B8]"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      
+                      {/* Trade Type Filter */}
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setTradeTypeFilterOpen(!tradeTypeFilterOpen); }}
+                          className={`h-[32px] px-2.5 border rounded flex items-center gap-1.5 text-[12px] transition-colors ${
+                            parentTradeTypeFilter !== 'all' 
+                              ? 'border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]' 
+                              : 'border-[#E2E8F0] text-[#64748B] hover:border-[#94A3B8]'
+                          }`}
+                        >
+                          <IconFilter size={14} stroke={2} />
+                          {parentTradeTypeFilter === 'all' ? 'All' : parentTradeTypeFilter}
+                        </button>
+                        
+                        {/* Filter Dropdown */}
+                        {tradeTypeFilterOpen && (
+                          <div className="absolute right-0 top-full mt-1 w-[160px] bg-white border border-[#E2E8F0] rounded-lg shadow-lg z-20 py-1 max-h-[200px] overflow-y-auto">
+                            <div
+                              className={`px-3 py-2 hover:bg-[#F8FAFC] cursor-pointer flex items-center justify-between text-[12px] ${
+                                parentTradeTypeFilter === 'all' ? 'bg-[#EFF6FF] text-[#2563EB]' : 'text-[#1E293B]'
+                              }`}
+                              onClick={(e) => { e.stopPropagation(); setParentTradeTypeFilter('all'); setTradeTypeFilterOpen(false); }}
+                            >
+                              All Types
+                              {parentTradeTypeFilter === 'all' && <IconCheck size={14} className="text-[#2563EB]" stroke={2} />}
+                            </div>
+                            {TRADE_TYPES.map(t => (
+                              <div
+                                key={t.id}
+                                className={`px-3 py-2 hover:bg-[#F8FAFC] cursor-pointer flex items-center justify-between text-[12px] ${
+                                  parentTradeTypeFilter === t.name ? 'bg-[#EFF6FF] text-[#2563EB]' : 'text-[#1E293B]'
+                                }`}
+                                onClick={(e) => { e.stopPropagation(); setParentTradeTypeFilter(t.name); setTradeTypeFilterOpen(false); }}
+                              >
+                                {t.name}
+                                {parentTradeTypeFilter === t.name && <IconCheck size={14} className="text-[#2563EB]" stroke={2} />}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                   
-                  <div className="max-h-[220px] overflow-y-auto">
-                    {/* None option - make it top-level */}
-                    {(!parentCategorySearch || 'none top-level'.includes(parentCategorySearch.toLowerCase())) && (
+                  <div className="max-h-[260px] overflow-y-auto">
+                    {/* None option - make it top-level (hide when trade type filter active) */}
+                    {parentTradeTypeFilter === 'all' && (!parentCategorySearch || 'none top-level'.includes(parentCategorySearch.toLowerCase())) && (
                       <div
                         className={`px-3 py-2.5 hover:bg-[#F8FAFC] cursor-pointer flex items-center justify-between ${
                           selectedParentId === null ? 'bg-[#EFF6FF]' : ''
                         }`}
-                        onClick={(e) => { e.stopPropagation(); setSelectedParentId(null); setParentDropdownOpen(false); setParentCategorySearch(''); }}
+                        onClick={(e) => { e.stopPropagation(); setSelectedParentId(null); setParentDropdownOpen(false); setParentCategorySearch(''); setParentTradeTypeFilter('all'); }}
                       >
                         <span className="text-[13px] text-[#1E293B]">None (Top-level category)</span>
                         {selectedParentId === null && <IconCheck size={16} className="text-[#2563EB]" stroke={2} />}
                       </div>
                     )}
                     
-                    {(!parentCategorySearch || 'none top-level'.includes(parentCategorySearch.toLowerCase())) && (
+                    {parentTradeTypeFilter === 'all' && (!parentCategorySearch || 'none top-level'.includes(parentCategorySearch.toLowerCase())) && (
                       <div className="border-t border-[#E2E8F0]" />
                     )}
                     
@@ -761,19 +810,31 @@ function CategoryModal({
                         if (cat.id === initialData?.id) return false;
                         // Exclude own children (if this is a parent being edited)
                         if (initialData?.subCategories?.some(sub => sub.id === cat.id)) return false;
+                        // Trade type filter
+                        if (parentTradeTypeFilter !== 'all') {
+                          if (cat.tradeType?.name !== parentTradeTypeFilter) return false;
+                        }
                         // Search filter
                         if (parentCategorySearch) {
                           const searchLower = parentCategorySearch.toLowerCase();
-                          return cat.name.toLowerCase().includes(searchLower) ||
-                                 cat.tradeType?.name?.toLowerCase().includes(searchLower);
+                          return cat.name.toLowerCase().includes(searchLower);
                         }
                         return true;
                       });
                       
-                      if (filteredCategories.length === 0 && parentCategorySearch) {
+                      if (filteredCategories.length === 0 && (parentCategorySearch || parentTradeTypeFilter !== 'all')) {
                         return (
                           <div className="px-3 py-4 text-center text-[13px] text-[#94A3B8]">
                             No categories found
+                            {parentTradeTypeFilter !== 'all' && (
+                              <button
+                                type="button"
+                                className="block mx-auto mt-1 text-[#2563EB] hover:underline"
+                                onClick={(e) => { e.stopPropagation(); setParentTradeTypeFilter('all'); }}
+                              >
+                                Clear filter
+                              </button>
+                            )}
                           </div>
                         );
                       }
@@ -784,7 +845,7 @@ function CategoryModal({
                           className={`px-3 py-2.5 hover:bg-[#F8FAFC] cursor-pointer flex items-center justify-between ${
                             selectedParentId === cat.id ? 'bg-[#EFF6FF]' : ''
                           }`}
-                          onClick={(e) => { e.stopPropagation(); setSelectedParentId(cat.id); setParentDropdownOpen(false); setParentCategorySearch(''); }}
+                          onClick={(e) => { e.stopPropagation(); setSelectedParentId(cat.id); setParentDropdownOpen(false); setParentCategorySearch(''); setParentTradeTypeFilter('all'); }}
                         >
                           <div className="flex items-center gap-2">
                             <span className="text-[13px] text-[#1E293B]">{cat.name}</span>
