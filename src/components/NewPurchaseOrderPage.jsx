@@ -583,7 +583,7 @@ function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS S
                                   className="text-[13px] text-[#3B82F6] hover:text-[#2563EB] flex items-center gap-[4px]"
                                 >
                                   <IconPlus size={14} />
-                                  Add another color for this SKU
+                                  Add another option for this SKU
                                 </button>
                               </div>
                             )}
