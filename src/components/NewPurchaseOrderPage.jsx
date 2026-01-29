@@ -26,6 +26,7 @@ import {
   IconClipboardList,
   IconNotes,
   IconSearch,
+  IconDotsVertical,
 } from '@tabler/icons-react';
 
 // Asset paths from Figma
@@ -196,6 +197,7 @@ function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS S
         partId: part.id,
         partNumber: part.partId,
         partName: part.partName,
+        image: part.image,
         skuId: sku.id,
         vendorSku: sku.vendorSku,
         unitCost: sku.unitCost,
@@ -235,6 +237,7 @@ function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS S
           partId: part.id,
           partNumber: part.partId,
           partName: part.partName,
+          image: part.image,
           skuId: sku.id,
           vendorSku: sku.vendorSku,
           unitCost: sku.unitCost,
@@ -256,6 +259,7 @@ function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS S
       partId: part.id,
       partNumber: part.partId,
       partName: part.partName,
+      image: part.image,
       skuId: sku.id,
       vendorSku: sku.vendorSku,
       unitCost: sku.unitCost,
@@ -1093,23 +1097,33 @@ const NewPurchaseOrderPage = ({ onNavigateBack }) => {
             {/* PO Items Section */}
             <div className="bg-white border border-[#E2E8F0] rounded-[7px]">
               {/* Header */}
-              <button 
-                onClick={() => setPoItemsExpanded(!poItemsExpanded)}
-                className="w-full h-[49px] flex items-center justify-between px-[14px] border-b border-[#E2E8F0] rounded-t-[7px]"
-              >
+              <div className="h-[49px] flex items-center justify-between px-[14px] border-b border-[#E2E8F0] rounded-t-[7px]">
                 <div className="flex items-center gap-[10.5px]">
                   <POItemsIcon />
                   <span className="text-[14px] font-semibold text-[#334155]">PO Items</span>
-                  {poItems.length > 0 && (
-                    <span className="text-[12px] text-[#64748B]">({poItems.length})</span>
-                  )}
                 </div>
-                {poItemsExpanded ? (
-                  <IconChevronUp size={16} className="text-[#1E293B]" />
-                ) : (
-                  <IconChevronDown size={16} className="text-[#1E293B]" />
-                )}
-              </button>
+                <div className="flex items-center gap-[10px]">
+                  {poItems.length > 0 && (
+                    <button 
+                      onClick={() => setIsLineItemPickerOpen(true)}
+                      className="flex items-center gap-[5px] px-[12px] py-[5px] bg-white border border-[#CBD5E1] rounded-[5px] hover:bg-gray-50"
+                    >
+                      <IconPlus size={14} className="text-[#334155]" />
+                      <span className="text-[12px] font-medium text-[#334155]">Add</span>
+                    </button>
+                  )}
+                  <button 
+                    onClick={() => setPoItemsExpanded(!poItemsExpanded)}
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
+                    {poItemsExpanded ? (
+                      <IconChevronUp size={16} className="text-[#1E293B]" />
+                    ) : (
+                      <IconChevronDown size={16} className="text-[#1E293B]" />
+                    )}
+                  </button>
+                </div>
+              </div>
               
               {poItemsExpanded && (
                 <>
@@ -1134,73 +1148,79 @@ const NewPurchaseOrderPage = ({ onNavigateBack }) => {
                       {/* PO Items Table */}
                       <div className="overflow-x-auto">
                         <table className="w-full">
-                          <thead className="bg-[#F8FAFC]">
+                          <thead>
                             <tr className="border-b border-[#E2E8F0]">
-                              <th className="text-left px-[14px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Item</th>
-                              <th className="text-left px-[14px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider w-[100px]">Qty</th>
-                              <th className="text-left px-[14px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider w-[120px]">Unit Price</th>
-                              <th className="text-right px-[14px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider w-[120px]">Total</th>
-                              <th className="w-[50px]"></th>
+                              <th className="text-left px-[14px] py-[12px] text-[12px] font-medium text-[#64748B] w-[40px]">#</th>
+                              <th className="text-left px-[14px] py-[12px] text-[12px] font-medium text-[#64748B]">Item</th>
+                              <th className="text-left px-[14px] py-[12px] text-[12px] font-medium text-[#64748B] w-[140px]">Vendor SKU / ID</th>
+                              <th className="text-left px-[14px] py-[12px] text-[12px] font-medium text-[#64748B] w-[150px]">Unit Purchase Cost</th>
+                              <th className="text-left px-[14px] py-[12px] text-[12px] font-medium text-[#64748B] w-[120px]">Required Qty</th>
+                              <th className="text-left px-[14px] py-[12px] text-[12px] font-medium text-[#64748B] w-[100px]">Remarks</th>
+                              <th className="text-center px-[14px] py-[12px] text-[12px] font-medium text-[#64748B] w-[80px]">Actions</th>
                             </tr>
                           </thead>
                           <tbody>
                             {poItems.map((item, index) => (
                               <tr key={index} className="border-b border-[#E2E8F0] hover:bg-[#FAFAFA]">
-                                <td className="px-[14px] py-[14px]">
-                                  <div className="flex flex-col gap-[2px]">
-                                    <span className="text-[13px] font-medium text-[#1E293B]">{item.partName}</span>
-                                    <span className="text-[12px] text-[#64748B]">SKU: {item.vendorSku}</span>
-                                    {item.optionName && (
-                                      <div className="flex items-center gap-[6px] mt-[4px]">
-                                        <span className="text-[12px] text-[#64748B]">Option:</span>
-                                        <div className="flex items-center gap-[4px]">
-                                          <div 
-                                            className="w-[14px] h-[14px] rounded-[3px] border border-[#E2E8F0]"
-                                            style={{ backgroundColor: item.optionColor }}
-                                          />
-                                          <span className="text-[12px] text-[#1E293B]">{item.optionName}</span>
+                                <td className="px-[14px] py-[16px] text-[14px] text-[#1E293B]">{index + 1}</td>
+                                <td className="px-[14px] py-[16px]">
+                                  <div className="flex items-center gap-[12px]">
+                                    <div className="w-[44px] h-[44px] bg-[#F1F5F9] rounded-[6px] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                      {item.image ? (
+                                        <img src={item.image} alt="" className="w-full h-full object-cover" />
+                                      ) : (
+                                        <IconPackage size={22} stroke={1.5} className="text-[#94A3B8]" />
+                                      )}
+                                    </div>
+                                    <div className="flex flex-col">
+                                      <span className="text-[14px] font-medium text-[#1E293B]">
+                                        {item.partNumber} - {item.partName}
+                                      </span>
+                                      {item.optionName && (
+                                        <div className="flex items-center gap-[6px] mt-[2px]">
+                                          <span className="text-[12px] text-[#64748B]">Option:</span>
+                                          <div className="flex items-center gap-[4px]">
+                                            <div 
+                                              className="w-[12px] h-[12px] rounded-[2px] border border-[#E2E8F0]"
+                                              style={{ backgroundColor: item.optionColor }}
+                                            />
+                                            <span className="text-[12px] text-[#1E293B]">{item.optionName}</span>
+                                          </div>
                                         </div>
-                                      </div>
-                                    )}
+                                      )}
+                                    </div>
                                   </div>
                                 </td>
-                                <td className="px-[14px] py-[14px] text-[13px] text-[#1E293B]">{item.quantity}</td>
-                                <td className="px-[14px] py-[14px] text-[13px] text-[#1E293B]">${item.unitCost.toFixed(2)}</td>
-                                <td className="px-[14px] py-[14px] text-[13px] text-[#1E293B] text-right font-medium">
-                                  ${(item.unitCost * parseFloat(item.quantity || 0)).toFixed(2)}
+                                <td className="px-[14px] py-[16px] text-[14px] text-[#1E293B]">{item.vendorSku}</td>
+                                <td className="px-[14px] py-[16px] text-[14px] text-[#1E293B]">
+                                  ${item.unitCost.toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
                                 </td>
-                                <td className="px-[14px] py-[14px]">
+                                <td className="px-[14px] py-[16px] text-[14px] text-[#1E293B]">{item.quantity}</td>
+                                <td className="px-[14px] py-[16px] text-[14px] text-[#64748B]">{item.remarks || '-'}</td>
+                                <td className="px-[14px] py-[16px] text-center">
                                   <button 
                                     onClick={() => handleRemovePoItem(index)}
-                                    className="p-[4px] hover:bg-gray-100 rounded"
+                                    className="p-[6px] hover:bg-gray-100 rounded-full inline-flex items-center justify-center"
                                   >
-                                    <IconTrash size={16} className="text-[#94A3B8]" />
+                                    <IconDotsVertical size={18} className="text-[#64748B]" />
                                   </button>
                                 </td>
                               </tr>
                             ))}
                           </tbody>
-                          <tfoot className="bg-[#F8FAFC]">
+                          <tfoot>
                             <tr>
-                              <td colSpan="3" className="px-[14px] py-[12px] text-[13px] font-semibold text-[#1E293B]">Total</td>
-                              <td className="px-[14px] py-[12px] text-[14px] font-semibold text-[#1E293B] text-right">
-                                ${calculateTotal().toFixed(2)}
+                              <td colSpan="4" className="px-[14px] py-[16px] text-right">
+                                <span className="text-[14px] font-semibold text-[#1E293B]">Total</span>
                               </td>
-                              <td></td>
+                              <td colSpan="3" className="px-[14px] py-[16px]">
+                                <span className="text-[16px] font-semibold text-[#1E293B]">
+                                  ${calculateTotal().toLocaleString('en-US', { minimumFractionDigits: 3, maximumFractionDigits: 3 })}
+                                </span>
+                              </td>
                             </tr>
                           </tfoot>
                         </table>
-                      </div>
-                      
-                      {/* Add More Items Button */}
-                      <div className="p-[14px] border-t border-[#E2E8F0]">
-                        <button 
-                          onClick={() => setIsLineItemPickerOpen(true)}
-                          className="flex items-center gap-[7px] px-[15px] py-[6px] bg-white border border-[#CBD5E1] rounded-[5.25px] hover:bg-gray-50"
-                        >
-                          <IconPlus size={16} className="text-[#334155]" />
-                          <span className="text-[12.6px] font-medium text-[#334155] tracking-[0.25px]">Add More Items</span>
-                        </button>
                       </div>
                     </div>
                   )}
