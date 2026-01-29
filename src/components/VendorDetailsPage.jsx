@@ -126,26 +126,26 @@ function VendorDetailsPage({ onBack }) {
           <div className="p-[14px] border-b border-[#E2E8F0]">
             <div className="flex justify-center gap-[24px]">
               <button className="flex flex-col items-center gap-[6px] group">
-                <div className="w-[38px] h-[38px] rounded-full bg-[#F0FDFA] flex items-center justify-center group-hover:bg-[#CCFBF1] transition-colors">
-                  <IconPhone size={20} className="text-[#0D9488]" />
+                <div className="w-[38px] h-[38px] rounded-full bg-[#FEF2F2] flex items-center justify-center group-hover:bg-[#FEE2E2] transition-colors">
+                  <IconPhone size={20} className="text-[#EA580C]" />
                 </div>
                 <span className="text-[12px] text-[#64748B]">Call</span>
               </button>
               <button className="flex flex-col items-center gap-[6px] group">
-                <div className="w-[38px] h-[38px] rounded-full bg-[#F0FDFA] flex items-center justify-center group-hover:bg-[#CCFBF1] transition-colors">
-                  <IconMail size={20} className="text-[#0D9488]" />
+                <div className="w-[38px] h-[38px] rounded-full bg-[#FEF2F2] flex items-center justify-center group-hover:bg-[#FEE2E2] transition-colors">
+                  <IconMail size={20} className="text-[#EA580C]" />
                 </div>
                 <span className="text-[12px] text-[#64748B]">Mail</span>
               </button>
               <button className="flex flex-col items-center gap-[6px] group">
-                <div className="w-[38px] h-[38px] rounded-full bg-[#F0FDFA] flex items-center justify-center group-hover:bg-[#CCFBF1] transition-colors">
-                  <IconPlus size={20} className="text-[#0D9488]" />
+                <div className="w-[38px] h-[38px] rounded-full bg-[#FEF2F2] flex items-center justify-center group-hover:bg-[#FEE2E2] transition-colors">
+                  <IconPlus size={20} className="text-[#EA580C]" />
                 </div>
                 <span className="text-[12px] text-[#64748B]">New PO</span>
               </button>
               <button className="flex flex-col items-center gap-[6px] group">
-                <div className="w-[38px] h-[38px] rounded-full bg-[#F0FDFA] flex items-center justify-center group-hover:bg-[#CCFBF1] transition-colors">
-                  <IconNotes size={20} className="text-[#0D9488]" />
+                <div className="w-[38px] h-[38px] rounded-full bg-[#FEF2F2] flex items-center justify-center group-hover:bg-[#FEE2E2] transition-colors">
+                  <IconNotes size={20} className="text-[#EA580C]" />
                 </div>
                 <span className="text-[12px] text-[#64748B]">Add Note</span>
               </button>
