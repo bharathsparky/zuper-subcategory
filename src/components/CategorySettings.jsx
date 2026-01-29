@@ -840,10 +840,18 @@ function CategoryModal({
               )}
             </div>
             
-            {/* Warnings */}
-            {selectedParentId && (() => {
-              const newParent = allCategories.find(c => c.id === selectedParentId);
-              const willChangeTradeType = initialData?.tradeType?.id !== newParent?.tradeType?.id;
+            {/* Warnings - only show when parent selection has actually changed */}
+            {(() => {
+              // Check if parent has actually changed from original
+              const originalParentId = initialData?.parentId || null;
+              const hasParentChanged = selectedParentId !== originalParentId;
+              
+              if (!hasParentChanged) return null;
+              
+              const newParent = selectedParentId ? allCategories.find(c => c.id === selectedParentId) : null;
+              const currentTradeTypeId = initialData?.tradeType?.id;
+              const newTradeTypeId = newParent?.tradeType?.id || null;
+              const willChangeTradeType = currentTradeTypeId !== newTradeTypeId;
               const hasSubCategories = initialData?.subCategories?.length > 0;
               const subCategoryCount = initialData?.subCategories?.length || 0;
               
