@@ -30,7 +30,9 @@ import {
   IconChevronsRight,
   IconDotsVertical,
   IconCheck,
-  IconX
+  IconX,
+  IconArrowRight,
+  IconCornerDownRight
 } from '@tabler/icons-react';
 import { 
   Modal, 
@@ -126,7 +128,7 @@ const PAGE_SIZE_OPTIONS = [
 // Row Actions Menu
 // ============================================
 
-function RowActionsMenu({ onEdit, onDelete, onAddSubCategory, isParent = true }) {
+function RowActionsMenu({ onEdit, onDelete, onAddSubCategory, onMove, isParent = true }) {
   return (
     <Menu as="div" className="relative">
       <Menu.Button className="p-1.5 text-[#94A3B8] hover:text-[#64748B] hover:bg-[#F1F5F9] rounded transition-colors">
@@ -158,6 +160,19 @@ function RowActionsMenu({ onEdit, onDelete, onAddSubCategory, isParent = true })
               )}
             </Menu.Item>
           )}
+          <Menu.Item>
+            {({ active }) => (
+              <button
+                onClick={onMove}
+                className={`w-full px-3 py-2 text-left text-[13px] flex items-center gap-2.5 ${
+                  active ? 'bg-[#F8FAFC]' : ''
+                } text-[#1E293B]`}
+              >
+                <IconCornerDownRight size={15} className="text-[#64748B]" stroke={2} />
+                Move to Category
+              </button>
+            )}
+          </Menu.Item>
           <Menu.Item>
             {({ active }) => (
               <button
@@ -219,6 +234,7 @@ function SortableCategoryRow({
   onEdit, 
   onDelete,
   onAddSubCategory,
+  onMove,
   isSubCategory = false,
   searchTerm = '',
   isSearchMatch = false,
@@ -351,6 +367,7 @@ function SortableCategoryRow({
           onEdit={onEdit}
           onDelete={onDelete}
           onAddSubCategory={onAddSubCategory}
+          onMove={onMove}
           isParent={isParent}
         />
       </div>
@@ -717,6 +734,197 @@ function DeleteConfirmModal({ isOpen, onClose, onConfirm, category, hasSubCatego
 }
 
 // ============================================
+// Move Category Modal
+// ============================================
+
+function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
+  const [selectedTargetId, setSelectedTargetId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Reset state when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setSelectedTargetId(null);
+      setSearchTerm('');
+    }
+  }, [isOpen]);
+
+  // Determine available targets based on whether it's a parent or sub-category
+  const availableTargets = useMemo(() => {
+    if (!category) return [];
+    
+    if (category.isSubCategory) {
+      // For sub-categories: can move to any other parent or promote to top-level
+      return categories
+        .filter(cat => cat.id !== category.parentId) // Exclude current parent
+        .map(cat => ({
+          id: cat.id,
+          name: cat.name,
+          type: 'parent',
+          subCount: cat.subCategories?.length || 0
+        }));
+    } else {
+      // For parent categories: can only move as sub-category under another parent
+      return categories
+        .filter(cat => cat.id !== category.id) // Exclude self
+        .map(cat => ({
+          id: cat.id,
+          name: cat.name,
+          type: 'parent',
+          subCount: cat.subCategories?.length || 0
+        }));
+    }
+  }, [category, categories]);
+
+  // Filter targets based on search
+  const filteredTargets = useMemo(() => {
+    if (!searchTerm.trim()) return availableTargets;
+    const term = searchTerm.toLowerCase();
+    return availableTargets.filter(target => 
+      target.name.toLowerCase().includes(term)
+    );
+  }, [availableTargets, searchTerm]);
+
+  const handleMove = () => {
+    if (selectedTargetId !== null) {
+      onMove(selectedTargetId);
+    }
+  };
+
+  const isSubCategory = category?.isSubCategory;
+  const hasSubCategories = !isSubCategory && category?.subCategories?.length > 0;
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Move Category"
+      maxWidth="max-w-[480px]"
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button 
+            variant="primary" 
+            onClick={handleMove}
+            disabled={selectedTargetId === null}
+          >
+            Move
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        {/* Info */}
+        <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3">
+          <p className="text-[13px] text-[#475569]">
+            Moving <strong className="text-[#1E293B]">"{category?.name}"</strong>
+            {isSubCategory ? ' (sub-category)' : ''}
+          </p>
+          {hasSubCategories && (
+            <p className="text-[12px] text-[#94A3B8] mt-1">
+              This will also move {category?.subCategories?.length} sub-categories.
+            </p>
+          )}
+        </div>
+
+        {/* Search */}
+        <div className="relative">
+          <IconSearch 
+            size={15} 
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8]" 
+            stroke={2} 
+          />
+          <input
+            type="text"
+            placeholder="Search categories..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full h-[36px] pl-9 pr-3 text-[13px] text-[#1E293B] placeholder-[#94A3B8] border border-[#E2E8F0] rounded-lg bg-white focus:outline-none focus:border-[#94A3B8]"
+          />
+        </div>
+
+        {/* Target Selection */}
+        <div className="border border-[#E2E8F0] rounded-lg overflow-hidden max-h-[280px] overflow-y-auto">
+          {/* Make Top-Level option (only for sub-categories) */}
+          {isSubCategory && (
+            <div
+              onClick={() => setSelectedTargetId('top-level')}
+              className={`px-4 py-3 cursor-pointer flex items-center gap-3 border-b border-[#E2E8F0] transition-colors ${
+                selectedTargetId === 'top-level' 
+                  ? 'bg-[#EFF6FF] border-l-2 border-l-[#2563EB]' 
+                  : 'hover:bg-[#F8FAFC]'
+              }`}
+            >
+              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                selectedTargetId === 'top-level' ? 'border-[#2563EB]' : 'border-[#CBD5E1]'
+              }`}>
+                {selectedTargetId === 'top-level' && (
+                  <div className="w-2 h-2 rounded-full bg-[#2563EB]" />
+                )}
+              </div>
+              <div>
+                <span className="text-[13px] font-medium text-[#1E293B]">Make Top-Level Category</span>
+                <p className="text-[11px] text-[#94A3B8]">Promote to a standalone category</p>
+              </div>
+            </div>
+          )}
+
+          {/* Category Targets */}
+          {filteredTargets.length === 0 ? (
+            <div className="px-4 py-6 text-center text-[13px] text-[#94A3B8]">
+              No categories found
+            </div>
+          ) : (
+            filteredTargets.map(target => (
+              <div
+                key={target.id}
+                onClick={() => setSelectedTargetId(target.id)}
+                className={`px-4 py-3 cursor-pointer flex items-center gap-3 border-b border-[#E2E8F0] last:border-b-0 transition-colors ${
+                  selectedTargetId === target.id 
+                    ? 'bg-[#EFF6FF] border-l-2 border-l-[#2563EB]' 
+                    : 'hover:bg-[#F8FAFC]'
+                }`}
+              >
+                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                  selectedTargetId === target.id ? 'border-[#2563EB]' : 'border-[#CBD5E1]'
+                }`}>
+                  {selectedTargetId === target.id && (
+                    <div className="w-2 h-2 rounded-full bg-[#2563EB]" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[13px] font-medium text-[#1E293B] truncate">{target.name}</span>
+                    {target.subCount > 0 && (
+                      <span className="text-[11px] text-[#94A3B8] flex-shrink-0">
+                        ({target.subCount} sub-categories)
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-[#94A3B8]">
+                    {isSubCategory ? 'Move as sub-category' : 'Move as sub-category under this'}
+                  </p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Warning for parent categories with sub-categories */}
+        {hasSubCategories && selectedTargetId && (
+          <div className="bg-[#FEF3C7] border border-[#FCD34D] rounded-lg p-3 text-[12px] text-[#92400E]">
+            <strong>Note:</strong> Moving this category will also move its {category?.subCategories?.length} sub-categories. 
+            They will become nested under the new parent.
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
+// ============================================
 // Main Component
 // ============================================
 
@@ -732,6 +940,7 @@ function CategorySettings() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedParentForSubCategory, setSelectedParentForSubCategory] = useState(null);
   
@@ -943,6 +1152,116 @@ function CategorySettings() {
     setSelectedCategory(null);
   };
 
+  // Move category
+  const handleMoveCategory = (targetId) => {
+    if (!selectedCategory) return;
+
+    if (selectedCategory.isSubCategory) {
+      // Moving a sub-category
+      const sourceParentId = selectedCategory.parentId;
+      const subCategoryToMove = categories
+        .find(cat => cat.id === sourceParentId)
+        ?.subCategories?.find(sub => sub.id === selectedCategory.id);
+
+      if (!subCategoryToMove) return;
+
+      if (targetId === 'top-level') {
+        // Promote sub-category to top-level
+        setCategories(prev => {
+          // Remove from source parent
+          const updated = prev.map(cat => {
+            if (cat.id === sourceParentId) {
+              return {
+                ...cat,
+                subCategories: cat.subCategories.filter(sub => sub.id !== selectedCategory.id)
+              };
+            }
+            return cat;
+          });
+          // Add as new top-level category
+          const newTopLevelId = Math.max(...updated.map(c => c.id), 0) + 1;
+          return [...updated, {
+            id: newTopLevelId,
+            name: subCategoryToMove.name,
+            description: subCategoryToMove.description,
+            visibility: subCategoryToMove.visibility,
+            subCategories: []
+          }];
+        });
+      } else {
+        // Move to different parent
+        setCategories(prev => prev.map(cat => {
+          if (cat.id === sourceParentId) {
+            // Remove from source
+            return {
+              ...cat,
+              subCategories: cat.subCategories.filter(sub => sub.id !== selectedCategory.id)
+            };
+          }
+          if (cat.id === targetId) {
+            // Add to target
+            return {
+              ...cat,
+              subCategories: [...(cat.subCategories || []), {
+                ...subCategoryToMove,
+                id: Date.now() // New ID for the moved sub-category
+              }]
+            };
+          }
+          return cat;
+        }));
+        // Auto-expand target
+        setExpandedCategories(prev => new Set([...prev, targetId]));
+      }
+    } else {
+      // Moving a parent category as sub-category under another
+      const categoryToMove = categories.find(cat => cat.id === selectedCategory.id);
+      if (!categoryToMove) return;
+
+      setCategories(prev => {
+        // Remove from top level
+        const remaining = prev.filter(cat => cat.id !== selectedCategory.id);
+        // Add as sub-category to target
+        return remaining.map(cat => {
+          if (cat.id === targetId) {
+            // Convert parent to sub-category (keeping its sub-categories as nested)
+            const newSubCategory = {
+              id: Date.now(),
+              name: categoryToMove.name,
+              description: categoryToMove.description,
+              visibility: categoryToMove.visibility,
+              // Note: If the moved parent had sub-categories, they become nested under the new sub-category
+              // For simplicity, we merge them into the target's sub-categories
+            };
+            
+            // If the moved category had sub-categories, add them too
+            const additionalSubs = categoryToMove.subCategories?.map((sub, idx) => ({
+              ...sub,
+              id: Date.now() + idx + 1
+            })) || [];
+
+            return {
+              ...cat,
+              subCategories: [...(cat.subCategories || []), newSubCategory, ...additionalSubs]
+            };
+          }
+          return cat;
+        });
+      });
+      // Auto-expand target
+      setExpandedCategories(prev => new Set([...prev, targetId]));
+    }
+
+    setIsMoveModalOpen(false);
+    setSelectedCategory(null);
+  };
+
+  // Open move modal
+  const openMoveModal = (category, isSubCategory = false, parentId = null) => {
+    setSelectedCategory({ ...category, isSubCategory, parentId });
+    setIsMoveModalOpen(true);
+  };
+
   // Open create modal for new category
   const openCreateModal = () => {
     setSelectedParentForSubCategory(null);
@@ -1081,6 +1400,7 @@ function CategorySettings() {
                         onEdit={() => openEditModal(category)}
                         onDelete={() => openDeleteModal(category)}
                         onAddSubCategory={() => openAddSubCategoryModal(category)}
+                        onMove={() => openMoveModal(category)}
                         searchTerm={searchTerm}
                         isSearchMatch={parentMatches}
                         isDragDisabled={!!searchTerm}
@@ -1113,6 +1433,7 @@ function CategorySettings() {
                                   isSubCategory={true}
                                   onEdit={() => openEditModal(subCategory, true, category.id, category.name, category.tradeType)}
                                   onDelete={() => openDeleteModal(subCategory, true, category.id)}
+                                  onMove={() => openMoveModal(subCategory, true, category.id)}
                                   searchTerm={searchTerm}
                                   isSearchMatch={matchingSubCategoryIds.has(subCategory.id)}
                                   isDragDisabled={!!searchTerm}
@@ -1240,6 +1561,18 @@ function CategorySettings() {
         onConfirm={handleDeleteCategory}
         category={selectedCategory}
         hasSubCategories={!selectedCategory?.isSubCategory && selectedCategory?.subCategories?.length > 0}
+      />
+
+      {/* Move Modal */}
+      <MoveCategoryModal
+        isOpen={isMoveModalOpen}
+        onClose={() => {
+          setIsMoveModalOpen(false);
+          setSelectedCategory(null);
+        }}
+        onMove={handleMoveCategory}
+        category={selectedCategory}
+        categories={categories}
       />
     </div>
   );
