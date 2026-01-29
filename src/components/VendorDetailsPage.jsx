@@ -29,9 +29,9 @@ import {
 
 // Line Item Picker Data (simplified for vendor)
 const LINE_ITEMS_DATA = [
-  { id: 1, itemId: '#ZP - 45345', name: 'Drip edge', category: 'Material', type: 'Product', availableQty: 905, unit: 'Unit', minQty: 14, unitCost: 15500, image: '/assets/drip-edge.jpg' },
+  { id: 1, itemId: '#ZP - 45345', name: 'Drip edge', category: 'Material', type: 'Product', availableQty: 905, unit: 'Unit', minQty: 14, unitCost: 15500, image: 'https://picsum.photos/seed/drip/44/44' },
   { id: 2, itemId: '#ZP - 49', name: 'FastTrack', category: 'Water', type: 'Part', availableQty: 61.99, unit: '', minQty: 1, unitCost: 10000, image: null },
-  { id: 3, itemId: '#001 - P0543', name: 'Mini generator', category: 'Boat Smart Watches', type: 'Part', availableQty: -3, unit: '', minQty: 101, unitCost: 12, image: '/assets/generator.jpg' },
+  { id: 3, itemId: '#001 - P0543', name: 'Mini generator', category: 'Boat Smart Watches', type: 'Part', availableQty: -3, unit: '', minQty: 101, unitCost: 12, image: 'https://picsum.photos/seed/generator/44/44' },
   { id: 4, itemId: '#Part869745-632154578', name: 'Test spec oil fuel random wording length', category: 'Material', type: 'Product', availableQty: 0, unit: '', minQty: null, unitCost: 100, image: null },
   { id: 5, itemId: '#SC002', name: 'Repair of Plumbing Defects', category: 'Other', type: 'Product', availableQty: 11.36, unit: '', minQty: 4, unitCost: 0, image: null },
   { id: 6, itemId: '#PT - 12', name: 'sample', category: 'General', type: 'Product', availableQty: 25, unit: '', minQty: null, unitCost: 50, image: null },
