@@ -25,10 +25,653 @@ import {
   IconTruck,
   IconClipboardList,
   IconNotes,
+  IconSearch,
 } from '@tabler/icons-react';
 
 // Asset paths from Figma
 const LOCATION_PREVIEW = '/assets/5e8b95356d01faaee0e40c41704ee724c45dd548.png';
+
+// Vendor Catalog Data - Items with SKUs and Options
+const VENDOR_CATALOG_DATA = [
+  {
+    id: 1,
+    partId: '#MQ67DFR1',
+    partName: 'LG Refrigeration Compressors',
+    category: 'Compressors',
+    type: 'Part',
+    image: 'https://picsum.photos/seed/compressor/44/44',
+    skus: [
+      {
+        id: 'sku1',
+        vendorSku: '121',
+        unitCost: 7550,
+        remarks: '',
+        options: [] // No options for this SKU
+      },
+      {
+        id: 'sku2',
+        vendorSku: '1213',
+        unitCost: 7550,
+        remarks: '',
+        options: []
+      },
+      {
+        id: 'sku3',
+        vendorSku: '123',
+        unitCost: 7550,
+        remarks: '',
+        options: []
+      }
+    ]
+  },
+  {
+    id: 2,
+    partId: '#ABC123',
+    partName: 'HK Vision RE120',
+    category: 'HVAC',
+    type: 'Part',
+    image: 'https://picsum.photos/seed/hvac/44/44',
+    skus: [
+      {
+        id: 'sku4',
+        vendorSku: 'HK-STD',
+        unitCost: 2500,
+        remarks: 'Standard model',
+        options: [
+          { id: 'opt1', name: '120V', color: '#3B82F6', available: true },
+          { id: 'opt2', name: '240V', color: '#10B981', available: true },
+          { id: 'opt3', name: '480V', color: '#F59E0B', available: true },
+        ]
+      },
+      {
+        id: 'sku5',
+        vendorSku: 'HK-PRO',
+        unitCost: 3200,
+        remarks: 'Professional model',
+        options: [
+          { id: 'opt4', name: '120V Pro', color: '#3B82F6', available: true },
+          { id: 'opt5', name: '240V Pro', color: '#10B981', available: true },
+        ]
+      }
+    ]
+  },
+  {
+    id: 3,
+    partId: '#ABC124',
+    partName: 'Pipe V Connector',
+    category: 'Plumbing',
+    type: 'Part',
+    image: 'https://picsum.photos/seed/pipe/44/44',
+    skus: [
+      {
+        id: 'sku6',
+        vendorSku: 'PVC-1',
+        unitCost: 45,
+        remarks: '',
+        options: []
+      }
+    ]
+  },
+  {
+    id: 4,
+    partId: '#ASP.SHI.24109',
+    partName: 'IKO Architectural - Cambridge',
+    category: 'Shingles',
+    type: 'Product',
+    image: 'https://picsum.photos/seed/shingle/44/44',
+    skus: [
+      {
+        id: 'sku7',
+        vendorSku: 'IKOCAMB-STD',
+        unitCost: 32.67,
+        remarks: 'Standard colors',
+        options: [
+          { id: 'opt6', name: 'Charcoal', color: '#36454F', available: true },
+          { id: 'opt7', name: 'Weathered Wood', color: '#A0826D', available: true },
+          { id: 'opt8', name: 'Dual Black', color: '#1a1a1a', available: true },
+          { id: 'opt9', name: 'Barkwood', color: '#6B4423', available: true },
+        ]
+      },
+      {
+        id: 'sku8',
+        vendorSku: 'IKOCAMB-PREM',
+        unitCost: 35.00,
+        remarks: 'Premium colors',
+        options: [
+          { id: 'opt10', name: 'Desert Tan', color: '#C4A77D', available: true },
+          { id: 'opt11', name: 'Slate', color: '#708090', available: true },
+          { id: 'opt12', name: 'Driftwood', color: '#B8A082', available: true },
+        ]
+      }
+    ]
+  },
+];
+
+// PO Line Item Picker Modal Component
+function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS Shingle Supplier' }) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [expandedParts, setExpandedParts] = useState({});
+  // lineItems: array of { partId, skuId, vendorSku, unitCost, optionId, optionName, optionColor, quantity, remarks }
+  const [lineItems, setLineItems] = useState([]);
+  const [validationErrors, setValidationErrors] = useState({});
+
+  // Get a unique key for a line item
+  const getLineItemKey = (partId, skuId, optionId, index) => `${partId}_${skuId}_${optionId || 'no-opt'}_${index}`;
+
+  // Toggle part expansion
+  const togglePartExpanded = (partId) => {
+    setExpandedParts(prev => ({ ...prev, [partId]: !prev[partId] }));
+  };
+
+  // Check if a line item exists
+  const findLineItemIndex = (partId, skuId, optionId = null) => {
+    return lineItems.findIndex(item => 
+      item.partId === partId && 
+      item.skuId === skuId && 
+      (optionId === null ? !item.optionId : item.optionId === optionId)
+    );
+  };
+
+  // Check if SKU row is checked (for SKUs without options)
+  const isSkuChecked = (partId, skuId, hasOptions) => {
+    if (hasOptions) return false;
+    return lineItems.some(item => item.partId === partId && item.skuId === skuId);
+  };
+
+  // Check if any line item exists for a SKU
+  const hasAnyLineItemForSku = (partId, skuId) => {
+    return lineItems.some(item => item.partId === partId && item.skuId === skuId);
+  };
+
+  // Get line items for a specific SKU
+  const getLineItemsForSku = (partId, skuId) => {
+    return lineItems.filter(item => item.partId === partId && item.skuId === skuId);
+  };
+
+  // Handle checkbox toggle for SKUs without options
+  const handleSkuCheckToggle = (part, sku, checked) => {
+    if (checked) {
+      // Add new line item
+      setLineItems(prev => [...prev, {
+        partId: part.id,
+        partNumber: part.partId,
+        partName: part.partName,
+        skuId: sku.id,
+        vendorSku: sku.vendorSku,
+        unitCost: sku.unitCost,
+        optionId: null,
+        optionName: null,
+        optionColor: null,
+        quantity: '',
+        remarks: ''
+      }]);
+    } else {
+      // Remove line item
+      setLineItems(prev => prev.filter(item => !(item.partId === part.id && item.skuId === sku.id)));
+    }
+  };
+
+  // Handle option selection from dropdown
+  const handleOptionSelect = (part, sku, option, lineItemIndex = -1) => {
+    if (lineItemIndex >= 0) {
+      // Update existing line item's option
+      setLineItems(prev => prev.map((item, idx) => 
+        idx === lineItemIndex ? { ...item, optionId: option.id, optionName: option.name, optionColor: option.color } : item
+      ));
+    } else {
+      // Find if there's already a line item without option selected
+      const existingIdx = lineItems.findIndex(item => 
+        item.partId === part.id && item.skuId === sku.id && !item.optionId
+      );
+      
+      if (existingIdx >= 0) {
+        // Update the existing placeholder
+        setLineItems(prev => prev.map((item, idx) => 
+          idx === existingIdx ? { ...item, optionId: option.id, optionName: option.name, optionColor: option.color } : item
+        ));
+      } else {
+        // Create new line item with option
+        setLineItems(prev => [...prev, {
+          partId: part.id,
+          partNumber: part.partId,
+          partName: part.partName,
+          skuId: sku.id,
+          vendorSku: sku.vendorSku,
+          unitCost: sku.unitCost,
+          optionId: option.id,
+          optionName: option.name,
+          optionColor: option.color,
+          quantity: '',
+          remarks: ''
+        }]);
+      }
+    }
+    // Clear validation errors
+    clearValidationError(part.id, sku.id);
+  };
+
+  // Add another color/option for the same SKU
+  const addAnotherOption = (part, sku) => {
+    setLineItems(prev => [...prev, {
+      partId: part.id,
+      partNumber: part.partId,
+      partName: part.partName,
+      skuId: sku.id,
+      vendorSku: sku.vendorSku,
+      unitCost: sku.unitCost,
+      optionId: null,
+      optionName: null,
+      optionColor: null,
+      quantity: '',
+      remarks: ''
+    }]);
+  };
+
+  // Remove a line item by index
+  const removeLineItem = (index) => {
+    setLineItems(prev => prev.filter((_, idx) => idx !== index));
+  };
+
+  // Update line item quantity
+  const updateQuantity = (index, quantity) => {
+    setLineItems(prev => prev.map((item, idx) => 
+      idx === index ? { ...item, quantity } : item
+    ));
+    // Clear validation error
+    const item = lineItems[index];
+    if (item) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[`qty_${index}`];
+        return newErrors;
+      });
+    }
+  };
+
+  // Update line item remarks
+  const updateRemarks = (index, remarks) => {
+    setLineItems(prev => prev.map((item, idx) => 
+      idx === index ? { ...item, remarks } : item
+    ));
+  };
+
+  // Clear validation error for a SKU
+  const clearValidationError = (partId, skuId) => {
+    setValidationErrors(prev => {
+      const newErrors = { ...prev };
+      Object.keys(newErrors).forEach(key => {
+        if (key.includes(`${partId}_${skuId}`)) {
+          delete newErrors[key];
+        }
+      });
+      return newErrors;
+    });
+  };
+
+  // Get available options not yet used for this SKU
+  const getAvailableOptionsForSku = (part, sku, excludeIndex = -1) => {
+    const usedOptionIds = lineItems
+      .filter((item, idx) => item.partId === part.id && item.skuId === sku.id && idx !== excludeIndex && item.optionId)
+      .map(item => item.optionId);
+    return (sku.options || []).filter(opt => opt.available && !usedOptionIds.includes(opt.id));
+  };
+
+  // Check if can add another option
+  const canAddAnotherOption = (part, sku) => {
+    const availableOpts = getAvailableOptionsForSku(part, sku);
+    return availableOpts.length > 0;
+  };
+
+  // Handle form submission
+  const handleAddItems = () => {
+    const errors = {};
+    
+    // Validate all line items
+    lineItems.forEach((item, index) => {
+      // Check quantity
+      if (!item.quantity || parseFloat(item.quantity) <= 0) {
+        errors[`qty_${index}`] = 'Required';
+      }
+      // Check option if SKU has options
+      const part = VENDOR_CATALOG_DATA.find(p => p.id === item.partId);
+      const sku = part?.skus.find(s => s.id === item.skuId);
+      if (sku && sku.options && sku.options.length > 0 && !item.optionId) {
+        errors[`opt_${index}`] = 'Select an option';
+      }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    // Pass items to parent
+    onAddItems && onAddItems(lineItems);
+    handleClose();
+  };
+
+  // Handle modal close
+  const handleClose = () => {
+    setSearchTerm('');
+    setExpandedParts({});
+    setLineItems([]);
+    setValidationErrors({});
+    onClose();
+  };
+
+  // Count selected items
+  const selectedCount = lineItems.length;
+
+  if (!isOpen) return null;
+
+  // Filter parts by search
+  const filteredParts = VENDOR_CATALOG_DATA.filter(part =>
+    part.partName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    part.partId.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-[8px] w-[95vw] max-w-[1100px] max-h-[90vh] flex flex-col shadow-xl">
+        {/* Header */}
+        <div className="h-[56px] px-[24px] flex items-center justify-between border-b border-[#E2E8F0] shrink-0">
+          <h2 className="text-[18px] font-semibold text-[#1E293B]">{vendorName} Catalogue</h2>
+          <button onClick={handleClose} className="p-2 hover:bg-gray-100 rounded-full">
+            <IconX size={20} className="text-[#64748B]" />
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="px-[24px] py-[16px] border-b border-[#E2E8F0] shrink-0">
+          <div className="w-[280px] h-[40px] flex items-center gap-[8px] px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white">
+            <IconSearch size={18} stroke={1.5} className="text-[#94A3B8]" />
+            <input
+              type="text"
+              placeholder="Search Item"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none bg-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-auto min-h-0">
+          {filteredParts.map(part => (
+            <div key={part.id} className="border-b border-[#E2E8F0]">
+              {/* Part Header Row */}
+              <button
+                onClick={() => togglePartExpanded(part.id)}
+                className="w-full px-[24px] py-[16px] flex items-center justify-between hover:bg-[#F8FAFC] transition-colors"
+              >
+                <div className="flex items-center gap-[12px]">
+                  <div className="w-[44px] h-[44px] bg-[#F1F5F9] rounded-[6px] flex items-center justify-center overflow-hidden">
+                    {part.image ? (
+                      <img src={part.image} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <IconPackage size={22} stroke={1.5} className="text-[#94A3B8]" />
+                    )}
+                  </div>
+                  <span className="text-[14px] font-medium text-[#1E293B]">
+                    {part.partId} - {part.partName}
+                  </span>
+                </div>
+                {expandedParts[part.id] ? (
+                  <IconChevronUp size={20} className="text-[#64748B]" />
+                ) : (
+                  <IconChevronDown size={20} className="text-[#64748B]" />
+                )}
+              </button>
+
+              {/* Expanded SKU Table */}
+              {expandedParts[part.id] && (
+                <div className="px-[24px] pb-[16px]">
+                  {/* Table Header */}
+                  <div className="grid grid-cols-[40px_1fr_120px_180px_120px_1fr] gap-[8px] px-[12px] py-[10px] bg-[#F8FAFC] rounded-t-[6px] border border-[#E2E8F0] border-b-0">
+                    <div></div>
+                    <div className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Vendor SKU / ID</div>
+                    <div className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Unit Purchase Cost</div>
+                    <div className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Option</div>
+                    <div className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">
+                      Required Qty <span className="text-red-500">*</span>
+                    </div>
+                    <div className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Remarks</div>
+                  </div>
+
+                  {/* SKU Rows */}
+                  {part.skus.map(sku => {
+                    const hasOptions = sku.options && sku.options.length > 0;
+                    const skuLineItems = getLineItemsForSku(part.id, sku.id);
+                    const canAddMore = hasOptions && canAddAnotherOption(part, sku);
+                    
+                    return (
+                      <div key={sku.id} className="border border-[#E2E8F0] border-t-0">
+                        {/* Main SKU Row or Line Item Rows */}
+                        {hasOptions ? (
+                          // For SKUs with options, show each line item as a row
+                          <>
+                            {skuLineItems.length === 0 ? (
+                              // No line items yet - show placeholder row
+                              <div className="grid grid-cols-[40px_1fr_120px_180px_120px_1fr] gap-[8px] px-[12px] py-[12px] items-center hover:bg-[#FAFAFA]">
+                                <div></div>
+                                <div className="text-[13px] text-[#1E293B]">{sku.vendorSku}</div>
+                                <div className="text-[13px] text-[#1E293B]">
+                                  <div className="flex items-center gap-[4px] px-[8px] py-[6px] bg-[#F1F5F9] rounded-[4px] w-fit">
+                                    <span className="text-[12px] text-[#64748B]">USD</span>
+                                    <span className="text-[13px] text-[#1E293B]">{sku.unitCost}</span>
+                                  </div>
+                                </div>
+                                <div>
+                                  <select
+                                    className="w-full h-[36px] px-[10px] pr-[28px] bg-white border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] focus:outline-none focus:border-[#3B82F6] appearance-none cursor-pointer"
+                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}
+                                    onChange={(e) => {
+                                      const option = sku.options.find(o => o.id === e.target.value);
+                                      if (option) handleOptionSelect(part, sku, option);
+                                    }}
+                                    value=""
+                                  >
+                                    <option value="">Select option</option>
+                                    {getAvailableOptionsForSku(part, sku).map(opt => (
+                                      <option key={opt.id} value={opt.id}>{opt.name}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div>
+                                  <input
+                                    type="text"
+                                    placeholder="Ex: 10"
+                                    className="w-full h-[36px] px-[10px] bg-white border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6]"
+                                    disabled
+                                  />
+                                </div>
+                                <div>
+                                  <input
+                                    type="text"
+                                    placeholder="Remarks"
+                                    className="w-full h-[36px] px-[10px] bg-white border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6]"
+                                    disabled
+                                  />
+                                </div>
+                              </div>
+                            ) : (
+                              // Show each line item row
+                              skuLineItems.map((lineItem, idx) => {
+                                const lineItemGlobalIndex = lineItems.findIndex(li => li === lineItem);
+                                const hasQtyError = validationErrors[`qty_${lineItemGlobalIndex}`];
+                                const hasOptError = validationErrors[`opt_${lineItemGlobalIndex}`];
+                                
+                                return (
+                                  <div key={`${lineItem.skuId}_${lineItem.optionId || idx}`} className="grid grid-cols-[40px_1fr_120px_180px_120px_1fr_40px] gap-[8px] px-[12px] py-[12px] items-center hover:bg-[#FAFAFA]">
+                                    <div className="flex items-center justify-center">
+                                      <input
+                                        type="checkbox"
+                                        checked={true}
+                                        onChange={() => removeLineItem(lineItemGlobalIndex)}
+                                        className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
+                                      />
+                                    </div>
+                                    <div className="text-[13px] text-[#1E293B]">{sku.vendorSku}</div>
+                                    <div className="text-[13px] text-[#1E293B]">
+                                      <div className="flex items-center gap-[4px] px-[8px] py-[6px] bg-[#F1F5F9] rounded-[4px] w-fit">
+                                        <span className="text-[12px] text-[#64748B]">USD</span>
+                                        <span className="text-[13px] text-[#1E293B]">{sku.unitCost}</span>
+                                      </div>
+                                    </div>
+                                    <div>
+                                      <select
+                                        className={`w-full h-[36px] px-[10px] pr-[28px] bg-white border rounded-[6px] text-[13px] text-[#1E293B] focus:outline-none appearance-none cursor-pointer ${hasOptError ? 'border-red-500' : 'border-[#E2E8F0] focus:border-[#3B82F6]'}`}
+                                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}
+                                        value={lineItem.optionId || ''}
+                                        onChange={(e) => {
+                                          const option = sku.options.find(o => o.id === e.target.value);
+                                          if (option) {
+                                            setLineItems(prev => prev.map((item, i) => 
+                                              i === lineItemGlobalIndex ? { ...item, optionId: option.id, optionName: option.name, optionColor: option.color } : item
+                                            ));
+                                            setValidationErrors(prev => {
+                                              const newErrors = { ...prev };
+                                              delete newErrors[`opt_${lineItemGlobalIndex}`];
+                                              return newErrors;
+                                            });
+                                          }
+                                        }}
+                                      >
+                                        <option value="">Select option</option>
+                                        {/* Show current option + available options */}
+                                        {sku.options.filter(opt => opt.available && (opt.id === lineItem.optionId || !skuLineItems.some(li => li !== lineItem && li.optionId === opt.id))).map(opt => (
+                                          <option key={opt.id} value={opt.id}>{opt.name}</option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                    <div>
+                                      <input
+                                        type="text"
+                                        placeholder="Ex: 10"
+                                        value={lineItem.quantity}
+                                        onChange={(e) => updateQuantity(lineItemGlobalIndex, e.target.value)}
+                                        className={`w-full h-[36px] px-[10px] bg-white border rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none ${hasQtyError ? 'border-red-500' : 'border-[#E2E8F0] focus:border-[#3B82F6]'}`}
+                                      />
+                                    </div>
+                                    <div>
+                                      <input
+                                        type="text"
+                                        placeholder="Remarks"
+                                        value={lineItem.remarks}
+                                        onChange={(e) => updateRemarks(lineItemGlobalIndex, e.target.value)}
+                                        className="w-full h-[36px] px-[10px] bg-white border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6]"
+                                      />
+                                    </div>
+                                    <div className="flex items-center justify-center">
+                                      <button
+                                        onClick={() => removeLineItem(lineItemGlobalIndex)}
+                                        className="p-1 hover:bg-gray-100 rounded"
+                                      >
+                                        <IconTrash size={16} className="text-[#94A3B8]" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })
+                            )}
+                            
+                            {/* Add another color button */}
+                            {canAddMore && skuLineItems.length > 0 && (
+                              <div className="px-[52px] py-[8px] border-t border-dashed border-[#E2E8F0]">
+                                <button
+                                  onClick={() => addAnotherOption(part, sku)}
+                                  className="text-[13px] text-[#3B82F6] hover:text-[#2563EB] flex items-center gap-[4px]"
+                                >
+                                  <IconPlus size={14} />
+                                  Add another color for this SKU
+                                </button>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          // For SKUs without options - simple checkbox row
+                          (() => {
+                            const lineItemIdx = lineItems.findIndex(li => li.partId === part.id && li.skuId === sku.id);
+                            const lineItem = lineItemIdx >= 0 ? lineItems[lineItemIdx] : null;
+                            const hasQtyError = lineItemIdx >= 0 && validationErrors[`qty_${lineItemIdx}`];
+                            
+                            return (
+                              <div className="grid grid-cols-[40px_1fr_120px_180px_120px_1fr] gap-[8px] px-[12px] py-[12px] items-center hover:bg-[#FAFAFA]">
+                                <div className="flex items-center justify-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={!!lineItem}
+                                    onChange={(e) => handleSkuCheckToggle(part, sku, e.target.checked)}
+                                    className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
+                                  />
+                                </div>
+                                <div className="text-[13px] text-[#1E293B]">{sku.vendorSku}</div>
+                                <div className="text-[13px] text-[#1E293B]">
+                                  <div className="flex items-center gap-[4px] px-[8px] py-[6px] bg-[#F1F5F9] rounded-[4px] w-fit">
+                                    <span className="text-[12px] text-[#64748B]">USD</span>
+                                    <span className="text-[13px] text-[#1E293B]">{sku.unitCost}</span>
+                                  </div>
+                                </div>
+                                <div className="text-[13px] text-[#94A3B8]">—</div>
+                                <div>
+                                  <input
+                                    type="text"
+                                    placeholder="Ex: 10"
+                                    value={lineItem?.quantity || ''}
+                                    onChange={(e) => lineItemIdx >= 0 && updateQuantity(lineItemIdx, e.target.value)}
+                                    disabled={!lineItem}
+                                    className={`w-full h-[36px] px-[10px] bg-white border rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none ${!lineItem ? 'bg-[#F8FAFC] cursor-not-allowed' : ''} ${hasQtyError ? 'border-red-500' : 'border-[#E2E8F0] focus:border-[#3B82F6]'}`}
+                                  />
+                                </div>
+                                <div>
+                                  <input
+                                    type="text"
+                                    placeholder="Remarks"
+                                    value={lineItem?.remarks || ''}
+                                    onChange={(e) => lineItemIdx >= 0 && updateRemarks(lineItemIdx, e.target.value)}
+                                    disabled={!lineItem}
+                                    className={`w-full h-[36px] px-[10px] bg-white border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] focus:outline-none focus:border-[#3B82F6] ${!lineItem ? 'bg-[#F8FAFC] cursor-not-allowed' : ''}`}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })()
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Footer */}
+        <div className="h-[64px] px-[24px] flex items-center justify-between border-t border-[#E2E8F0] shrink-0 bg-white">
+          <div className="flex items-center gap-[8px]">
+            <span className="text-[14px] font-medium text-[#3B82F6]">{selectedCount} Item(s) Selected</span>
+            <IconArrowForwardUp size={16} className="text-[#3B82F6] rotate-90" style={{ transform: 'rotate(45deg)' }} />
+          </div>
+          <div className="flex items-center gap-[12px]">
+            <button
+              onClick={handleClose}
+              className="h-[36px] px-[16px] bg-white border border-[#CBD5E1] rounded-[6px] text-[14px] font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleAddItems}
+              disabled={selectedCount === 0}
+              className="h-[36px] px-[16px] bg-[#E44A19] rounded-[6px] text-[14px] font-medium text-white hover:bg-[#D94315] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Add Item
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // SVG Icons from Figma
 const ChevronRightIcon = () => (
@@ -104,6 +747,12 @@ const NewPurchaseOrderPage = ({ onNavigateBack }) => {
   const [billingAddressExpanded, setBillingAddressExpanded] = useState(true);
   const [attachmentsExpanded, setAttachmentsExpanded] = useState(true);
   
+  // Modal state
+  const [isLineItemPickerOpen, setIsLineItemPickerOpen] = useState(false);
+  
+  // PO Items state
+  const [poItems, setPoItems] = useState([]);
+  
   // Form state
   const [formData, setFormData] = useState({
     poTitle: '',
@@ -119,6 +768,21 @@ const NewPurchaseOrderPage = ({ onNavigateBack }) => {
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+  
+  // Handle adding items from modal
+  const handleAddItems = (items) => {
+    setPoItems(prev => [...prev, ...items]);
+  };
+  
+  // Handle removing a PO item
+  const handleRemovePoItem = (index) => {
+    setPoItems(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  // Calculate totals
+  const calculateTotal = () => {
+    return poItems.reduce((sum, item) => sum + (item.unitCost * parseFloat(item.quantity || 0)), 0);
   };
 
   return (
@@ -436,6 +1100,9 @@ const NewPurchaseOrderPage = ({ onNavigateBack }) => {
                 <div className="flex items-center gap-[10.5px]">
                   <POItemsIcon />
                   <span className="text-[14px] font-semibold text-[#334155]">PO Items</span>
+                  {poItems.length > 0 && (
+                    <span className="text-[12px] text-[#64748B]">({poItems.length})</span>
+                  )}
                 </div>
                 {poItemsExpanded ? (
                   <IconChevronUp size={16} className="text-[#1E293B]" />
@@ -445,18 +1112,99 @@ const NewPurchaseOrderPage = ({ onNavigateBack }) => {
               </button>
               
               {poItemsExpanded && (
-                <div className="p-[21px] flex flex-col items-center">
-                  <img src={NO_PARTS_FOUND_SVG} alt="No parts found" className="h-[112px]" />
-                  <p className="text-[14px] text-[#1E293B] tracking-[0.25px] py-[3.5px]">
-                    Start adding parts for the purchase order
-                  </p>
-                  <div className="pt-[10.5px]">
-                    <button className="flex items-center gap-[7px] px-[15px] py-[2.27px] bg-white border border-[#CBD5E1] rounded-[5.25px] hover:bg-gray-50">
-                      <IconPlus size={16} className="text-[#334155]" />
-                      <span className="text-[12.6px] font-medium text-[#334155] tracking-[0.25px]">Add</span>
-                    </button>
-                  </div>
-                </div>
+                <>
+                  {poItems.length === 0 ? (
+                    <div className="p-[21px] flex flex-col items-center">
+                      <img src={NO_PARTS_FOUND_SVG} alt="No parts found" className="h-[112px]" />
+                      <p className="text-[14px] text-[#1E293B] tracking-[0.25px] py-[3.5px]">
+                        Start adding parts for the purchase order
+                      </p>
+                      <div className="pt-[10.5px]">
+                        <button 
+                          onClick={() => setIsLineItemPickerOpen(true)}
+                          className="flex items-center gap-[7px] px-[15px] py-[2.27px] bg-white border border-[#CBD5E1] rounded-[5.25px] hover:bg-gray-50"
+                        >
+                          <IconPlus size={16} className="text-[#334155]" />
+                          <span className="text-[12.6px] font-medium text-[#334155] tracking-[0.25px]">Add</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col">
+                      {/* PO Items Table */}
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="bg-[#F8FAFC]">
+                            <tr className="border-b border-[#E2E8F0]">
+                              <th className="text-left px-[14px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider">Item</th>
+                              <th className="text-left px-[14px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider w-[100px]">Qty</th>
+                              <th className="text-left px-[14px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider w-[120px]">Unit Price</th>
+                              <th className="text-right px-[14px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider w-[120px]">Total</th>
+                              <th className="w-[50px]"></th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {poItems.map((item, index) => (
+                              <tr key={index} className="border-b border-[#E2E8F0] hover:bg-[#FAFAFA]">
+                                <td className="px-[14px] py-[14px]">
+                                  <div className="flex flex-col gap-[2px]">
+                                    <span className="text-[13px] font-medium text-[#1E293B]">{item.partName}</span>
+                                    <span className="text-[12px] text-[#64748B]">SKU: {item.vendorSku}</span>
+                                    {item.optionName && (
+                                      <div className="flex items-center gap-[6px] mt-[4px]">
+                                        <span className="text-[12px] text-[#64748B]">Option:</span>
+                                        <div className="flex items-center gap-[4px]">
+                                          <div 
+                                            className="w-[14px] h-[14px] rounded-[3px] border border-[#E2E8F0]"
+                                            style={{ backgroundColor: item.optionColor }}
+                                          />
+                                          <span className="text-[12px] text-[#1E293B]">{item.optionName}</span>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="px-[14px] py-[14px] text-[13px] text-[#1E293B]">{item.quantity}</td>
+                                <td className="px-[14px] py-[14px] text-[13px] text-[#1E293B]">${item.unitCost.toFixed(2)}</td>
+                                <td className="px-[14px] py-[14px] text-[13px] text-[#1E293B] text-right font-medium">
+                                  ${(item.unitCost * parseFloat(item.quantity || 0)).toFixed(2)}
+                                </td>
+                                <td className="px-[14px] py-[14px]">
+                                  <button 
+                                    onClick={() => handleRemovePoItem(index)}
+                                    className="p-[4px] hover:bg-gray-100 rounded"
+                                  >
+                                    <IconTrash size={16} className="text-[#94A3B8]" />
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          <tfoot className="bg-[#F8FAFC]">
+                            <tr>
+                              <td colSpan="3" className="px-[14px] py-[12px] text-[13px] font-semibold text-[#1E293B]">Total</td>
+                              <td className="px-[14px] py-[12px] text-[14px] font-semibold text-[#1E293B] text-right">
+                                ${calculateTotal().toFixed(2)}
+                              </td>
+                              <td></td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                      
+                      {/* Add More Items Button */}
+                      <div className="p-[14px] border-t border-[#E2E8F0]">
+                        <button 
+                          onClick={() => setIsLineItemPickerOpen(true)}
+                          className="flex items-center gap-[7px] px-[15px] py-[6px] bg-white border border-[#CBD5E1] rounded-[5.25px] hover:bg-gray-50"
+                        >
+                          <IconPlus size={16} className="text-[#334155]" />
+                          <span className="text-[12.6px] font-medium text-[#334155] tracking-[0.25px]">Add More Items</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -632,6 +1380,14 @@ const NewPurchaseOrderPage = ({ onNavigateBack }) => {
           </div>
         </div>
       </div>
+      
+      {/* PO Line Item Picker Modal */}
+      <POLineItemPickerModal
+        isOpen={isLineItemPickerOpen}
+        onClose={() => setIsLineItemPickerOpen(false)}
+        onAddItems={handleAddItems}
+        vendorName={formData.vendor}
+      />
     </div>
   );
 };
