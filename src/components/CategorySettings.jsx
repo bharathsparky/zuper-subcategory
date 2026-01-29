@@ -425,7 +425,6 @@ function CategoryModal({
   const [parentDropdownOpen, setParentDropdownOpen] = useState(false);
   const [parentCategorySearch, setParentCategorySearch] = useState('');
   const [parentTradeTypeFilter, setParentTradeTypeFilter] = useState('all');
-  const [tradeTypeFilterOpen, setTradeTypeFilterOpen] = useState(false);
 
   // Reset form when modal opens
   React.useEffect(() => {
@@ -440,7 +439,6 @@ function CategoryModal({
       setParentDropdownOpen(false);
       setParentCategorySearch('');
       setParentTradeTypeFilter('all');
-      setTradeTypeFilterOpen(false);
     }
   }, [isOpen, initialData]);
 
@@ -740,47 +738,25 @@ function CategoryModal({
                         />
                       </div>
                       
-                      {/* Trade Type Filter */}
-                      <div className="relative">
-                        <button
-                          type="button"
-                          onClick={(e) => { e.stopPropagation(); setTradeTypeFilterOpen(!tradeTypeFilterOpen); }}
-                          className={`h-[32px] px-2.5 border rounded flex items-center gap-1.5 text-[12px] transition-colors ${
+                      {/* Trade Type Filter - Native Select */}
+                      <div className="relative flex items-center">
+                        <IconFilter size={14} className="absolute left-2 text-[#94A3B8] pointer-events-none" stroke={2} />
+                        <select
+                          value={parentTradeTypeFilter}
+                          onChange={(e) => { e.stopPropagation(); setParentTradeTypeFilter(e.target.value); }}
+                          onClick={(e) => e.stopPropagation()}
+                          className={`h-[32px] pl-7 pr-6 text-[12px] border rounded appearance-none cursor-pointer focus:outline-none ${
                             parentTradeTypeFilter !== 'all' 
                               ? 'border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]' 
-                              : 'border-[#E2E8F0] text-[#64748B] hover:border-[#94A3B8]'
+                              : 'border-[#E2E8F0] text-[#64748B] bg-white hover:border-[#94A3B8]'
                           }`}
                         >
-                          <IconFilter size={14} stroke={2} />
-                          {parentTradeTypeFilter === 'all' ? 'All' : parentTradeTypeFilter}
-                        </button>
-                        
-                        {/* Filter Dropdown */}
-                        {tradeTypeFilterOpen && (
-                          <div className="absolute right-0 top-full mt-1 w-[160px] bg-white border border-[#E2E8F0] rounded-lg shadow-lg z-20 py-1 max-h-[200px] overflow-y-auto">
-                            <div
-                              className={`px-3 py-2 hover:bg-[#F8FAFC] cursor-pointer flex items-center justify-between text-[12px] ${
-                                parentTradeTypeFilter === 'all' ? 'bg-[#EFF6FF] text-[#2563EB]' : 'text-[#1E293B]'
-                              }`}
-                              onClick={(e) => { e.stopPropagation(); setParentTradeTypeFilter('all'); setTradeTypeFilterOpen(false); }}
-                            >
-                              All Types
-                              {parentTradeTypeFilter === 'all' && <IconCheck size={14} className="text-[#2563EB]" stroke={2} />}
-                            </div>
-                            {TRADE_TYPES.map(t => (
-                              <div
-                                key={t.id}
-                                className={`px-3 py-2 hover:bg-[#F8FAFC] cursor-pointer flex items-center justify-between text-[12px] ${
-                                  parentTradeTypeFilter === t.name ? 'bg-[#EFF6FF] text-[#2563EB]' : 'text-[#1E293B]'
-                                }`}
-                                onClick={(e) => { e.stopPropagation(); setParentTradeTypeFilter(t.name); setTradeTypeFilterOpen(false); }}
-                              >
-                                {t.name}
-                                {parentTradeTypeFilter === t.name && <IconCheck size={14} className="text-[#2563EB]" stroke={2} />}
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                          <option value="all">All Types</option>
+                          {TRADE_TYPES.map(t => (
+                            <option key={t.id} value={t.name}>{t.name}</option>
+                          ))}
+                        </select>
+                        <IconChevronDown size={12} className="absolute right-2 text-[#94A3B8] pointer-events-none" stroke={2} />
                       </div>
                     </div>
                   </div>
