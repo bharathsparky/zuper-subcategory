@@ -29,12 +29,98 @@ import {
 
 // Line Item Picker Data (simplified for vendor)
 const LINE_ITEMS_DATA = [
-  { id: 1, itemId: '#ZP - 45345', name: 'Drip edge', category: 'Material', type: 'Product', availableQty: 905, unit: 'Unit', minQty: 14, unitCost: 15500, image: 'https://picsum.photos/seed/drip/44/44' },
-  { id: 2, itemId: '#ZP - 49', name: 'FastTrack', category: 'Water', type: 'Part', availableQty: 61.99, unit: '', minQty: 1, unitCost: 10000, image: null },
-  { id: 3, itemId: '#001 - P0543', name: 'Mini generator', category: 'Boat Smart Watches', type: 'Part', availableQty: -3, unit: '', minQty: 101, unitCost: 12, image: 'https://picsum.photos/seed/generator/44/44' },
-  { id: 4, itemId: '#Part869745-632154578', name: 'Test spec oil fuel random wording length', category: 'Material', type: 'Product', availableQty: 0, unit: '', minQty: null, unitCost: 100, image: null },
-  { id: 5, itemId: '#SC002', name: 'Repair of Plumbing Defects', category: 'Other', type: 'Product', availableQty: 11.36, unit: '', minQty: 4, unitCost: 0, image: null },
-  { id: 6, itemId: '#PT - 12', name: 'sample', category: 'General', type: 'Product', availableQty: 25, unit: '', minQty: null, unitCost: 50, image: null },
+  { 
+    id: 1, 
+    itemId: '#ZP - 45345', 
+    name: 'Drip edge', 
+    category: 'Material', 
+    type: 'Product', 
+    availableQty: 905, 
+    unit: 'Unit', 
+    minQty: 14, 
+    unitCost: 15500, 
+    image: 'https://picsum.photos/seed/drip/44/44',
+    options: [
+      { id: 'opt1', name: 'White', imageUrl: 'https://picsum.photos/seed/white/60/60', available: true },
+      { id: 'opt2', name: 'Brown', imageUrl: 'https://picsum.photos/seed/brown/60/60', available: true },
+      { id: 'opt3', name: 'Black', imageUrl: 'https://picsum.photos/seed/black/60/60', available: true },
+      { id: 'opt4', name: 'Charcoal', imageUrl: 'https://picsum.photos/seed/charcoal/60/60', available: true },
+    ]
+  },
+  { 
+    id: 2, 
+    itemId: '#ZP - 49', 
+    name: 'FastTrack', 
+    category: 'Water', 
+    type: 'Part', 
+    availableQty: 61.99, 
+    unit: '', 
+    minQty: 1, 
+    unitCost: 10000, 
+    image: null,
+    options: null // No options
+  },
+  { 
+    id: 3, 
+    itemId: '#001 - P0543', 
+    name: 'Mini generator', 
+    category: 'Boat Smart Watches', 
+    type: 'Part', 
+    availableQty: -3, 
+    unit: '', 
+    minQty: 101, 
+    unitCost: 12, 
+    image: 'https://picsum.photos/seed/generator/44/44',
+    options: null // No options
+  },
+  { 
+    id: 4, 
+    itemId: '#Part869745-632154578', 
+    name: 'Test spec oil fuel random wording length', 
+    category: 'Material', 
+    type: 'Product', 
+    availableQty: 0, 
+    unit: '', 
+    minQty: null, 
+    unitCost: 100, 
+    image: null,
+    options: null // No options
+  },
+  { 
+    id: 5, 
+    itemId: '#SC002', 
+    name: 'IKO Cambridge Shingles', 
+    category: 'Shingles', 
+    type: 'Product', 
+    availableQty: 11.36, 
+    unit: '', 
+    minQty: 4, 
+    unitCost: 3267, 
+    image: null,
+    options: [
+      { id: 'opt1', name: 'Charcoal', imageUrl: 'https://picsum.photos/seed/shingle-charcoal/60/60', available: true },
+      { id: 'opt2', name: 'Weathered Wood', imageUrl: 'https://picsum.photos/seed/shingle-weathered/60/60', available: true },
+      { id: 'opt3', name: 'Desert Tan', imageUrl: 'https://picsum.photos/seed/shingle-tan/60/60', available: true },
+      { id: 'opt4', name: 'Dual Black', imageUrl: 'https://picsum.photos/seed/shingle-dualblack/60/60', available: true },
+      { id: 'opt5', name: 'Slate', imageUrl: 'https://picsum.photos/seed/shingle-slate/60/60', available: true },
+      { id: 'opt6', name: 'Driftwood', imageUrl: 'https://picsum.photos/seed/shingle-driftwood/60/60', available: true },
+      { id: 'opt7', name: 'Barkwood', imageUrl: 'https://picsum.photos/seed/shingle-barkwood/60/60', available: true },
+      { id: 'opt8', name: 'Shakewood', imageUrl: 'https://picsum.photos/seed/shingle-shakewood/60/60', available: false }, // Unavailable globally
+    ]
+  },
+  { 
+    id: 6, 
+    itemId: '#PT - 12', 
+    name: 'sample', 
+    category: 'General', 
+    type: 'Product', 
+    availableQty: 25, 
+    unit: '', 
+    minQty: null, 
+    unitCost: 50, 
+    image: null,
+    options: null // No options
+  },
 ];
 
 // Line Item Picker Modal
@@ -45,7 +131,15 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
   const [selectedItems, setSelectedItems] = useState([]);
   const [expandedItems, setExpandedItems] = useState({});
   const [itemDetails, setItemDetails] = useState({});
+  const [selectedOptions, setSelectedOptions] = useState({}); // { itemId: ['opt1', 'opt2', ...] }
+  const [validationErrors, setValidationErrors] = useState({});
   const totalPages = 80;
+
+  // Get available options for an item (only where available = true)
+  const getAvailableOptions = (item) => {
+    if (!item.options || item.options.length === 0) return [];
+    return item.options.filter(opt => opt.available);
+  };
 
   const handleItemSelect = (item, checked) => {
     if (checked) {
@@ -60,6 +154,14 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
         }
       }));
       setExpandedItems(prev => ({ ...prev, [item.id]: true }));
+      // Initialize all available options as selected by default
+      const availableOpts = getAvailableOptions(item);
+      if (availableOpts.length > 0) {
+        setSelectedOptions(prev => ({
+          ...prev,
+          [item.id]: availableOpts.map(opt => opt.id)
+        }));
+      }
     } else {
       setSelectedItems(prev => prev.filter(i => i.id !== item.id));
       setItemDetails(prev => {
@@ -72,7 +174,65 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
         delete newExpanded[item.id];
         return newExpanded;
       });
+      setSelectedOptions(prev => {
+        const newOptions = { ...prev };
+        delete newOptions[item.id];
+        return newOptions;
+      });
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[item.id];
+        return newErrors;
+      });
     }
+  };
+
+  // Toggle option selection for an item
+  const toggleOptionSelection = (itemId, optionId) => {
+    setSelectedOptions(prev => {
+      const currentSelected = prev[itemId] || [];
+      const isSelected = currentSelected.includes(optionId);
+      
+      if (isSelected) {
+        return {
+          ...prev,
+          [itemId]: currentSelected.filter(id => id !== optionId)
+        };
+      } else {
+        return {
+          ...prev,
+          [itemId]: [...currentSelected, optionId]
+        };
+      }
+    });
+    // Clear validation error when user selects an option
+    setValidationErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[itemId];
+      return newErrors;
+    });
+  };
+
+  // Select all options for an item
+  const selectAllOptions = (item) => {
+    const availableOpts = getAvailableOptions(item);
+    setSelectedOptions(prev => ({
+      ...prev,
+      [item.id]: availableOpts.map(opt => opt.id)
+    }));
+    setValidationErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[item.id];
+      return newErrors;
+    });
+  };
+
+  // Clear all options for an item
+  const clearAllOptions = (item) => {
+    setSelectedOptions(prev => ({
+      ...prev,
+      [item.id]: []
+    }));
   };
 
   const handleRemoveItem = (itemId) => {
@@ -86,6 +246,16 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
       const newExpanded = { ...prev };
       delete newExpanded[itemId];
       return newExpanded;
+    });
+    setSelectedOptions(prev => {
+      const newOptions = { ...prev };
+      delete newOptions[itemId];
+      return newOptions;
+    });
+    setValidationErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[itemId];
+      return newErrors;
     });
   };
 
@@ -111,16 +281,36 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
 
   const handleBack = () => {
     setStep(1);
+    setValidationErrors({});
   };
 
   const handleAddItem = () => {
-    onAddProduct && onAddProduct(selectedItems, itemDetails);
+    // Validate options - ensure at least one option is selected for items with options
+    const errors = {};
+    selectedItems.forEach(item => {
+      const availableOpts = getAvailableOptions(item);
+      if (availableOpts.length > 0) {
+        const selected = selectedOptions[item.id] || [];
+        if (selected.length === 0) {
+          errors[item.id] = `Select at least one option for ${item.name}`;
+        }
+      }
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    onAddProduct && onAddProduct(selectedItems, itemDetails, selectedOptions);
     onClose();
     // Reset state
     setStep(1);
     setSelectedItems([]);
     setItemDetails({});
     setExpandedItems({});
+    setSelectedOptions({});
+    setValidationErrors({});
   };
 
   const handleClose = () => {
@@ -130,6 +320,8 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
     setSelectedItems([]);
     setItemDetails({});
     setExpandedItems({});
+    setSelectedOptions({});
+    setValidationErrors({});
   };
 
   if (!isOpen) return null;
@@ -367,6 +559,105 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
                           <IconPlus size={16} stroke={2} />
                           Add SKU
                         </button>
+
+                        {/* Options Selection Section - Only show for items with options */}
+                        {(() => {
+                          const availableOpts = getAvailableOptions(item);
+                          if (availableOpts.length === 0) return null;
+                          
+                          const selectedCount = (selectedOptions[item.id] || []).length;
+                          const totalCount = availableOpts.length;
+                          
+                          return (
+                            <>
+                              {/* Divider */}
+                              <div className="border-t border-dashed border-[#E2E8F0] my-[16px]" />
+                              
+                              {/* Options Header */}
+                              <div className="flex items-center justify-between mb-[12px]">
+                                <div className="flex items-center gap-[8px]">
+                                  <span className="text-[13px] font-medium text-[#334155]">
+                                    Options available from this vendor
+                                  </span>
+                                  <span className="text-[12px] text-[#64748B]">
+                                    ({selectedCount} of {totalCount} selected)
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Options Grid */}
+                              <div className="grid grid-cols-4 gap-[12px] mb-[12px]">
+                                {availableOpts.map((option) => {
+                                  const isSelected = (selectedOptions[item.id] || []).includes(option.id);
+                                  return (
+                                    <div
+                                      key={option.id}
+                                      onClick={() => toggleOptionSelection(item.id, option.id)}
+                                      className={`
+                                        relative p-[12px] rounded-[8px] border cursor-pointer transition-all
+                                        ${isSelected 
+                                          ? 'border-[#E44A19] bg-[#FEF7F5]' 
+                                          : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1]'
+                                        }
+                                      `}
+                                    >
+                                      {/* Checkbox */}
+                                      <div className="absolute top-[8px] left-[8px]">
+                                        <input
+                                          type="checkbox"
+                                          checked={isSelected}
+                                          onChange={() => {}}
+                                          className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
+                                        />
+                                      </div>
+                                      
+                                      {/* Option Image */}
+                                      <div className="w-[48px] h-[48px] mx-auto mb-[8px] rounded-[6px] overflow-hidden bg-[#F1F5F9] flex items-center justify-center">
+                                        {option.imageUrl ? (
+                                          <img 
+                                            src={option.imageUrl} 
+                                            alt={option.name} 
+                                            className="w-full h-full object-cover"
+                                          />
+                                        ) : (
+                                          <div className="w-full h-full bg-[#CBD5E1]" />
+                                        )}
+                                      </div>
+                                      
+                                      {/* Option Name */}
+                                      <div className="text-[12px] text-center text-[#334155] font-medium truncate">
+                                        {option.name}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+
+                              {/* Quick Actions */}
+                              <div className="flex items-center gap-[16px]">
+                                <button
+                                  onClick={() => selectAllOptions(item)}
+                                  className="text-[13px] text-[#3B82F6] hover:text-[#2563EB] font-medium transition-colors"
+                                >
+                                  Select All
+                                </button>
+                                <button
+                                  onClick={() => clearAllOptions(item)}
+                                  className="text-[13px] text-[#64748B] hover:text-[#334155] font-medium transition-colors"
+                                >
+                                  Clear All
+                                </button>
+                              </div>
+
+                              {/* Validation Error */}
+                              {validationErrors[item.id] && (
+                                <div className="mt-[8px] text-[13px] text-[#EF4444]">
+                                  {validationErrors[item.id]}
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
