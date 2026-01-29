@@ -166,7 +166,7 @@ function VendorDetailsPage({ onBack }) {
               >
                 <div className="flex items-center gap-[7px]">
                   <item.icon size={20} stroke={1.5} />
-                  <span className="text-[14px] font-medium">{item.label}</span>
+                  <span className="text-[14px] font-semibold">{item.label}</span>
                 </div>
                 {item.count !== null && (
                   <span className={`text-[13px] px-[7px] py-[3px] rounded-[4px] ${
