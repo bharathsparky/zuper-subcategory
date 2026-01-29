@@ -16,8 +16,10 @@ import {
   IconArrowForwardUp,
   IconHighlight,
   IconChevronRight,
+  IconChevronLeft,
   IconSearch,
   IconX,
+  IconPackage,
 } from '@tabler/icons-react';
 
 // Searchable User Dropdown Component
@@ -161,6 +163,337 @@ const PartsEmptyIcon = () => (
   </svg>
 );
 
+// Line Items Data for Quote
+const QUOTE_LINE_ITEMS_DATA = [
+  {
+    id: 1,
+    itemId: '#MQ67DFR1',
+    name: 'LG Refrigeration Compressors',
+    availableQty: 56,
+    unit: 'Mtrs',
+    minQty: 1,
+    category: 'Labor',
+    productType: 'Product',
+    location: 'Redmond Warehouse (52)',
+    unitCost: '7550',
+    markup: '',
+    unitSellingPrice: '7500',
+    hasOptions: true,
+    options: [
+      { id: 'opt-1', name: 'Model A', color: '#3B82F6' },
+      { id: 'opt-2', name: 'Model B', color: '#22C55E' },
+      { id: 'opt-3', name: 'Model C', color: '#F59E0B' },
+    ],
+  },
+  {
+    id: 2,
+    itemId: '#ABC123',
+    name: 'HK Vision RE120',
+    availableQty: 98,
+    unit: 'Units',
+    minQty: null,
+    category: 'Labor',
+    productType: 'Product',
+    location: null,
+    unitCost: '150',
+    markup: '',
+    unitSellingPrice: '300',
+    hasOptions: false,
+    options: [],
+  },
+  {
+    id: 3,
+    itemId: '#ABC124',
+    name: 'Pipe V Connector',
+    availableQty: -2,
+    unit: 'Units',
+    minQty: 1,
+    category: 'Tools',
+    productType: 'Product',
+    location: 'Redmond Warehouse (-2)',
+    unitCost: '1080',
+    markup: '',
+    unitSellingPrice: '450',
+    hasOptions: false,
+    options: [],
+  },
+  {
+    id: 4,
+    itemId: '#3653',
+    name: 'Plumbing',
+    availableQty: 1,
+    unit: 'Units',
+    minQty: null,
+    category: 'Fmcg',
+    productType: 'Service',
+    location: null,
+    unitCost: '',
+    markup: '',
+    unitSellingPrice: '135',
+    hasOptions: false,
+    options: [],
+  },
+  {
+    id: 5,
+    itemId: '#12344',
+    name: '12W Battery edited',
+    availableQty: 98,
+    unit: 'Units',
+    minQty: 6,
+    category: 'Labor',
+    productType: 'Part',
+    location: 'Redmond Warehouse (40)',
+    unitCost: '66',
+    markup: '',
+    unitSellingPrice: '123',
+    hasOptions: false,
+    options: [],
+  },
+];
+
+// Choose Line Item Modal Component for Quote
+function ChooseLineItemModal({ isOpen, onClose, onAddProduct }) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedItems, setSelectedItems] = useState({});
+  const [itemValues, setItemValues] = useState({});
+  const totalPages = 20;
+
+  const handleCheckboxChange = (itemId) => {
+    setSelectedItems(prev => ({
+      ...prev,
+      [itemId]: !prev[itemId]
+    }));
+  };
+
+  const handleValueChange = (itemId, field, value) => {
+    setItemValues(prev => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        [field]: value
+      }
+    }));
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-[8px] w-[95vw] max-w-[1500px] max-h-[90vh] flex flex-col shadow-xl">
+        {/* Header */}
+        <div className="h-[56px] px-[24px] flex items-center justify-between border-b border-[#E2E8F0] shrink-0">
+          <h2 className="text-[18px] font-semibold text-[#1E293B]">Choose Line Item</h2>
+          <button
+            onClick={onClose}
+            className="w-[32px] h-[32px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors"
+          >
+            <IconX size={20} stroke={1.5} className="text-[#64748B]" />
+          </button>
+        </div>
+
+        {/* Filters */}
+        <div className="px-[24px] py-[16px] flex items-center gap-[12px] border-b border-[#E2E8F0] shrink-0">
+          {/* Search */}
+          <div className="w-[200px] h-[40px] flex items-center gap-[8px] px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white">
+            <IconSearch size={18} stroke={1.5} className="text-[#94A3B8]" />
+            <input
+              type="text"
+              placeholder="Search Item"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none bg-transparent"
+            />
+          </div>
+
+          {/* Product Type Dropdown */}
+          <div className="w-[140px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
+            <span className="text-[14px] text-[#94A3B8]">Product Type</span>
+            <IconChevronDown size={16} stroke={1.5} className="text-[#94A3B8]" />
+          </div>
+
+          {/* Category Dropdown */}
+          <div className="w-[140px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
+            <span className="text-[14px] text-[#94A3B8]">Category</span>
+            <IconChevronDown size={16} stroke={1.5} className="text-[#94A3B8]" />
+          </div>
+
+          {/* Location Dropdown */}
+          <div className="w-[140px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
+            <span className="text-[14px] text-[#94A3B8]">Location</span>
+            <IconChevronDown size={16} stroke={1.5} className="text-[#94A3B8]" />
+          </div>
+
+          {/* Availability Dropdown */}
+          <div className="w-[140px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
+            <span className="text-[14px] text-[#94A3B8]">Availability</span>
+            <IconChevronDown size={16} stroke={1.5} className="text-[#94A3B8]" />
+          </div>
+
+          {/* Pagination */}
+          <div className="ml-auto flex items-center gap-[8px]">
+            <span className="text-[14px] text-[#64748B]">Page {currentPage} of {totalPages}</span>
+            <button
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors disabled:opacity-50"
+              disabled={currentPage === 1}
+            >
+              <IconChevronLeft size={16} stroke={1.5} className="text-[#64748B]" />
+            </button>
+            <button
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors disabled:opacity-50"
+              disabled={currentPage === totalPages}
+            >
+              <IconChevronRight size={16} stroke={1.5} className="text-[#64748B]" />
+            </button>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="flex-1 overflow-auto min-h-0">
+          <table className="w-full border-collapse">
+            <thead className="bg-white sticky top-0 z-10">
+              <tr className="border-b border-[#E2E8F0]">
+                <th className="w-[40px] text-left px-[16px] py-[14px] bg-white"></th>
+                <th className="text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Item</th>
+                <th className="w-[80px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Category</th>
+                <th className="w-[70px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Type</th>
+                <th className="w-[180px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Location</th>
+                <th className="w-[100px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider leading-tight bg-white">
+                  <div>Unit Purchase</div>
+                  <div>Price/Unit Cost (in USD)</div>
+                </th>
+                <th className="w-[80px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Markup</th>
+                <th className="w-[100px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider leading-tight bg-white">
+                  <div>Unit Selling Price</div>
+                  <div>(in USD) <span className="text-[#EF4444]">*</span></div>
+                </th>
+                <th className="w-[80px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">
+                  Quantity <span className="text-[#EF4444]">*</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {QUOTE_LINE_ITEMS_DATA.map((item) => (
+                <tr key={item.id} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC]">
+                  {/* Checkbox */}
+                  <td className="px-[16px] py-[16px]">
+                    <input
+                      type="checkbox"
+                      checked={selectedItems[item.id] || false}
+                      onChange={() => handleCheckboxChange(item.id)}
+                      className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
+                    />
+                  </td>
+                  {/* Item with image */}
+                  <td className="px-[12px] py-[16px]">
+                    <div className="flex items-center gap-[12px]">
+                      {/* Product Image Placeholder */}
+                      <div className="w-[44px] h-[44px] bg-[#F1F5F9] rounded-[6px] flex items-center justify-center flex-shrink-0">
+                        <IconPackage size={22} stroke={1.5} className="text-[#94A3B8]" />
+                      </div>
+                      <div>
+                        <div className="text-[13px] font-medium text-[#1E293B]">
+                          {item.itemId} - {item.name}
+                        </div>
+                        <div className="text-[12px] text-[#64748B]">
+                          Available Qty: {item.availableQty} {item.unit}
+                        </div>
+                        {item.minQty && (
+                          <div className="text-[12px] text-[#64748B]">
+                            Minimum Qty: {item.minQty}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  {/* Category */}
+                  <td className="px-[12px] py-[16px] text-[13px] text-[#64748B]">{item.category}</td>
+                  {/* Type */}
+                  <td className="px-[12px] py-[16px] text-[13px] text-[#64748B]">{item.productType}</td>
+                  {/* Location */}
+                  <td className="px-[12px] py-[16px]">
+                    {item.location ? (
+                      <div className="relative">
+                        <select 
+                          className="w-full h-[36px] px-[10px] pr-[28px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] outline-none focus:border-[#3B82F6] appearance-none bg-white"
+                          defaultValue={item.location}
+                        >
+                          <option>{item.location}</option>
+                        </select>
+                        <IconChevronDown size={14} className="absolute right-[10px] top-1/2 -translate-y-1/2 text-[#64748B] pointer-events-none" />
+                      </div>
+                    ) : (
+                      <span className="text-[13px] text-[#EF4444]">No Location Found!!</span>
+                    )}
+                  </td>
+                  {/* Unit Cost */}
+                  <td className="px-[12px] py-[16px]">
+                    <input
+                      type="text"
+                      defaultValue={item.unitCost}
+                      placeholder="Eg: 20"
+                      className="w-[80px] h-[36px] px-[10px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] bg-white"
+                    />
+                  </td>
+                  {/* Markup */}
+                  <td className="px-[12px] py-[16px]">
+                    <div className="flex items-center gap-[4px]">
+                      <input
+                        type="text"
+                        defaultValue={item.markup}
+                        placeholder="Eg: 10"
+                        className="w-[50px] h-[36px] px-[8px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] bg-white"
+                      />
+                      <span className="text-[13px] text-[#64748B]">%</span>
+                    </div>
+                  </td>
+                  {/* Unit Selling Price */}
+                  <td className="px-[12px] py-[16px]">
+                    <input
+                      type="text"
+                      defaultValue={item.unitSellingPrice}
+                      className="w-[80px] h-[36px] px-[10px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] outline-none focus:border-[#3B82F6] bg-white"
+                    />
+                  </td>
+                  {/* Quantity */}
+                  <td className="px-[12px] py-[16px]">
+                    <input
+                      type="text"
+                      placeholder="Eg: 20"
+                      className="w-[70px] h-[36px] px-[8px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] bg-white"
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer */}
+        <div className="h-[64px] px-[24px] flex items-center justify-end gap-[12px] border-t border-[#E2E8F0] shrink-0 bg-white">
+          <button
+            onClick={onClose}
+            className="h-[40px] px-[20px] border border-[#E2E8F0] rounded-[6px] text-[14px] font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors bg-white"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              onAddProduct && onAddProduct();
+              onClose();
+            }}
+            className="h-[40px] px-[20px] bg-[#E44A19] rounded-[6px] text-[14px] font-medium text-white hover:bg-[#D13D0F] transition-colors"
+          >
+            Add Product
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const AttachmentEmptyIcon = () => (
   <svg width="119" height="112" viewBox="0 0 119 112" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="59.5" cy="56" r="50" fill="#F1F5F9"/>
@@ -180,6 +513,7 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
   const [isQuoteDetailsExpanded, setIsQuoteDetailsExpanded] = useState(true);
   const [isOtherDetailsExpanded, setIsOtherDetailsExpanded] = useState(true);
   const [isTestExpanded, setIsTestExpanded] = useState(true);
+  const [isLineItemPickerOpen, setIsLineItemPickerOpen] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -549,7 +883,10 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
                 <button className="w-[29px] h-[32px] flex items-center justify-center border border-[#E2E8F0] rounded-[4px] hover:bg-[#F8FAFC] transition-colors">
                   <IconSettings size={14} stroke={1.5} className="text-[#64748B]" />
                 </button>
-                <button className="h-[32px] px-[15px] flex items-center gap-[7px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#64748B] hover:bg-[#F8FAFC] transition-colors">
+                <button 
+                  onClick={() => setIsLineItemPickerOpen(true)}
+                  className="h-[32px] px-[15px] flex items-center gap-[7px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#64748B] hover:bg-[#F8FAFC] transition-colors"
+                >
                   <IconPlus size={14} stroke={2} />
                   <span>Add</span>
                 </button>
@@ -709,6 +1046,14 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
         </div>
       </div>
 
+      {/* Choose Line Item Modal */}
+      <ChooseLineItemModal
+        isOpen={isLineItemPickerOpen}
+        onClose={() => setIsLineItemPickerOpen(false)}
+        onAddProduct={() => {
+          console.log('Adding products to quote...');
+        }}
+      />
     </div>
   );
 }
