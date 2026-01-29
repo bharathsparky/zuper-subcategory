@@ -41,10 +41,10 @@ const LINE_ITEMS_DATA = [
     unitCost: 15500, 
     image: 'https://picsum.photos/seed/drip/44/44',
     options: [
-      { id: 'opt1', name: 'White', imageUrl: 'https://picsum.photos/seed/white/60/60', available: true },
-      { id: 'opt2', name: 'Brown', imageUrl: 'https://picsum.photos/seed/brown/60/60', available: true },
-      { id: 'opt3', name: 'Black', imageUrl: 'https://picsum.photos/seed/black/60/60', available: true },
-      { id: 'opt4', name: 'Charcoal', imageUrl: 'https://picsum.photos/seed/charcoal/60/60', available: true },
+      { id: 'opt1', name: 'White', color: '#FFFFFF', available: true },
+      { id: 'opt2', name: 'Brown', color: '#8B4513', available: true },
+      { id: 'opt3', name: 'Black', color: '#1a1a1a', available: true },
+      { id: 'opt4', name: 'Charcoal', color: '#36454F', available: true },
     ]
   },
   { 
@@ -98,14 +98,14 @@ const LINE_ITEMS_DATA = [
     unitCost: 3267, 
     image: null,
     options: [
-      { id: 'opt1', name: 'Charcoal', imageUrl: 'https://picsum.photos/seed/shingle-charcoal/60/60', available: true },
-      { id: 'opt2', name: 'Weathered Wood', imageUrl: 'https://picsum.photos/seed/shingle-weathered/60/60', available: true },
-      { id: 'opt3', name: 'Desert Tan', imageUrl: 'https://picsum.photos/seed/shingle-tan/60/60', available: true },
-      { id: 'opt4', name: 'Dual Black', imageUrl: 'https://picsum.photos/seed/shingle-dualblack/60/60', available: true },
-      { id: 'opt5', name: 'Slate', imageUrl: 'https://picsum.photos/seed/shingle-slate/60/60', available: true },
-      { id: 'opt6', name: 'Driftwood', imageUrl: 'https://picsum.photos/seed/shingle-driftwood/60/60', available: true },
-      { id: 'opt7', name: 'Barkwood', imageUrl: 'https://picsum.photos/seed/shingle-barkwood/60/60', available: true },
-      { id: 'opt8', name: 'Shakewood', imageUrl: 'https://picsum.photos/seed/shingle-shakewood/60/60', available: false }, // Unavailable globally
+      { id: 'opt1', name: 'Charcoal', color: '#36454F', available: true },
+      { id: 'opt2', name: 'Weathered Wood', color: '#A0826D', available: true },
+      { id: 'opt3', name: 'Desert Tan', color: '#C4A77D', available: true },
+      { id: 'opt4', name: 'Dual Black', color: '#1a1a1a', available: true },
+      { id: 'opt5', name: 'Slate', color: '#708090', available: true },
+      { id: 'opt6', name: 'Driftwood', color: '#B8A082', available: true },
+      { id: 'opt7', name: 'Barkwood', color: '#6B4423', available: true },
+      { id: 'opt8', name: 'Shakewood', color: '#8B7355', available: false }, // Unavailable globally
     ]
   },
   { 
@@ -611,18 +611,11 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
                                         />
                                       </div>
                                       
-                                      {/* Option Image */}
-                                      <div className="w-[48px] h-[48px] mx-auto mb-[8px] rounded-[6px] overflow-hidden bg-[#F1F5F9] flex items-center justify-center">
-                                        {option.imageUrl ? (
-                                          <img 
-                                            src={option.imageUrl} 
-                                            alt={option.name} 
-                                            className="w-full h-full object-cover"
-                                          />
-                                        ) : (
-                                          <div className="w-full h-full bg-[#CBD5E1]" />
-                                        )}
-                                      </div>
+                                      {/* Option Color Swatch */}
+                                      <div 
+                                        className="w-[48px] h-[48px] mx-auto mb-[8px] rounded-[6px] overflow-hidden border border-[#E2E8F0]"
+                                        style={{ backgroundColor: option.color || '#CBD5E1' }}
+                                      />
                                       
                                       {/* Option Name */}
                                       <div className="text-[12px] text-center text-[#334155] font-medium truncate">
