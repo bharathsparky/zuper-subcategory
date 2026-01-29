@@ -630,7 +630,7 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
       quantity: 1,
       unit: 'Mtrs',
       tax: 'GST',
-      option: null,
+      option: { id: 'opt-2', name: 'Model B - Premium', color: '#22C55E' },
     }
   ]);
   const [taxItems, setTaxItems] = useState([
