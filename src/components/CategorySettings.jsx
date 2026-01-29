@@ -424,7 +424,8 @@ function CategoryModal({
   const [selectedParentId, setSelectedParentId] = useState(null);
   const [parentDropdownOpen, setParentDropdownOpen] = useState(false);
   const [parentCategorySearch, setParentCategorySearch] = useState('');
-  const [parentTradeTypeFilter, setParentTradeTypeFilter] = useState('all');
+  const [parentTradeTypeFilter, setParentTradeTypeFilter] = useState([]); // Array for multi-select
+  const [tradeTypeFilterDropdownOpen, setTradeTypeFilterDropdownOpen] = useState(false);
 
   // Reset form when modal opens
   React.useEffect(() => {
@@ -438,7 +439,8 @@ function CategoryModal({
       setTradeTypeDropdownOpen(false);
       setParentDropdownOpen(false);
       setParentCategorySearch('');
-      setParentTradeTypeFilter('all');
+      setParentTradeTypeFilter([]);
+      setTradeTypeFilterDropdownOpen(false);
     }
   }, [isOpen, initialData]);
 
@@ -738,40 +740,91 @@ function CategoryModal({
                         />
                       </div>
                       
-                      {/* Trade Type Filter */}
-                      <select
-                        value={parentTradeTypeFilter}
-                        onChange={(e) => { e.stopPropagation(); setParentTradeTypeFilter(e.target.value); }}
-                        onClick={(e) => e.stopPropagation()}
-                        className={`h-[32px] px-3 text-[12px] border rounded cursor-pointer focus:outline-none ${
-                          parentTradeTypeFilter !== 'all' 
-                            ? 'border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]' 
-                            : 'border-[#E2E8F0] text-[#64748B] bg-white hover:border-[#94A3B8]'
-                        }`}
-                      >
-                        <option value="all">All Types</option>
-                        {TRADE_TYPES.map(t => (
-                          <option key={t.id} value={t.name}>{t.name}</option>
-                        ))}
-                      </select>
+                      {/* Trade Type Filter - Multi-select */}
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setTradeTypeFilterDropdownOpen(!tradeTypeFilterDropdownOpen); }}
+                          className={`h-[32px] px-3 text-[12px] border rounded cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
+                            parentTradeTypeFilter.length > 0 
+                              ? 'border-[#2563EB] bg-[#EFF6FF] text-[#2563EB]' 
+                              : 'border-[#E2E8F0] text-[#64748B] bg-white hover:border-[#94A3B8]'
+                          }`}
+                        >
+                          <IconFilter size={14} stroke={2} />
+                          {parentTradeTypeFilter.length === 0 
+                            ? 'All Types' 
+                            : parentTradeTypeFilter.length === 1 
+                              ? parentTradeTypeFilter[0]
+                              : `${parentTradeTypeFilter.length} selected`
+                          }
+                          <IconChevronDown size={12} className={`transition-transform ${tradeTypeFilterDropdownOpen ? 'rotate-180' : ''}`} stroke={2} />
+                        </button>
+                        
+                        {/* Filter Dropdown - Opens upward */}
+                        {tradeTypeFilterDropdownOpen && (
+                          <div className="absolute right-0 bottom-full mb-1 w-[180px] bg-white border border-[#E2E8F0] rounded-lg shadow-lg z-30 py-1 max-h-[200px] overflow-y-auto">
+                            {/* Clear all option */}
+                            {parentTradeTypeFilter.length > 0 && (
+                              <>
+                                <div
+                                  className="px-3 py-2 hover:bg-[#F8FAFC] cursor-pointer text-[12px] text-[#2563EB] font-medium"
+                                  onClick={(e) => { e.stopPropagation(); setParentTradeTypeFilter([]); }}
+                                >
+                                  Clear all
+                                </div>
+                                <div className="border-t border-[#E2E8F0] my-1" />
+                              </>
+                            )}
+                            
+                            {/* Trade type options */}
+                            {TRADE_TYPES.map(t => {
+                              const isSelected = parentTradeTypeFilter.includes(t.name);
+                              return (
+                                <div
+                                  key={t.id}
+                                  className={`px-3 py-2 hover:bg-[#F8FAFC] cursor-pointer flex items-center gap-2 text-[12px] ${
+                                    isSelected ? 'bg-[#EFF6FF]' : ''
+                                  }`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (isSelected) {
+                                      setParentTradeTypeFilter(parentTradeTypeFilter.filter(n => n !== t.name));
+                                    } else {
+                                      setParentTradeTypeFilter([...parentTradeTypeFilter, t.name]);
+                                    }
+                                  }}
+                                >
+                                  <div className={`w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 ${
+                                    isSelected ? 'bg-[#2563EB] border-[#2563EB]' : 'border-[#CBD5E1]'
+                                  }`}>
+                                    {isSelected && <IconCheck size={12} className="text-white" stroke={3} />}
+                                  </div>
+                                  <span className={isSelected ? 'text-[#2563EB] font-medium' : 'text-[#1E293B]'}>{t.name}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                   
                   <div className="max-h-[200px] overflow-y-auto">
                     {/* None option - make it top-level (hide when trade type filter active) */}
-                    {parentTradeTypeFilter === 'all' && (!parentCategorySearch || 'none top-level'.includes(parentCategorySearch.toLowerCase())) && (
+                    {parentTradeTypeFilter.length === 0 && (!parentCategorySearch || 'none top-level'.includes(parentCategorySearch.toLowerCase())) && (
                       <div
                         className={`px-3 py-2.5 hover:bg-[#F8FAFC] cursor-pointer flex items-center justify-between ${
                           selectedParentId === null ? 'bg-[#EFF6FF]' : ''
                         }`}
-                        onClick={(e) => { e.stopPropagation(); setSelectedParentId(null); setParentDropdownOpen(false); setParentCategorySearch(''); setParentTradeTypeFilter('all'); }}
+                        onClick={(e) => { e.stopPropagation(); setSelectedParentId(null); setParentDropdownOpen(false); setParentCategorySearch(''); setParentTradeTypeFilter([]); setTradeTypeFilterDropdownOpen(false); }}
                       >
                         <span className="text-[13px] text-[#1E293B]">None (Top-level category)</span>
                         {selectedParentId === null && <IconCheck size={16} className="text-[#2563EB]" stroke={2} />}
                       </div>
                     )}
                     
-                    {parentTradeTypeFilter === 'all' && (!parentCategorySearch || 'none top-level'.includes(parentCategorySearch.toLowerCase())) && (
+                    {parentTradeTypeFilter.length === 0 && (!parentCategorySearch || 'none top-level'.includes(parentCategorySearch.toLowerCase())) && (
                       <div className="border-t border-[#E2E8F0]" />
                     )}
                     
@@ -782,9 +835,9 @@ function CategoryModal({
                         if (cat.id === initialData?.id) return false;
                         // Exclude own children (if this is a parent being edited)
                         if (initialData?.subCategories?.some(sub => sub.id === cat.id)) return false;
-                        // Trade type filter
-                        if (parentTradeTypeFilter !== 'all') {
-                          if (cat.tradeType?.name !== parentTradeTypeFilter) return false;
+                        // Trade type filter (multi-select)
+                        if (parentTradeTypeFilter.length > 0) {
+                          if (!parentTradeTypeFilter.includes(cat.tradeType?.name)) return false;
                         }
                         // Search filter
                         if (parentCategorySearch) {
@@ -794,15 +847,15 @@ function CategoryModal({
                         return true;
                       });
                       
-                      if (filteredCategories.length === 0 && (parentCategorySearch || parentTradeTypeFilter !== 'all')) {
+                      if (filteredCategories.length === 0 && (parentCategorySearch || parentTradeTypeFilter.length > 0)) {
                         return (
                           <div className="px-3 py-4 text-center text-[13px] text-[#94A3B8]">
                             No categories found
-                            {parentTradeTypeFilter !== 'all' && (
+                            {parentTradeTypeFilter.length > 0 && (
                               <button
                                 type="button"
                                 className="block mx-auto mt-1 text-[#2563EB] hover:underline"
-                                onClick={(e) => { e.stopPropagation(); setParentTradeTypeFilter('all'); }}
+                                onClick={(e) => { e.stopPropagation(); setParentTradeTypeFilter([]); }}
                               >
                                 Clear filter
                               </button>
@@ -817,7 +870,7 @@ function CategoryModal({
                           className={`px-3 py-2.5 hover:bg-[#F8FAFC] cursor-pointer flex items-center justify-between ${
                             selectedParentId === cat.id ? 'bg-[#EFF6FF]' : ''
                           }`}
-                          onClick={(e) => { e.stopPropagation(); setSelectedParentId(cat.id); setParentDropdownOpen(false); setParentCategorySearch(''); setParentTradeTypeFilter('all'); }}
+                          onClick={(e) => { e.stopPropagation(); setSelectedParentId(cat.id); setParentDropdownOpen(false); setParentCategorySearch(''); setParentTradeTypeFilter([]); setTradeTypeFilterDropdownOpen(false); }}
                         >
                           <div className="flex items-center gap-2">
                             <span className="text-[13px] text-[#1E293B]">{cat.name}</span>
