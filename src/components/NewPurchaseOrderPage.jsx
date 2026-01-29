@@ -91,38 +91,10 @@ const AttachmentsIcon = () => (
   </svg>
 );
 
-// Empty state SVG for no parts found
-const NoPartsFoundSvg = () => (
-  <svg width="146" height="112" viewBox="0 0 146 112" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="73" cy="56" r="45" fill="#F1F5F9"/>
-    <path d="M73 25L95.5 38V64L73 77L50.5 64V38L73 25Z" stroke="#94A3B8" strokeWidth="2"/>
-    <circle cx="73" cy="51" r="8" fill="#E2E8F0"/>
-    <path d="M73 63V68" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round"/>
-    <circle cx="73" cy="73" r="2" fill="#94A3B8"/>
-  </svg>
-);
-
-// Service address placeholder SVG
-const ServiceAddressPlaceholderSvg = () => (
-  <svg width="168" height="177" viewBox="0 0 168 177" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect width="168" height="177" rx="8" fill="#F8FAFC"/>
-    <path d="M84 50C71.8497 50 62 59.8497 62 72C62 88.5 84 115 84 115C84 115 106 88.5 106 72C106 59.8497 96.1503 50 84 50Z" stroke="#CBD5E1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <circle cx="84" cy="72" r="8" stroke="#CBD5E1" strokeWidth="2"/>
-    <path d="M40 140H128" stroke="#E2E8F0" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M50 150H118" stroke="#E2E8F0" strokeWidth="2" strokeLinecap="round"/>
-  </svg>
-);
-
-// Attachment placeholder SVG
-const AttachmentPlaceholderSvg = () => (
-  <svg width="119" height="112" viewBox="0 0 119 112" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="19" y="16" width="80" height="80" rx="8" fill="#F1F5F9"/>
-    <path d="M77.5 52L59.5 70L51.5 62" stroke="#94A3B8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-    <rect x="35" y="32" width="48" height="48" rx="4" stroke="#CBD5E1" strokeWidth="2" strokeDasharray="4 4"/>
-    <path d="M59 48V64" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M51 56H67" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round"/>
-  </svg>
-);
+// Figma assets for placeholder illustrations
+const NO_PARTS_FOUND_SVG = '/assets/b0ce5152600488fbb3eaae7160f16ad08fd4db7b.svg';
+const SERVICE_ADDRESS_PLACEHOLDER_SVG = '/assets/a3e4f039c6cedc946b5963bc8bfb1ff07266d844.svg';
+const ATTACHMENT_PLACEHOLDER_SVG = '/assets/013866c89a0e6b228e4b3ec894f98ff85d971fbd.svg';
 
 const NewPurchaseOrderPage = ({ onNavigateBack }) => {
   const [primaryDetailsExpanded, setPrimaryDetailsExpanded] = useState(true);
@@ -474,7 +446,7 @@ const NewPurchaseOrderPage = ({ onNavigateBack }) => {
               
               {poItemsExpanded && (
                 <div className="p-[21px] flex flex-col items-center">
-                  <NoPartsFoundSvg />
+                  <img src={NO_PARTS_FOUND_SVG} alt="No parts found" className="h-[112px]" />
                   <p className="text-[14px] text-[#1E293B] tracking-[0.25px] py-[3.5px]">
                     Start adding parts for the purchase order
                   </p>
@@ -569,7 +541,7 @@ const NewPurchaseOrderPage = ({ onNavigateBack }) => {
               
               {deliveryAddressExpanded && (
                 <div className="flex flex-col items-center p-[21px]">
-                  <ServiceAddressPlaceholderSvg />
+                  <img src={SERVICE_ADDRESS_PLACEHOLDER_SVG} alt="Add delivery address" className="h-[176.84px] w-[168px]" />
                   <div className="pt-[21px]">
                     <button className="flex items-center gap-[7px] px-[15px] py-[2.27px] bg-white border border-[#CBD5E1] rounded-[5.25px] hover:bg-gray-50">
                       <IconPlus size={16} className="text-[#334155]" />
@@ -642,7 +614,7 @@ const NewPurchaseOrderPage = ({ onNavigateBack }) => {
               
               {attachmentsExpanded && (
                 <div className="p-[21px] flex flex-col items-center">
-                  <AttachmentPlaceholderSvg />
+                  <img src={ATTACHMENT_PLACEHOLDER_SVG} alt="Add attachment" className="h-[112px]" />
                   <div className="pt-[14px]">
                     <button className="flex items-center gap-[7px] px-[15px] py-[11.5px] h-[31.5px] bg-white border border-[#CBD5E1] rounded-[5.25px] hover:bg-gray-50">
                       <IconPlus size={16} className="text-[#334155]" />
