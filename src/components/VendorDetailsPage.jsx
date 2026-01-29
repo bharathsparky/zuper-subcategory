@@ -1028,57 +1028,60 @@ function EditSkuModal({ isOpen, onClose, product, onSave }) {
           </div>
 
           {/* SKU Details Fields */}
-          <div className="grid grid-cols-3 gap-[24px] mb-[24px]">
-            {/* Vendor SKU */}
-            <div>
-              <label className="block text-[13px] font-medium text-[#334155] mb-[6px]">
-                Vendor SKU <span className="text-[#EF4444]">*</span>
-              </label>
-              <input
-                type="text"
-                value={vendorSku}
-                onChange={(e) => {
-                  setVendorSku(e.target.value);
-                  setValidationErrors(prev => ({ ...prev, vendorSku: null }));
-                }}
-                placeholder="Eg: IKOCAMB-STD"
-                className={`w-full h-[40px] px-[12px] border rounded-[6px] text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] ${
-                  validationErrors.vendorSku ? 'border-[#EF4444]' : 'border-[#E2E8F0]'
-                }`}
-              />
-              {validationErrors.vendorSku && (
-                <div className="mt-[4px] text-[12px] text-[#EF4444]">{validationErrors.vendorSku}</div>
-              )}
-            </div>
-            
-            {/* Unit Purchase Cost */}
-            <div>
-              <label className="block text-[13px] font-medium text-[#334155] mb-[6px]">
-                Unit Purchase Cost <span className="text-[#EF4444]">*</span>
-              </label>
-              <div className="flex">
-                <div className="h-[40px] px-[12px] flex items-center bg-[#F8FAFC] border border-r-0 border-[#E2E8F0] rounded-l-[6px] text-[14px] text-[#64748B]">
-                  USD
-                </div>
+          <div className="space-y-[16px] mb-[24px]">
+            {/* Row 1: Vendor SKU and Unit Purchase Cost */}
+            <div className="grid grid-cols-2 gap-[24px]">
+              {/* Vendor SKU */}
+              <div>
+                <label className="block text-[13px] font-medium text-[#334155] mb-[6px]">
+                  Vendor SKU <span className="text-[#EF4444]">*</span>
+                </label>
                 <input
                   type="text"
-                  value={unitCost}
+                  value={vendorSku}
                   onChange={(e) => {
-                    setUnitCost(e.target.value);
-                    setValidationErrors(prev => ({ ...prev, unitCost: null }));
+                    setVendorSku(e.target.value);
+                    setValidationErrors(prev => ({ ...prev, vendorSku: null }));
                   }}
-                  placeholder="0.00"
-                  className={`flex-1 h-[40px] px-[12px] border rounded-r-[6px] text-[14px] text-[#334155] outline-none focus:border-[#3B82F6] ${
-                    validationErrors.unitCost ? 'border-[#EF4444]' : 'border-[#E2E8F0]'
+                  placeholder="Eg: IKOCAMB-STD"
+                  className={`w-full h-[40px] px-[12px] border rounded-[6px] text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] ${
+                    validationErrors.vendorSku ? 'border-[#EF4444]' : 'border-[#E2E8F0]'
                   }`}
                 />
+                {validationErrors.vendorSku && (
+                  <div className="mt-[4px] text-[12px] text-[#EF4444]">{validationErrors.vendorSku}</div>
+                )}
               </div>
-              {validationErrors.unitCost && (
-                <div className="mt-[4px] text-[12px] text-[#EF4444]">{validationErrors.unitCost}</div>
-              )}
+              
+              {/* Unit Purchase Cost */}
+              <div>
+                <label className="block text-[13px] font-medium text-[#334155] mb-[6px]">
+                  Unit Purchase Cost <span className="text-[#EF4444]">*</span>
+                </label>
+                <div className="flex">
+                  <div className="h-[40px] px-[12px] flex items-center bg-[#F8FAFC] border border-r-0 border-[#E2E8F0] rounded-l-[6px] text-[14px] text-[#64748B]">
+                    USD
+                  </div>
+                  <input
+                    type="text"
+                    value={unitCost}
+                    onChange={(e) => {
+                      setUnitCost(e.target.value);
+                      setValidationErrors(prev => ({ ...prev, unitCost: null }));
+                    }}
+                    placeholder="0.00"
+                    className={`flex-1 h-[40px] px-[12px] border rounded-r-[6px] text-[14px] text-[#334155] outline-none focus:border-[#3B82F6] ${
+                      validationErrors.unitCost ? 'border-[#EF4444]' : 'border-[#E2E8F0]'
+                    }`}
+                  />
+                </div>
+                {validationErrors.unitCost && (
+                  <div className="mt-[4px] text-[12px] text-[#EF4444]">{validationErrors.unitCost}</div>
+                )}
+              </div>
             </div>
             
-            {/* Remarks */}
+            {/* Row 2: Remarks (full width) */}
             <div>
               <label className="block text-[13px] font-medium text-[#334155] mb-[6px]">
                 Remarks
@@ -1087,7 +1090,7 @@ function EditSkuModal({ isOpen, onClose, product, onSave }) {
                 type="text"
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
-                placeholder="Notes..."
+                placeholder="Add notes about this SKU..."
                 className="w-full h-[40px] px-[12px] border border-[#E2E8F0] rounded-[6px] text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6]"
               />
             </div>
