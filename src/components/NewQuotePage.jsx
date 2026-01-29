@@ -640,17 +640,18 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
   const [depositAmount, setDepositAmount] = useState('1575');
   const [remarks, setRemarks] = useState('Wifi Fitting');
   
-  // Column visibility state
+  // Column visibility and order state
   const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
-  const [visibleColumns, setVisibleColumns] = useState({
-    unitCost: true,
-    markup: true,
-    taxPreference: true,
-    location: true,
-    option: true,
-    brand: true,
-    specification: true,
-  });
+  const [columns, setColumns] = useState([
+    { key: 'unitCost', label: 'Unit Cost', visible: true },
+    { key: 'markup', label: 'Markup', visible: true },
+    { key: 'taxPreference', label: 'Tax Preference', visible: true },
+    { key: 'location', label: 'Location', visible: true },
+    { key: 'option', label: 'Option', visible: true },
+    { key: 'brand', label: 'Brand', visible: true },
+    { key: 'specification', label: 'Specification', visible: true },
+  ]);
+  const [draggedColumn, setDraggedColumn] = useState(null);
   
   const columnDropdownRef = useRef(null);
   
@@ -665,12 +666,36 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
-  const toggleColumnVisibility = (column) => {
-    setVisibleColumns(prev => ({
-      ...prev,
-      [column]: !prev[column]
-    }));
+  const toggleColumnVisibility = (columnKey) => {
+    setColumns(prev => prev.map(col => 
+      col.key === columnKey ? { ...col, visible: !col.visible } : col
+    ));
   };
+  
+  const handleDragStart = (e, index) => {
+    setDraggedColumn(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+  
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    if (draggedColumn === null || draggedColumn === index) return;
+    
+    const newColumns = [...columns];
+    const draggedItem = newColumns[draggedColumn];
+    newColumns.splice(draggedColumn, 1);
+    newColumns.splice(index, 0, draggedItem);
+    
+    setDraggedColumn(index);
+    setColumns(newColumns);
+  };
+  
+  const handleDragEnd = () => {
+    setDraggedColumn(null);
+  };
+  
+  // Helper to check if a column is visible
+  const isColumnVisible = (key) => columns.find(col => col.key === key)?.visible ?? false;
 
   // Form state
   const [formData, setFormData] = useState({
@@ -1068,27 +1093,30 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
                         <span className="text-[14px] font-semibold text-[#1E293B]">Columns</span>
                       </div>
                       <div className="py-[8px]">
-                        {[
-                          { key: 'unitCost', label: 'Unit Cost' },
-                          { key: 'markup', label: 'Markup' },
-                          { key: 'taxPreference', label: 'Tax Preference' },
-                          { key: 'location', label: 'Location' },
-                          { key: 'option', label: 'Option' },
-                          { key: 'brand', label: 'Brand' },
-                          { key: 'specification', label: 'Specification' },
-                        ].map((column) => (
+                        {columns.map((column, index) => (
                           <div 
                             key={column.key}
-                            className="flex items-center gap-[10px] px-[16px] py-[8px] hover:bg-[#F8FAFC] cursor-pointer"
-                            onClick={() => toggleColumnVisibility(column.key)}
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, index)}
+                            onDragOver={(e) => handleDragOver(e, index)}
+                            onDragEnd={handleDragEnd}
+                            className={`flex items-center gap-[10px] px-[16px] py-[8px] hover:bg-[#F8FAFC] cursor-pointer ${
+                              draggedColumn === index ? 'bg-[#EFF6FF] opacity-50' : ''
+                            }`}
                           >
-                            <IconGripVertical size={14} className="text-[#CBD5E1]" />
-                            <div className={`w-[18px] h-[18px] rounded-[4px] flex items-center justify-center ${
-                              visibleColumns[column.key] 
-                                ? 'bg-[#3B82F6]' 
-                                : 'border-2 border-[#CBD5E1]'
-                            }`}>
-                              {visibleColumns[column.key] && (
+                            <IconGripVertical size={14} className="text-[#CBD5E1] cursor-grab" />
+                            <div 
+                              className={`w-[18px] h-[18px] rounded-[4px] flex items-center justify-center ${
+                                column.visible 
+                                  ? 'bg-[#3B82F6]' 
+                                  : 'border-2 border-[#CBD5E1]'
+                              }`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleColumnVisibility(column.key);
+                              }}
+                            >
+                              {column.visible && (
                                 <IconCheck size={12} stroke={3} className="text-white" />
                               )}
                             </div>
@@ -1117,13 +1145,13 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
                   <div className="w-[40px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">#</div>
                   <div className="w-[40px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0"></div>
                   <div className="w-[240px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Product / Service</div>
-                  {visibleColumns.unitCost && <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Unit Cost</div>}
-                  {visibleColumns.markup && <div className="w-[80px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Markup</div>}
-                  {visibleColumns.taxPreference && <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Tax Preference</div>}
-                  {visibleColumns.location && <div className="w-[140px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Location</div>}
-                  {visibleColumns.option && <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Option</div>}
-                  {visibleColumns.brand && <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Brand</div>}
-                  {visibleColumns.specification && <div className="w-[120px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Specification</div>}
+                  {isColumnVisible('unitCost') && <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Unit Cost</div>}
+                  {isColumnVisible('markup') && <div className="w-[80px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Markup</div>}
+                  {isColumnVisible('taxPreference') && <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Tax Preference</div>}
+                  {isColumnVisible('location') && <div className="w-[140px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Location</div>}
+                  {isColumnVisible('option') && <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Option</div>}
+                  {isColumnVisible('brand') && <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Brand</div>}
+                  {isColumnVisible('specification') && <div className="w-[120px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Specification</div>}
                   <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Price</div>
                   <div className="w-[60px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Action</div>
                 </div>
@@ -1155,31 +1183,31 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
                       </div>
                     </div>
                     {/* Unit Cost */}
-                    {visibleColumns.unitCost && (
+                    {isColumnVisible('unitCost') && (
                       <div className="w-[100px] px-[12px] py-[16px] flex-shrink-0">
                         <span className="text-[13px] text-[#1E293B]">${item.unitCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                       </div>
                     )}
                     {/* Markup */}
-                    {visibleColumns.markup && (
+                    {isColumnVisible('markup') && (
                       <div className="w-[80px] px-[12px] py-[16px] flex-shrink-0">
                         <span className="text-[13px] text-[#64748B]">{item.markup || '-'}</span>
                       </div>
                     )}
                     {/* Tax Preference */}
-                    {visibleColumns.taxPreference && (
+                    {isColumnVisible('taxPreference') && (
                       <div className="w-[100px] px-[12px] py-[16px] flex-shrink-0">
                         <span className="text-[13px] text-[#1E293B]">{item.taxPreference}</span>
                       </div>
                     )}
                     {/* Location */}
-                    {visibleColumns.location && (
+                    {isColumnVisible('location') && (
                       <div className="w-[140px] px-[12px] py-[16px] flex-shrink-0">
                         <span className="text-[13px] text-[#1E293B]">{item.location}</span>
                       </div>
                     )}
                     {/* Option */}
-                    {visibleColumns.option && (
+                    {isColumnVisible('option') && (
                       <div className="w-[100px] px-[12px] py-[16px] flex-shrink-0">
                         {item.option ? (
                           <div className="flex items-center gap-[6px]">
@@ -1195,13 +1223,13 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
                       </div>
                     )}
                     {/* Brand */}
-                    {visibleColumns.brand && (
+                    {isColumnVisible('brand') && (
                       <div className="w-[100px] px-[12px] py-[16px] flex-shrink-0">
                         <span className="text-[13px] text-[#64748B]">{item.brand || '---'}</span>
                       </div>
                     )}
                     {/* Specification */}
-                    {visibleColumns.specification && (
+                    {isColumnVisible('specification') && (
                       <div className="w-[120px] px-[12px] py-[16px] flex-shrink-0">
                         <span className="text-[13px] text-[#64748B]">{item.specification || '---'}</span>
                       </div>
