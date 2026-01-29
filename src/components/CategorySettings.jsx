@@ -178,7 +178,7 @@ function RowActionsMenu({ onEdit, onDelete, onAddSubCategory, onMove, isParent =
                 } text-[#1E293B]`}
               >
                 <IconCornerDownRight size={15} className="text-[#64748B]" stroke={2} />
-                {isParent ? 'Make Subcategory' : 'Change Parent'}
+                {isParent ? 'Set as Subcategory' : 'Change Parent'}
               </button>
             )}
           </Menu.Item>
@@ -860,7 +860,7 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isSubCategory ? "Change Parent" : "Make Subcategory"}
+      title={isSubCategory ? "Change Parent" : "Set as Subcategory"}
       maxWidth="max-w-[520px]"
       footer={
         <>
@@ -881,8 +881,8 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
         {/* Info */}
         <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3">
           <p className="text-[13px] text-[#475569]">
-            {isSubCategory ? 'Change parent of' : 'Make'} <strong className="text-[#1E293B]">"{category?.name}"</strong>
-            {isSubCategory ? '' : ' a subcategory'}
+            {isSubCategory ? 'Change parent of' : 'Set'} <strong className="text-[#1E293B]">"{category?.name}"</strong>
+            {isSubCategory ? '' : ' as a subcategory'}
           </p>
           {currentTradeType && (
             <div className="flex items-center gap-2 mt-2">
