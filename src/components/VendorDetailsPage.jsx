@@ -3,12 +3,12 @@ import {
   IconPhone, 
   IconMail, 
   IconPlus, 
-  IconNotes, 
+  IconFileText,
   IconHome, 
-  IconPackage, 
-  IconFileInvoice, 
+  IconTag, 
+  IconShoppingCart, 
   IconMessage, 
-  IconActivity,
+  IconChartLine,
   IconSearch,
   IconChevronLeft,
   IconChevronRight,
@@ -18,18 +18,38 @@ import {
   IconChevronDown,
   IconBuildingBank,
   IconPaperclip,
-  IconChevronRight as IconBreadcrumbArrow
+  IconChevronRight as IconBreadcrumbArrow,
+  IconBox,
+  IconNotes
 } from '@tabler/icons-react';
+
+// Product images - using placeholder shingle textures
+const SHINGLE_IMAGE = 'data:image/svg+xml,' + encodeURIComponent(`
+<svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="42" height="42" fill="#8B7355"/>
+  <rect x="0" y="0" width="14" height="10" fill="#6B5344"/>
+  <rect x="14" y="0" width="14" height="10" fill="#7A6454"/>
+  <rect x="28" y="0" width="14" height="10" fill="#6B5344"/>
+  <rect x="7" y="10" width="14" height="10" fill="#7A6454"/>
+  <rect x="21" y="10" width="14" height="10" fill="#6B5344"/>
+  <rect x="35" y="10" width="7" height="10" fill="#7A6454"/>
+  <rect x="0" y="20" width="14" height="10" fill="#6B5344"/>
+  <rect x="14" y="20" width="14" height="10" fill="#7A6454"/>
+  <rect x="28" y="20" width="14" height="10" fill="#6B5344"/>
+  <rect x="7" y="30" width="14" height="12" fill="#7A6454"/>
+  <rect x="21" y="30" width="14" height="12" fill="#6B5344"/>
+</svg>
+`);
 
 // Mock data for products
 const MOCK_PRODUCTS = [
   { id: 1, sku: '#12345 - PLACEHOLDER', category: 'Sidewall SWA', image: null },
-  { id: 2, sku: '#ASP.SHI.24109 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop' },
-  { id: 3, sku: '#ASP.SHI.40918 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop' },
-  { id: 4, sku: '#ASP.SHI.74824 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop' },
-  { id: 5, sku: '#ASP.SHI.95785 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop' },
-  { id: 6, sku: '#ASP.SHI.48522 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop' },
-  { id: 7, sku: '#ASP.SHI.73459 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop' },
+  { id: 2, sku: '#ASP.SHI.24109 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE },
+  { id: 3, sku: '#ASP.SHI.40918 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE },
+  { id: 4, sku: '#ASP.SHI.74824 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE },
+  { id: 5, sku: '#ASP.SHI.95785 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE },
+  { id: 6, sku: '#ASP.SHI.48522 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE },
+  { id: 7, sku: '#ASP.SHI.73459 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE },
   { id: 8, sku: '#ASP.SHI.86264 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null },
   { id: 9, sku: '#ASP.SHI.31413 - IKO - Architectural - Cambridge...', category: 'Shingles SHI', image: null },
   { id: 10, sku: '#ASP.SHI.74281 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null },
@@ -51,10 +71,10 @@ function VendorDetailsPage({ onBack }) {
 
   const navItems = [
     { id: 'details', label: 'Details', icon: IconHome, count: null },
-    { id: 'product-catalog', label: 'Product Catalog', icon: IconPackage, count: 161 },
-    { id: 'purchase-orders', label: 'Purchase Orders', icon: IconFileInvoice, count: 17 },
+    { id: 'product-catalog', label: 'Product Catalog', icon: IconTag, count: 161 },
+    { id: 'purchase-orders', label: 'Purchase Orders', icon: IconShoppingCart, count: 17 },
     { id: 'notes', label: 'Notes', icon: IconMessage, count: null },
-    { id: 'activity', label: 'Activity', icon: IconActivity, count: null },
+    { id: 'activity', label: 'Activity', icon: IconChartLine, count: null },
   ];
 
   return (
@@ -234,7 +254,7 @@ function VendorDetailsPage({ onBack }) {
                         <img src={product.image} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <IconPackage size={20} className="text-[#94A3B8]" />
+                          <IconBox size={20} className="text-[#94A3B8]" />
                         </div>
                       )}
                     </div>
@@ -272,19 +292,26 @@ function VendorDetailsPage({ onBack }) {
               
               {/* Bank Details Empty State */}
               <div className="py-[21px] flex flex-col items-center">
-                {/* Illustration */}
-                <div className="w-[168px] h-[186px] mb-[14px]">
+                {/* Illustration - matching Figma */}
+                <div className="w-[168px] h-[186px] mb-[14px] relative">
                   <svg viewBox="0 0 168 187" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                    <rect x="34" y="60" width="100" height="80" rx="4" fill="#F1F5F9"/>
-                    <rect x="44" y="75" width="80" height="8" rx="2" fill="#E2E8F0"/>
-                    <rect x="44" y="91" width="60" height="8" rx="2" fill="#E2E8F0"/>
-                    <rect x="44" y="107" width="40" height="8" rx="2" fill="#E2E8F0"/>
-                    <circle cx="134" cy="50" r="20" fill="#DBEAFE"/>
-                    <path d="M134 42V58M126 50H142" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round"/>
+                    {/* Background card/document */}
+                    <rect x="24" y="40" width="120" height="120" rx="8" fill="#F8FAFC" stroke="#E2E8F0" strokeWidth="1"/>
+                    {/* Card lines */}
+                    <rect x="40" y="60" width="88" height="8" rx="4" fill="#E2E8F0"/>
+                    <rect x="40" y="76" width="70" height="8" rx="4" fill="#E2E8F0"/>
+                    <rect x="40" y="92" width="50" height="8" rx="4" fill="#E2E8F0"/>
+                    {/* Decorative dots */}
+                    <circle cx="136" cy="28" r="4" fill="#E2E8F0"/>
+                    <circle cx="148" cy="40" r="3" fill="#F1F5F9"/>
+                    <circle cx="20" cy="140" r="3" fill="#F1F5F9"/>
+                    {/* Plus button circle */}
+                    <circle cx="128" cy="130" r="24" fill="#DBEAFE"/>
+                    <path d="M128 120V140M118 130H138" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round"/>
                   </svg>
                 </div>
                 <button className="px-[14px] py-[7px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#64748B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[7px]">
-                  <IconPlus size={14} />
+                  <IconPlus size={16} className="text-[#64748B]" />
                   Add Bank Details
                 </button>
               </div>
