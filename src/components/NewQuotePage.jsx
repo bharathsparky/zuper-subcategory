@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   IconChevronDown, 
   IconChevronUp, 
@@ -16,7 +16,137 @@ import {
   IconArrowForwardUp,
   IconHighlight,
   IconChevronRight,
+  IconSearch,
+  IconX,
 } from '@tabler/icons-react';
+
+// Searchable User Dropdown Component
+const SearchableUserDropdown = ({ users, value, onChange, onClear, placeholder = "Select a user" }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+        setSearchQuery('');
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Focus input when dropdown opens
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
+
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    user.team.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleSelect = (user) => {
+    onChange(user);
+    setIsOpen(false);
+    setSearchQuery('');
+  };
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      {/* Trigger Button */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full h-[38px] px-[12px] border border-[#E2E8F0] rounded-[4px] cursor-pointer flex items-center justify-between gap-[8px] hover:border-[#CBD5E1] transition-colors bg-white text-left"
+      >
+        {value ? (
+          <div className="flex items-center gap-[8px] flex-1 min-w-0">
+            <img 
+              src={value.avatar} 
+              alt={value.name}
+              className="w-[24px] h-[24px] rounded-full object-cover flex-shrink-0"
+            />
+            <span className="text-[13px] text-[#334155] truncate">{value.name}</span>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onClear(); }}
+              className="ml-auto text-[#94A3B8] hover:text-[#64748B] flex-shrink-0"
+            >
+              <IconX size={14} />
+            </button>
+          </div>
+        ) : (
+          <span className="text-[13px] text-[#94A3B8]">{placeholder}</span>
+        )}
+        <IconChevronDown 
+          size={14} 
+          stroke={2} 
+          className={`text-[#64748B] flex-shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+        />
+      </button>
+
+      {/* Dropdown Menu */}
+      {isOpen && (
+        <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-white border border-[#E2E8F0] rounded-[6px] shadow-lg z-50 overflow-hidden">
+          {/* Search Input */}
+          <div className="p-[8px] border-b border-[#E2E8F0]">
+            <div className="relative">
+              <IconSearch size={14} className="absolute left-[10px] top-1/2 -translate-y-1/2 text-[#94A3B8]" />
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-[32px] pl-[32px] pr-[10px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6]"
+              />
+            </div>
+          </div>
+
+          {/* Users List */}
+          <div className="max-h-[240px] overflow-y-auto">
+            {filteredUsers.length === 0 ? (
+              <div className="px-[12px] py-[16px] text-[13px] text-[#94A3B8] text-center">
+                No users found
+              </div>
+            ) : (
+              filteredUsers.map(user => (
+                <button
+                  key={user.id}
+                  type="button"
+                  onClick={() => handleSelect(user)}
+                  className={`w-full px-[12px] py-[10px] flex items-center gap-[10px] hover:bg-[#F1F5F9] transition-colors text-left ${
+                    value?.id === user.id ? 'bg-[#F8FAFC]' : ''
+                  }`}
+                >
+                  <img 
+                    src={user.avatar} 
+                    alt={user.name}
+                    className="w-[32px] h-[32px] rounded-full object-cover flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] font-medium text-[#1E293B] truncate">{user.name}</div>
+                    <div className="text-[12px] text-[#64748B]">{user.team}</div>
+                  </div>
+                  {value?.id === user.id && (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" className="flex-shrink-0">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  )}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Empty state illustrations
 const PartsEmptyIcon = () => (
@@ -66,8 +196,6 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
   });
 
   // Sample users for assignment (single select)
-  const [assignModalOpen, setAssignModalOpen] = useState(false);
-  const [userSearchQuery, setUserSearchQuery] = useState('');
   
   const availableUsers = [
     { id: 1, name: 'Marcus Chen', initials: 'MC', team: 'Seattle', avatar: 'https://i.pravatar.cc/150?img=11' },
@@ -82,18 +210,11 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
     { id: 10, name: 'Isabella Kim', initials: 'IK', team: 'Seattle', avatar: 'https://i.pravatar.cc/150?img=4' },
   ];
 
-  const filteredUsers = availableUsers.filter(user => 
-    user.name.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
-    user.team.toLowerCase().includes(userSearchQuery.toLowerCase())
-  );
-
   const selectUser = (user) => {
     setFormData({
       ...formData,
       assignTo: user
     });
-    setAssignModalOpen(false);
-    setUserSearchQuery('');
   };
 
   const clearAssignee = () => {
@@ -324,34 +445,13 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
                     <label className="block text-[13px] text-[#64748B] mb-[8px]">
                       Quote Sold By
                     </label>
-                    <button
-                      type="button"
-                      onClick={() => setAssignModalOpen(true)}
-                      className="w-full h-[38px] px-[12px] border border-[#E2E8F0] rounded-[4px] cursor-pointer flex items-center justify-between gap-[8px] hover:border-[#CBD5E1] transition-colors bg-white text-left"
-                    >
-                      {formData.assignTo ? (
-                        <div className="flex items-center gap-[8px] flex-1">
-                          <img 
-                            src={formData.assignTo.avatar} 
-                            alt={formData.assignTo.name}
-                            className="w-[24px] h-[24px] rounded-full object-cover"
-                          />
-                          <span className="text-[13px] text-[#334155]">{formData.assignTo.name}</span>
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); clearAssignee(); }}
-                            className="ml-auto text-[#94A3B8] hover:text-[#64748B]"
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <line x1="18" y1="6" x2="6" y2="18"/>
-                              <line x1="6" y1="6" x2="18" y2="18"/>
-                            </svg>
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-[13px] text-[#94A3B8]">Select a user</span>
-                      )}
-                      <IconChevronDown size={14} stroke={2} className="text-[#64748B] flex-shrink-0" />
-                    </button>
+                    <SearchableUserDropdown
+                      users={availableUsers}
+                      value={formData.assignTo}
+                      onChange={selectUser}
+                      onClear={clearAssignee}
+                      placeholder="Select a user"
+                    />
                   </div>
                 </div>
 
@@ -609,104 +709,6 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
         </div>
       </div>
 
-      {/* User Assignment Side Sheet */}
-      {assignModalOpen && (
-        <>
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black/50 z-40"
-            onClick={() => { setAssignModalOpen(false); setUserSearchQuery(''); }}
-          />
-          
-          {/* Side Sheet */}
-          <div className="fixed top-0 right-0 h-full w-[480px] bg-white shadow-2xl z-50 flex flex-col animate-slide-in-right">
-            {/* Header */}
-            <div className="h-[60px] flex items-center justify-between px-[24px] border-b border-[#E2E8F0]">
-              <h2 className="text-[18px] font-semibold text-[#1E293B]">Select User</h2>
-              <button 
-                onClick={() => { setAssignModalOpen(false); setUserSearchQuery(''); }}
-                className="w-[36px] h-[36px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-
-            {/* Search */}
-            <div className="px-[24px] py-[16px] border-b border-[#E2E8F0]">
-              <div className="relative">
-                <svg className="absolute left-[12px] top-1/2 -translate-y-1/2 text-[#94A3B8]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8"/>
-                  <path d="m21 21-4.35-4.35"/>
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={userSearchQuery}
-                  onChange={(e) => setUserSearchQuery(e.target.value)}
-                  className="w-full h-[44px] pl-[40px] pr-[12px] border border-[#E2E8F0] rounded-[6px] text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]"
-                  autoFocus
-                />
-              </div>
-            </div>
-
-            {/* Users List */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="px-[24px] py-[10px] text-[12px] font-medium text-[#64748B] uppercase tracking-wide bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                Users ({filteredUsers.length})
-              </div>
-              {filteredUsers.map(user => (
-                <div
-                  key={user.id}
-                  onClick={() => selectUser(user)}
-                  className="flex items-center gap-[12px] px-[24px] py-[14px] cursor-pointer hover:bg-[#F8FAFC] border-b border-[#F1F5F9] transition-colors"
-                >
-                  {/* Avatar */}
-                  <img 
-                    src={user.avatar} 
-                    alt={user.name}
-                    className="w-[44px] h-[44px] rounded-full object-cover flex-shrink-0"
-                  />
-                  
-                  {/* User Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[14px] font-medium text-[#1E293B]">{user.name}</div>
-                    <div className="text-[13px] text-[#64748B]">{user.team}</div>
-                  </div>
-                  
-                  {/* Select Icon */}
-                  <button className="w-[32px] h-[32px] flex items-center justify-center text-[#22C55E] hover:bg-[#F0FDF4] rounded transition-colors">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                      <circle cx="8.5" cy="7" r="4"/>
-                      <line x1="20" y1="8" x2="20" y2="14"/>
-                      <line x1="23" y1="11" x2="17" y2="11"/>
-                    </svg>
-                  </button>
-                </div>
-              ))}
-              
-              {filteredUsers.length === 0 && (
-                <div className="py-[60px] text-center">
-                  <div className="text-[14px] text-[#64748B]">No users found</div>
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="h-[68px] flex items-center justify-end gap-[12px] px-[24px] border-t border-[#E2E8F0] bg-white">
-              <button 
-                onClick={() => { setAssignModalOpen(false); setUserSearchQuery(''); }}
-                className="h-[40px] px-[24px] border border-[#E2E8F0] rounded-[6px] text-[14px] font-medium text-[#64748B] bg-white hover:bg-[#F8FAFC] transition-colors"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 }
