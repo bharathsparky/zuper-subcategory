@@ -27,40 +27,34 @@ import {
 
 // Line Item Picker Data (simplified for vendor)
 const LINE_ITEMS_DATA = [
-  { id: 1, itemId: '#RF-SHG-001', name: 'GAF Timberline HDZ Shingles', category: 'Shingles', type: 'Material', location: 'Warehouse A', availableQty: 150, unit: 'bundle', unitCost: '45.00', markup: '25', unitSellingPrice: '56.25' },
-  { id: 2, itemId: '#RF-UND-002', name: 'Synthetic Underlayment Roll', category: 'Underlayment', type: 'Material', location: 'Warehouse A', availableQty: 75, unit: 'roll', unitCost: '120.00', markup: '20', unitSellingPrice: '144.00' },
-  { id: 3, itemId: '#RF-FLS-003', name: 'Aluminum Drip Edge Flashing', category: 'Flashing', type: 'Material', location: 'Warehouse B', availableQty: 200, unit: 'piece', unitCost: '8.50', markup: '30', unitSellingPrice: '11.05' },
-  { id: 4, itemId: '#RF-VNT-004', name: 'Ridge Vent System', category: 'Ventilation', type: 'Material', location: 'Warehouse A', availableQty: 50, unit: 'unit', unitCost: '35.00', markup: '25', unitSellingPrice: '43.75' },
-  { id: 5, itemId: '#RF-NAI-005', name: 'Roofing Nails (1.5")', category: 'Fasteners', type: 'Material', location: 'Warehouse A', availableQty: 500, unit: 'box', unitCost: '12.00', markup: '35', unitSellingPrice: '16.20' },
-  { id: 6, itemId: '#RF-ICE-006', name: 'Ice & Water Shield', category: 'Protection', type: 'Material', location: 'Warehouse B', availableQty: 30, unit: 'roll', unitCost: '180.00', markup: '20', unitSellingPrice: '216.00' },
+  { id: 1, itemId: '#ZP - 45345', name: 'Drip edge', category: 'Material', type: 'Product', availableQty: 905, unit: 'Unit', minQty: 14, unitCost: 15500, image: '/assets/drip-edge.jpg' },
+  { id: 2, itemId: '#ZP - 49', name: 'FastTrack', category: 'Water', type: 'Part', availableQty: 61.99, unit: '', minQty: 1, unitCost: 10000, image: null },
+  { id: 3, itemId: '#001 - P0543', name: 'Mini generator', category: 'Boat Smart Watches', type: 'Part', availableQty: -3, unit: '', minQty: 101, unitCost: 12, image: '/assets/generator.jpg' },
+  { id: 4, itemId: '#Part869745-632154578', name: 'Test spec oil fuel random wording length', category: 'Material', type: 'Product', availableQty: 0, unit: '', minQty: null, unitCost: 100, image: null },
+  { id: 5, itemId: '#SC002', name: 'Repair of Plumbing Defects', category: 'Other', type: 'Product', availableQty: 11.36, unit: '', minQty: 4, unitCost: 0, image: null },
+  { id: 6, itemId: '#PT - 12', name: 'sample', category: 'General', type: 'Product', availableQty: 25, unit: '', minQty: null, unitCost: 50, image: null },
 ];
 
 // Line Item Picker Modal
 function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 1;
+  const totalPages = 80;
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-[8px] w-[95vw] max-w-[1200px] max-h-[90vh] flex flex-col shadow-xl">
+      <div className="bg-white rounded-[8px] w-[95vw] max-w-[1100px] max-h-[90vh] flex flex-col shadow-xl">
         {/* Header */}
-        <div className="h-[56px] px-[24px] flex items-center justify-between border-b border-[#E2E8F0] shrink-0">
-          <h2 className="text-[18px] font-semibold text-[#1E293B]">Choose Line Item</h2>
-          <button
-            onClick={onClose}
-            className="w-[32px] h-[32px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors"
-          >
-            <IconX size={20} stroke={1.5} className="text-[#64748B]" />
-          </button>
+        <div className="h-[56px] px-[24px] flex items-center border-b border-[#E2E8F0] shrink-0">
+          <h2 className="text-[18px] font-semibold text-[#1E293B]">Add Item</h2>
         </div>
 
         {/* Filters */}
         <div className="px-[24px] py-[16px] flex items-center gap-[12px] border-b border-[#E2E8F0] shrink-0">
           {/* Search */}
-          <div className="w-[200px] h-[40px] flex items-center gap-[8px] px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white">
+          <div className="w-[280px] h-[40px] flex items-center gap-[8px] px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white">
             <IconSearch size={18} stroke={1.5} className="text-[#94A3B8]" />
             <input
               type="text"
@@ -71,15 +65,15 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
             />
           </div>
 
-          {/* Category Dropdown */}
-          <div className="w-[140px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
-            <span className="text-[14px] text-[#94A3B8]">Category</span>
+          {/* Product Type Dropdown */}
+          <div className="w-[180px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
+            <span className="text-[14px] text-[#94A3B8]">Product Type</span>
             <IconChevronDown size={16} stroke={1.5} className="text-[#94A3B8]" />
           </div>
 
-          {/* Type Dropdown */}
-          <div className="w-[140px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
-            <span className="text-[14px] text-[#94A3B8]">Type</span>
+          {/* Category Dropdown */}
+          <div className="w-[180px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
+            <span className="text-[14px] text-[#94A3B8]">Category</span>
             <IconChevronDown size={16} stroke={1.5} className="text-[#94A3B8]" />
           </div>
 
@@ -109,14 +103,10 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
             <thead className="bg-white sticky top-0 z-10">
               <tr className="border-b border-[#E2E8F0]">
                 <th className="w-[40px] text-left px-[16px] py-[14px] bg-white"></th>
-                <th className="w-[280px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Item</th>
-                <th className="w-[100px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Category</th>
-                <th className="w-[80px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Type</th>
-                <th className="w-[100px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Location</th>
-                <th className="w-[90px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Unit Cost</th>
-                <th className="w-[80px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Markup</th>
-                <th className="w-[100px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Selling Price</th>
-                <th className="w-[60px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Qty</th>
+                <th className="text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Item</th>
+                <th className="w-[150px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Category</th>
+                <th className="w-[100px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Type</th>
+                <th className="w-[200px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Unit Purchase Price/Unit Cost (in USD)</th>
               </tr>
             </thead>
             <tbody className="bg-white">
@@ -133,53 +123,31 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
                   </td>
                   <td className="px-[12px] py-[16px]">
                     <div className="flex items-center gap-[12px]">
-                      <div className="w-[44px] h-[44px] bg-[#F1F5F9] rounded-[6px] flex items-center justify-center flex-shrink-0">
-                        <IconPackage size={22} stroke={1.5} className="text-[#94A3B8]" />
+                      <div className="w-[44px] h-[44px] bg-[#F1F5F9] rounded-[6px] flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        {item.image ? (
+                          <img src={item.image} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <IconPackage size={22} stroke={1.5} className="text-[#94A3B8]" />
+                        )}
                       </div>
                       <div>
                         <div className="text-[13px] font-medium text-[#1E293B]">
                           {item.itemId} - {item.name}
                         </div>
                         <div className="text-[12px] text-[#64748B]">
-                          Available: {item.availableQty} {item.unit}
+                          Available Qty: {item.availableQty}{item.unit ? ` ${item.unit}` : ''}
                         </div>
+                        {item.minQty !== null && (
+                          <div className="text-[12px] text-[#64748B]">
+                            Minimum Qty: {item.minQty}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </td>
-                  <td className="px-[12px] py-[16px] text-[13px] text-[#64748B]">{item.category}</td>
-                  <td className="px-[12px] py-[16px] text-[13px] text-[#64748B]">{item.type}</td>
-                  <td className="px-[12px] py-[16px] text-[13px] text-[#64748B]">{item.location}</td>
-                  <td className="px-[12px] py-[16px]">
-                    <input
-                      type="text"
-                      defaultValue={item.unitCost}
-                      className="w-[70px] h-[36px] px-[10px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] outline-none focus:border-[#3B82F6] bg-white"
-                    />
-                  </td>
-                  <td className="px-[12px] py-[16px]">
-                    <div className="flex items-center gap-[4px]">
-                      <input
-                        type="text"
-                        defaultValue={item.markup}
-                        className="w-[45px] h-[36px] px-[8px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] outline-none focus:border-[#3B82F6] bg-white"
-                      />
-                      <span className="text-[13px] text-[#64748B]">%</span>
-                    </div>
-                  </td>
-                  <td className="px-[12px] py-[16px]">
-                    <input
-                      type="text"
-                      defaultValue={item.unitSellingPrice}
-                      className="w-[70px] h-[36px] px-[10px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] outline-none focus:border-[#3B82F6] bg-white"
-                    />
-                  </td>
-                  <td className="px-[12px] py-[16px]">
-                    <input
-                      type="text"
-                      placeholder="0"
-                      className="w-[50px] h-[36px] px-[8px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] bg-white"
-                    />
-                  </td>
+                  <td className="px-[12px] py-[16px] text-[13px] text-[#1E293B]">{item.category}</td>
+                  <td className="px-[12px] py-[16px] text-[13px] text-[#1E293B]">{item.type}</td>
+                  <td className="px-[12px] py-[16px] text-[13px] text-[#1E293B]">{item.unitCost}</td>
                 </tr>
               ))}
             </tbody>
@@ -201,7 +169,7 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
             }}
             className="h-[40px] px-[20px] bg-[#E44A19] rounded-[6px] text-[14px] font-medium text-white hover:bg-[#D13D0F] transition-colors"
           >
-            Add Product
+            Next
           </button>
         </div>
       </div>
