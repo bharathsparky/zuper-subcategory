@@ -1129,7 +1129,7 @@ const NewPurchaseOrderPage = ({ onNavigateBack }) => {
                 <>
                   {poItems.length === 0 ? (
                     <div className="p-[21px] flex flex-col items-center">
-                      <img src={NO_PARTS_FOUND_SVG} alt="No parts found" className="h-[112px]" />
+                      <img src={NO_PARTS_FOUND_SVG} alt="No parts found" className="h-[112px] w-auto object-contain" />
                       <p className="text-[14px] text-[#1E293B] tracking-[0.25px] py-[3.5px]">
                         Start adding parts for the purchase order
                       </p>
