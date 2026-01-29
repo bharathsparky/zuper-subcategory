@@ -1111,7 +1111,7 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
               </div>
             ) : (
               /* Parts Table */
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto overscroll-x-contain">
                 {/* Table Header */}
                 <div className="flex border-b border-[#E2E8F0] bg-[#F8FAFC]">
                   <div className="w-[40px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">#</div>
