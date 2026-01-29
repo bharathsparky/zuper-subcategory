@@ -20,8 +20,194 @@ import {
   IconPaperclip,
   IconChevronRight as IconBreadcrumbArrow,
   IconBox,
-  IconNotes
+  IconNotes,
+  IconX,
+  IconPackage
 } from '@tabler/icons-react';
+
+// Line Item Picker Data (simplified for vendor)
+const LINE_ITEMS_DATA = [
+  { id: 1, itemId: '#RF-SHG-001', name: 'GAF Timberline HDZ Shingles', category: 'Shingles', type: 'Material', location: 'Warehouse A', availableQty: 150, unit: 'bundle', unitCost: '45.00', markup: '25', unitSellingPrice: '56.25' },
+  { id: 2, itemId: '#RF-UND-002', name: 'Synthetic Underlayment Roll', category: 'Underlayment', type: 'Material', location: 'Warehouse A', availableQty: 75, unit: 'roll', unitCost: '120.00', markup: '20', unitSellingPrice: '144.00' },
+  { id: 3, itemId: '#RF-FLS-003', name: 'Aluminum Drip Edge Flashing', category: 'Flashing', type: 'Material', location: 'Warehouse B', availableQty: 200, unit: 'piece', unitCost: '8.50', markup: '30', unitSellingPrice: '11.05' },
+  { id: 4, itemId: '#RF-VNT-004', name: 'Ridge Vent System', category: 'Ventilation', type: 'Material', location: 'Warehouse A', availableQty: 50, unit: 'unit', unitCost: '35.00', markup: '25', unitSellingPrice: '43.75' },
+  { id: 5, itemId: '#RF-NAI-005', name: 'Roofing Nails (1.5")', category: 'Fasteners', type: 'Material', location: 'Warehouse A', availableQty: 500, unit: 'box', unitCost: '12.00', markup: '35', unitSellingPrice: '16.20' },
+  { id: 6, itemId: '#RF-ICE-006', name: 'Ice & Water Shield', category: 'Protection', type: 'Material', location: 'Warehouse B', availableQty: 30, unit: 'roll', unitCost: '180.00', markup: '20', unitSellingPrice: '216.00' },
+];
+
+// Line Item Picker Modal
+function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = 1;
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-[8px] w-[95vw] max-w-[1200px] max-h-[90vh] flex flex-col shadow-xl">
+        {/* Header */}
+        <div className="h-[56px] px-[24px] flex items-center justify-between border-b border-[#E2E8F0] shrink-0">
+          <h2 className="text-[18px] font-semibold text-[#1E293B]">Choose Line Item</h2>
+          <button
+            onClick={onClose}
+            className="w-[32px] h-[32px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors"
+          >
+            <IconX size={20} stroke={1.5} className="text-[#64748B]" />
+          </button>
+        </div>
+
+        {/* Filters */}
+        <div className="px-[24px] py-[16px] flex items-center gap-[12px] border-b border-[#E2E8F0] shrink-0">
+          {/* Search */}
+          <div className="w-[200px] h-[40px] flex items-center gap-[8px] px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white">
+            <IconSearch size={18} stroke={1.5} className="text-[#94A3B8]" />
+            <input
+              type="text"
+              placeholder="Search Item"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none bg-transparent"
+            />
+          </div>
+
+          {/* Category Dropdown */}
+          <div className="w-[140px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
+            <span className="text-[14px] text-[#94A3B8]">Category</span>
+            <IconChevronDown size={16} stroke={1.5} className="text-[#94A3B8]" />
+          </div>
+
+          {/* Type Dropdown */}
+          <div className="w-[140px] h-[40px] flex items-center justify-between px-[12px] border border-[#E2E8F0] rounded-[6px] bg-white cursor-pointer hover:bg-[#F8FAFC]">
+            <span className="text-[14px] text-[#94A3B8]">Type</span>
+            <IconChevronDown size={16} stroke={1.5} className="text-[#94A3B8]" />
+          </div>
+
+          {/* Pagination */}
+          <div className="ml-auto flex items-center gap-[8px]">
+            <span className="text-[14px] text-[#64748B]">Page {currentPage} of {totalPages}</span>
+            <button
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors disabled:opacity-50"
+              disabled={currentPage === 1}
+            >
+              <IconChevronLeft size={16} stroke={1.5} className="text-[#64748B]" />
+            </button>
+            <button
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors disabled:opacity-50"
+              disabled={currentPage === totalPages}
+            >
+              <IconChevronRight size={16} stroke={1.5} className="text-[#64748B]" />
+            </button>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="flex-1 overflow-auto min-h-0">
+          <table className="w-full border-collapse">
+            <thead className="bg-white sticky top-0 z-10">
+              <tr className="border-b border-[#E2E8F0]">
+                <th className="w-[40px] text-left px-[16px] py-[14px] bg-white"></th>
+                <th className="w-[280px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Item</th>
+                <th className="w-[100px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Category</th>
+                <th className="w-[80px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Type</th>
+                <th className="w-[100px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Location</th>
+                <th className="w-[90px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Unit Cost</th>
+                <th className="w-[80px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Markup</th>
+                <th className="w-[100px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Selling Price</th>
+                <th className="w-[60px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Qty</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white">
+              {LINE_ITEMS_DATA.filter(item => 
+                item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.itemId.toLowerCase().includes(searchTerm.toLowerCase())
+              ).map((item) => (
+                <tr key={item.id} className="border-b border-[#E2E8F0] hover:bg-[#F8FAFC]">
+                  <td className="px-[16px] py-[16px]">
+                    <input
+                      type="checkbox"
+                      className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
+                    />
+                  </td>
+                  <td className="px-[12px] py-[16px]">
+                    <div className="flex items-center gap-[12px]">
+                      <div className="w-[44px] h-[44px] bg-[#F1F5F9] rounded-[6px] flex items-center justify-center flex-shrink-0">
+                        <IconPackage size={22} stroke={1.5} className="text-[#94A3B8]" />
+                      </div>
+                      <div>
+                        <div className="text-[13px] font-medium text-[#1E293B]">
+                          {item.itemId} - {item.name}
+                        </div>
+                        <div className="text-[12px] text-[#64748B]">
+                          Available: {item.availableQty} {item.unit}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-[12px] py-[16px] text-[13px] text-[#64748B]">{item.category}</td>
+                  <td className="px-[12px] py-[16px] text-[13px] text-[#64748B]">{item.type}</td>
+                  <td className="px-[12px] py-[16px] text-[13px] text-[#64748B]">{item.location}</td>
+                  <td className="px-[12px] py-[16px]">
+                    <input
+                      type="text"
+                      defaultValue={item.unitCost}
+                      className="w-[70px] h-[36px] px-[10px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] outline-none focus:border-[#3B82F6] bg-white"
+                    />
+                  </td>
+                  <td className="px-[12px] py-[16px]">
+                    <div className="flex items-center gap-[4px]">
+                      <input
+                        type="text"
+                        defaultValue={item.markup}
+                        className="w-[45px] h-[36px] px-[8px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] outline-none focus:border-[#3B82F6] bg-white"
+                      />
+                      <span className="text-[13px] text-[#64748B]">%</span>
+                    </div>
+                  </td>
+                  <td className="px-[12px] py-[16px]">
+                    <input
+                      type="text"
+                      defaultValue={item.unitSellingPrice}
+                      className="w-[70px] h-[36px] px-[10px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] outline-none focus:border-[#3B82F6] bg-white"
+                    />
+                  </td>
+                  <td className="px-[12px] py-[16px]">
+                    <input
+                      type="text"
+                      placeholder="0"
+                      className="w-[50px] h-[36px] px-[8px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] bg-white"
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Footer */}
+        <div className="h-[64px] px-[24px] flex items-center justify-end gap-[12px] border-t border-[#E2E8F0] shrink-0 bg-white">
+          <button
+            onClick={onClose}
+            className="h-[40px] px-[20px] border border-[#E2E8F0] rounded-[6px] text-[14px] font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors bg-white"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              onAddProduct && onAddProduct();
+              onClose();
+            }}
+            className="h-[40px] px-[20px] bg-[#E44A19] rounded-[6px] text-[14px] font-medium text-white hover:bg-[#D13D0F] transition-colors"
+          >
+            Add Product
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Product images - using placeholder shingle textures (dark gray/charcoal)
 const SHINGLE_IMAGE = 'data:image/svg+xml,' + encodeURIComponent(`
@@ -66,6 +252,7 @@ const VENDOR_DATA = {
 function VendorDetailsPage({ onBack }) {
   const [activeTab, setActiveTab] = useState('product-catalog');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLineItemPickerOpen, setIsLineItemPickerOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedRows, setExpandedRows] = useState([2]); // Default expanded row 2 like in Figma
   const totalPages = 17;
@@ -234,7 +421,10 @@ function VendorDetailsPage({ onBack }) {
                     </button>
                   </div>
                 </div>
-                <button className="h-[31px] px-[14px] bg-[#E44A19] text-white rounded-[4px] text-[13px] font-medium flex items-center gap-[7px] hover:bg-[#D43D12] transition-colors">
+                <button 
+                  onClick={() => setIsLineItemPickerOpen(true)}
+                  className="h-[31px] px-[14px] bg-[#E44A19] text-white rounded-[4px] text-[13px] font-medium flex items-center gap-[7px] hover:bg-[#D43D12] transition-colors"
+                >
                   <IconPlus size={13} />
                   Add
                 </button>
@@ -385,6 +575,15 @@ function VendorDetailsPage({ onBack }) {
           </div>
         </div>
       </div>
+
+      {/* Line Item Picker Modal */}
+      <LineItemPickerModal
+        isOpen={isLineItemPickerOpen}
+        onClose={() => setIsLineItemPickerOpen(false)}
+        onAddProduct={() => {
+          console.log('Adding product to vendor...');
+        }}
+      />
     </div>
   );
 }
