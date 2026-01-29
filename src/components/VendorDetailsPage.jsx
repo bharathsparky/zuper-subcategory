@@ -12,8 +12,8 @@ import {
   IconSearch,
   IconChevronLeft,
   IconChevronRight,
-  IconChevronsLeft,
-  IconChevronsRight,
+  IconPlayerSkipBack,
+  IconPlayerSkipForward,
   IconDotsVertical,
   IconChevronDown,
   IconBuildingBank,
@@ -23,21 +23,21 @@ import {
   IconNotes
 } from '@tabler/icons-react';
 
-// Product images - using placeholder shingle textures
+// Product images - using placeholder shingle textures (dark gray/charcoal)
 const SHINGLE_IMAGE = 'data:image/svg+xml,' + encodeURIComponent(`
 <svg width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="42" height="42" fill="#8B7355"/>
-  <rect x="0" y="0" width="14" height="10" fill="#6B5344"/>
-  <rect x="14" y="0" width="14" height="10" fill="#7A6454"/>
-  <rect x="28" y="0" width="14" height="10" fill="#6B5344"/>
-  <rect x="7" y="10" width="14" height="10" fill="#7A6454"/>
-  <rect x="21" y="10" width="14" height="10" fill="#6B5344"/>
-  <rect x="35" y="10" width="7" height="10" fill="#7A6454"/>
-  <rect x="0" y="20" width="14" height="10" fill="#6B5344"/>
-  <rect x="14" y="20" width="14" height="10" fill="#7A6454"/>
-  <rect x="28" y="20" width="14" height="10" fill="#6B5344"/>
-  <rect x="7" y="30" width="14" height="12" fill="#7A6454"/>
-  <rect x="21" y="30" width="14" height="12" fill="#6B5344"/>
+  <rect width="42" height="42" fill="#4A4A4A"/>
+  <rect x="0" y="0" width="14" height="10" fill="#3A3A3A"/>
+  <rect x="14" y="0" width="14" height="10" fill="#454545"/>
+  <rect x="28" y="0" width="14" height="10" fill="#3A3A3A"/>
+  <rect x="7" y="10" width="14" height="10" fill="#454545"/>
+  <rect x="21" y="10" width="14" height="10" fill="#3A3A3A"/>
+  <rect x="35" y="10" width="7" height="10" fill="#454545"/>
+  <rect x="0" y="20" width="14" height="10" fill="#3A3A3A"/>
+  <rect x="14" y="20" width="14" height="10" fill="#454545"/>
+  <rect x="28" y="20" width="14" height="10" fill="#3A3A3A"/>
+  <rect x="7" y="30" width="14" height="12" fill="#454545"/>
+  <rect x="21" y="30" width="14" height="12" fill="#3A3A3A"/>
 </svg>
 `);
 
@@ -209,28 +209,28 @@ function VendorDetailsPage({ onBack }) {
                       disabled={currentPage === 1}
                       className="w-[35px] h-[35px] flex items-center justify-center hover:bg-[#F8FAFC] rounded-[4px] disabled:opacity-40"
                     >
-                      <IconChevronsLeft size={20} className="text-[#64748B]" />
+                      <IconPlayerSkipBack size={18} className="text-[#64748B]" />
                     </button>
                     <button 
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
                       className="w-[35px] h-[35px] flex items-center justify-center hover:bg-[#F8FAFC] rounded-[4px] disabled:opacity-40"
                     >
-                      <IconChevronLeft size={20} className="text-[#64748B]" />
+                      <IconChevronLeft size={18} className="text-[#64748B]" />
                     </button>
                     <button 
                       onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
                       className="w-[35px] h-[35px] flex items-center justify-center hover:bg-[#F8FAFC] rounded-[4px] disabled:opacity-40"
                     >
-                      <IconChevronRight size={20} className="text-[#64748B]" />
+                      <IconChevronRight size={18} className="text-[#64748B]" />
                     </button>
                     <button 
                       onClick={() => setCurrentPage(totalPages)}
                       disabled={currentPage === totalPages}
                       className="w-[35px] h-[35px] flex items-center justify-center hover:bg-[#F8FAFC] rounded-[4px] disabled:opacity-40"
                     >
-                      <IconChevronsRight size={20} className="text-[#64748B]" />
+                      <IconPlayerSkipForward size={18} className="text-[#64748B]" />
                     </button>
                   </div>
                 </div>
@@ -245,9 +245,9 @@ function VendorDetailsPage({ onBack }) {
             <div className="overflow-auto">
               {/* Table Header Row */}
               <div className="border-y border-[#E2E8F0] px-[35px] py-[10px] flex items-center">
-                <div className="w-[45%] text-[12px] font-medium text-[#64748B] uppercase tracking-wider">Item</div>
-                <div className="w-[35%] text-[12px] font-medium text-[#64748B] uppercase tracking-wider">Category</div>
-                <div className="w-[20%] text-[12px] font-medium text-[#64748B] uppercase tracking-wider text-center">Actions</div>
+                <div className="w-[45%] text-[12px] font-medium text-[#64748B]">Item</div>
+                <div className="w-[35%] text-[12px] font-medium text-[#64748B]">Category</div>
+                <div className="w-[20%] text-[12px] font-medium text-[#64748B] text-center">Actions</div>
               </div>
 
               {/* Table Body */}
@@ -289,22 +289,20 @@ function VendorDetailsPage({ onBack }) {
                       </div>
                     </div>
                     
-                    {/* Expanded Details */}
+                    {/* Expanded Details - Table-like layout */}
                     {isExpanded && (
-                      <div className="px-[14px] py-[14px] pl-[91px] bg-white">
-                        <div className="grid grid-cols-3 gap-[21px] text-[13px]">
-                          <div>
-                            <span className="text-[#64748B] font-medium">Vendor SKU</span>
-                            <p className="text-[#1E293B] mt-[3px]">{product.vendorSku}</p>
-                          </div>
-                          <div>
-                            <span className="text-[#64748B] font-medium">Unit Purchase Cost</span>
-                            <p className="text-[#1E293B] mt-[3px]">{product.unitCost}</p>
-                          </div>
-                          <div>
-                            <span className="text-[#64748B] font-medium">Remarks</span>
-                            <p className="text-[#1E293B] mt-[3px]">{product.remarks}</p>
-                          </div>
+                      <div className="bg-white border-t border-[#E2E8F0]">
+                        {/* Header Row */}
+                        <div className="flex border-b border-[#E2E8F0] text-[13px] font-medium text-[#64748B]">
+                          <div className="w-[33%] py-[10px] px-[14px] pl-[35px]">Vendor SKU</div>
+                          <div className="w-[33%] py-[10px] px-[14px]">Unit Purchase Cost</div>
+                          <div className="w-[34%] py-[10px] px-[14px]">Remarks</div>
+                        </div>
+                        {/* Data Row */}
+                        <div className="flex text-[13px] text-[#1E293B]">
+                          <div className="w-[33%] py-[10px] px-[14px] pl-[35px]">{product.vendorSku}</div>
+                          <div className="w-[33%] py-[10px] px-[14px]">{product.unitCost}</div>
+                          <div className="w-[34%] py-[10px] px-[14px]">{product.remarks}</div>
                         </div>
                       </div>
                     )}
