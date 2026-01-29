@@ -137,7 +137,7 @@ const PAGE_SIZE_OPTIONS = [
 // Row Actions Menu
 // ============================================
 
-function RowActionsMenu({ onEdit, onDelete, onAddSubCategory, onMove, isParent = true }) {
+function RowActionsMenu({ onEdit, onDelete, onAddSubCategory, isParent = true }) {
   return (
     <Menu as="div" className="relative">
       <Menu.Button className="p-1.5 text-[#94A3B8] hover:text-[#64748B] hover:bg-[#F1F5F9] rounded transition-colors">
@@ -169,19 +169,6 @@ function RowActionsMenu({ onEdit, onDelete, onAddSubCategory, onMove, isParent =
               )}
             </Menu.Item>
           )}
-          <Menu.Item>
-            {({ active }) => (
-              <button
-                onClick={onMove}
-                className={`w-full px-3 py-2 text-left text-[13px] flex items-center gap-2.5 ${
-                  active ? 'bg-[#F8FAFC]' : ''
-                } text-[#1E293B]`}
-              >
-                <IconCornerDownRight size={15} className="text-[#64748B]" stroke={2} />
-                {isParent ? 'Set as Subcategory' : 'Change Parent'}
-              </button>
-            )}
-          </Menu.Item>
           <Menu.Item>
             {({ active }) => (
               <button
@@ -243,7 +230,6 @@ function SortableCategoryRow({
   onEdit, 
   onDelete,
   onAddSubCategory,
-  onMove,
   isSubCategory = false,
   searchTerm = '',
   isSearchMatch = false,
@@ -376,7 +362,6 @@ function SortableCategoryRow({
           onEdit={onEdit}
           onDelete={onDelete}
           onAddSubCategory={onAddSubCategory}
-          onMove={onMove}
           isParent={isParent}
         />
       </div>
@@ -425,7 +410,8 @@ function CategoryModal({
   onSave, 
   mode = 'create', // 'create' | 'edit'
   parentCategory = null, // For sub-category creation - the parent category
-  initialData = null 
+  initialData = null,
+  allCategories = [] // All categories for parent selection in edit mode
 }) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -433,6 +419,8 @@ function CategoryModal({
   const [selectedTradeTypes, setSelectedTradeTypes] = useState([]);
   const [tradeTypeDropdownOpen, setTradeTypeDropdownOpen] = useState(false);
   const [tradeTypeSearch, setTradeTypeSearch] = useState('');
+  const [selectedParentId, setSelectedParentId] = useState(null);
+  const [parentDropdownOpen, setParentDropdownOpen] = useState(false);
 
   // Reset form when modal opens
   React.useEffect(() => {
@@ -441,8 +429,10 @@ function CategoryModal({
       setDescription(initialData?.description || '');
       setImagePreview(initialData?.image || null);
       setSelectedTradeTypes(initialData?.tradeTypes || []);
+      setSelectedParentId(initialData?.parentId || null);
       setTradeTypeSearch('');
       setTradeTypeDropdownOpen(false);
+      setParentDropdownOpen(false);
     }
   }, [isOpen, initialData]);
 
@@ -451,9 +441,11 @@ function CategoryModal({
       onSave({
         name: name.trim(),
         description: description.trim(),
-        parentId: parentCategory?.id || null,
+        parentId: mode === 'edit' ? selectedParentId : (parentCategory?.id || null),
         image: imagePreview,
         tradeTypes: selectedTradeTypes,
+        // For edit mode, track if parent changed
+        originalParentId: initialData?.parentId || null,
       });
       onClose();
     }
@@ -601,18 +593,22 @@ function CategoryModal({
         {/* Trade Type - Picker for categories, Read-only for sub-categories */}
         <div>
           <Label className="mb-2 block">Trade Type</Label>
-          {isSubCategory ? (
+          {isSubCategory || (mode === 'edit' && selectedParentId) ? (
             // Read-only display for sub-categories - shows inherited trade types from parent
             <div className="min-h-[42px] px-3 py-2 border border-[#E2E8F0] rounded-lg bg-[#F8FAFC] flex items-center flex-wrap gap-2">
-              {parentCategory?.tradeTypes?.length > 0 ? (
-                parentCategory.tradeTypes.map(t => (
-                  <span key={t.id} className="text-[13px] text-[#1E293B] bg-white px-2 py-1 rounded border border-[#E2E8F0]">
-                    {t.name}
+              {(() => {
+                const effectiveParent = selectedParentId 
+                  ? allCategories.find(c => c.id === selectedParentId)
+                  : parentCategory;
+                const tradeType = effectiveParent?.tradeType;
+                return tradeType ? (
+                  <span className="text-[13px] text-[#1E293B] bg-white px-2 py-1 rounded border border-[#E2E8F0]">
+                    {tradeType.name}
                   </span>
-                ))
-              ) : (
-                <span className="text-[13px] text-[#94A3B8]">Not set</span>
-              )}
+                ) : (
+                  <span className="text-[13px] text-[#94A3B8]">Inherited from parent</span>
+                );
+              })()}
             </div>
           ) : (
             // Trade Type multi-select picker for categories
@@ -692,6 +688,103 @@ function CategoryModal({
             </div>
           )}
         </div>
+
+        {/* Parent Category - Only shown in edit mode */}
+        {mode === 'edit' && (
+          <div>
+            <Label className="mb-2 block">Parent Category</Label>
+            <div className="relative">
+              <div 
+                className="min-h-[42px] px-3 py-2 border border-[#E2E8F0] rounded-lg bg-white cursor-pointer flex items-center justify-between"
+                onClick={() => setParentDropdownOpen(!parentDropdownOpen)}
+              >
+                <span className={`text-[13px] ${selectedParentId ? 'text-[#1E293B]' : 'text-[#94A3B8]'}`}>
+                  {selectedParentId 
+                    ? allCategories.find(c => c.id === selectedParentId)?.name || 'Select parent...'
+                    : 'None (Top-level category)'
+                  }
+                </span>
+                <IconChevronDown 
+                  size={16} 
+                  className={`text-[#94A3B8] transition-transform flex-shrink-0 ${parentDropdownOpen ? 'rotate-180' : ''}`} 
+                />
+              </div>
+              
+              {/* Parent Category Dropdown */}
+              {parentDropdownOpen && (
+                <div className="absolute z-10 left-0 right-0 mt-1 bg-white border border-[#E2E8F0] rounded-lg shadow-lg max-h-[240px] overflow-y-auto">
+                  {/* None option - make it top-level */}
+                  <div
+                    className={`px-3 py-2.5 hover:bg-[#F8FAFC] cursor-pointer flex items-center justify-between ${
+                      selectedParentId === null ? 'bg-[#EFF6FF]' : ''
+                    }`}
+                    onClick={(e) => { e.stopPropagation(); setSelectedParentId(null); setParentDropdownOpen(false); }}
+                  >
+                    <span className="text-[13px] text-[#1E293B]">None (Top-level category)</span>
+                    {selectedParentId === null && <IconCheck size={16} className="text-[#2563EB]" stroke={2} />}
+                  </div>
+                  
+                  <div className="border-t border-[#E2E8F0]" />
+                  
+                  {/* Available parent categories */}
+                  {allCategories
+                    .filter(cat => {
+                      // Exclude self
+                      if (cat.id === initialData?.id) return false;
+                      // Exclude own children (if this is a parent being edited)
+                      if (initialData?.subCategories?.some(sub => sub.id === cat.id)) return false;
+                      return true;
+                    })
+                    .map(cat => {
+                      const willChangeTradeType = initialData?.tradeType?.id !== cat.tradeType?.id;
+                      return (
+                        <div
+                          key={cat.id}
+                          className={`px-3 py-2.5 hover:bg-[#F8FAFC] cursor-pointer ${
+                            selectedParentId === cat.id ? 'bg-[#EFF6FF]' : ''
+                          }`}
+                          onClick={(e) => { e.stopPropagation(); setSelectedParentId(cat.id); setParentDropdownOpen(false); }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[13px] text-[#1E293B]">{cat.name}</span>
+                              {cat.tradeType && (
+                                <span className="text-[10px] px-1.5 py-0.5 bg-[#F1F5F9] text-[#64748B] rounded">
+                                  {cat.tradeType.name}
+                                </span>
+                              )}
+                            </div>
+                            {selectedParentId === cat.id && <IconCheck size={16} className="text-[#2563EB]" stroke={2} />}
+                          </div>
+                          {willChangeTradeType && selectedParentId !== cat.id && (
+                            <p className="text-[11px] text-[#F59E0B] mt-1">
+                              Will inherit {cat.tradeType?.name || 'no'} trade type
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+            </div>
+            
+            {/* Trade type change warning */}
+            {selectedParentId && (() => {
+              const newParent = allCategories.find(c => c.id === selectedParentId);
+              const willChangeTradeType = initialData?.tradeType?.id !== newParent?.tradeType?.id;
+              if (willChangeTradeType) {
+                return (
+                  <div className="mt-2 p-2 bg-[#FFFBEB] border border-[#FCD34D] rounded-lg">
+                    <p className="text-[12px] text-[#92400E]">
+                      <strong>Note:</strong> Trade type will change from <strong>{initialData?.tradeType?.name || 'none'}</strong> to <strong>{newParent?.tradeType?.name || 'none'}</strong>
+                    </p>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+          </div>
+        )}
       </div>
     </Modal>
   );
@@ -1269,22 +1362,75 @@ function CategorySettings() {
   const handleEditCategory = (data) => {
     if (!selectedCategory) return;
     
-    if (selectedCategory.isSubCategory) {
-      setCategories(categories.map(cat => {
-        if (cat.id === selectedCategory.parentId) {
-          return {
-            ...cat,
-            subCategories: cat.subCategories.map(sub => 
-              sub.id === selectedCategory.id ? { ...sub, ...data } : sub
-            )
-          };
-        }
-        return cat;
-      }));
+    const { parentId, originalParentId, ...categoryData } = data;
+    const parentChanged = parentId !== originalParentId;
+    
+    if (parentChanged) {
+      // Parent changed - need to move the category
+      let categoryToMove;
+      let updatedCategories = [...categories];
+      
+      if (selectedCategory.isSubCategory) {
+        // Remove from old parent
+        updatedCategories = updatedCategories.map(cat => {
+          if (cat.id === originalParentId) {
+            const subToMove = cat.subCategories.find(sub => sub.id === selectedCategory.id);
+            categoryToMove = { ...subToMove, ...categoryData };
+            return {
+              ...cat,
+              subCategories: cat.subCategories.filter(sub => sub.id !== selectedCategory.id)
+            };
+          }
+          return cat;
+        });
+      } else {
+        // Remove from top-level
+        categoryToMove = { ...updatedCategories.find(c => c.id === selectedCategory.id), ...categoryData };
+        updatedCategories = updatedCategories.filter(c => c.id !== selectedCategory.id);
+      }
+      
+      if (parentId === null) {
+        // Moving to top-level
+        const newParentCategory = {
+          ...categoryToMove,
+          subCategories: categoryToMove.subCategories || []
+        };
+        updatedCategories.push(newParentCategory);
+      } else {
+        // Moving under a new parent
+        updatedCategories = updatedCategories.map(cat => {
+          if (cat.id === parentId) {
+            return {
+              ...cat,
+              subCategories: [...(cat.subCategories || []), { ...categoryToMove, subCategories: undefined }]
+            };
+          }
+          return cat;
+        });
+        // Auto-expand the new parent
+        setExpandedCategories(prev => new Set([...prev, parentId]));
+      }
+      
+      setCategories(updatedCategories);
     } else {
-      setCategories(categories.map(cat => 
-        cat.id === selectedCategory.id ? { ...cat, ...data } : cat
-      ));
+      // No parent change - simple edit
+      if (selectedCategory.isSubCategory) {
+        setCategories(categories.map(cat => {
+          if (cat.id === selectedCategory.parentId) {
+            return {
+              ...cat,
+              subCategories: cat.subCategories.map(sub => 
+                sub.id === selectedCategory.id ? { ...sub, ...categoryData } : sub
+              )
+            };
+          }
+          return cat;
+        }));
+      } else {
+        setCategories(categories.map(cat => 
+          cat.id === selectedCategory.id ? { ...cat, ...categoryData } : cat
+        ));
+      }
     }
   };
 
@@ -1558,7 +1704,6 @@ function CategorySettings() {
                         onEdit={() => openEditModal(category)}
                         onDelete={() => openDeleteModal(category)}
                         onAddSubCategory={() => openAddSubCategoryModal(category)}
-                        onMove={() => openMoveModal(category)}
                         searchTerm={searchTerm}
                         isSearchMatch={parentMatches}
                         isDragDisabled={!!searchTerm}
@@ -1591,7 +1736,6 @@ function CategorySettings() {
                                   isSubCategory={true}
                                   onEdit={() => openEditModal(subCategory, true, category.id, category.name, category.tradeType)}
                                   onDelete={() => openDeleteModal(subCategory, true, category.id)}
-                                  onMove={() => openMoveModal(subCategory, true, category.id)}
                                   searchTerm={searchTerm}
                                   isSearchMatch={matchingSubCategoryIds.has(subCategory.id)}
                                   isDragDisabled={!!searchTerm}
@@ -1707,6 +1851,7 @@ function CategorySettings() {
           name: selectedCategory.parentName,
           tradeType: selectedCategory.parentTradeType
         } : null}
+        allCategories={categories}
       />
 
       {/* Delete Modal */}
