@@ -270,7 +270,7 @@ function VendorDetailsPage({ onBack }) {
                           )}
                         </div>
                         {/* Product SKU */}
-                        <span className="text-[14px] text-[#3B82F6] truncate">{product.sku}</span>
+                        <span className="text-[14px] text-[#1E293B] truncate">{product.sku}</span>
                       </div>
                       <div className="w-[35%] text-[14px] text-[#64748B]">{product.category}</div>
                       <div className="w-[20%] flex items-center justify-center gap-[14px]">
