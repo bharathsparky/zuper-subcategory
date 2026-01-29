@@ -748,12 +748,14 @@ function DeleteConfirmModal({ isOpen, onClose, onConfirm, category, hasSubCatego
 function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
   const [selectedTargetId, setSelectedTargetId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTradeTypeFilter, setSelectedTradeTypeFilter] = useState(null);
 
   // Reset state when modal opens
   React.useEffect(() => {
     if (isOpen) {
       setSelectedTargetId(null);
       setSearchTerm('');
+      setSelectedTradeTypeFilter(null);
     }
   }, [isOpen]);
 
@@ -798,14 +800,38 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
     }
   }, [category, categories]);
 
-  // Filter targets based on search
+  // Get unique trade types for filter
+  const uniqueTradeTypes = useMemo(() => {
+    const tradeTypeMap = new Map();
+    availableTargets.forEach(target => {
+      if (target.tradeType) {
+        tradeTypeMap.set(target.tradeType.id, target.tradeType);
+      }
+    });
+    return Array.from(tradeTypeMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [availableTargets]);
+
+  // Filter targets based on search and trade type
   const filteredTargets = useMemo(() => {
-    if (!searchTerm.trim()) return availableTargets;
-    const term = searchTerm.toLowerCase();
-    return availableTargets.filter(target => 
-      target.name.toLowerCase().includes(term)
-    );
-  }, [availableTargets, searchTerm]);
+    let filtered = availableTargets;
+    
+    // Apply trade type filter
+    if (selectedTradeTypeFilter) {
+      filtered = filtered.filter(target => 
+        target.tradeType?.id === selectedTradeTypeFilter
+      );
+    }
+    
+    // Apply search filter
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(target => 
+        target.name.toLowerCase().includes(term)
+      );
+    }
+    
+    return filtered;
+  }, [availableTargets, searchTerm, selectedTradeTypeFilter]);
 
   // Get selected target details
   const selectedTarget = useMemo(() => {
@@ -887,6 +913,35 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
             className="w-full h-[36px] pl-9 pr-3 text-[13px] text-[#1E293B] placeholder-[#94A3B8] border border-[#E2E8F0] rounded-lg bg-white focus:outline-none focus:border-[#94A3B8]"
           />
         </div>
+
+        {/* Trade Type Filter */}
+        {uniqueTradeTypes.length > 1 && (
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedTradeTypeFilter(null)}
+              className={`px-3 py-1.5 text-[12px] font-medium rounded-full transition-colors ${
+                selectedTradeTypeFilter === null
+                  ? 'bg-[#1E293B] text-white'
+                  : 'bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0]'
+              }`}
+            >
+              All
+            </button>
+            {uniqueTradeTypes.map(tradeType => (
+              <button
+                key={tradeType.id}
+                onClick={() => setSelectedTradeTypeFilter(tradeType.id)}
+                className={`px-3 py-1.5 text-[12px] font-medium rounded-full transition-colors ${
+                  selectedTradeTypeFilter === tradeType.id
+                    ? 'bg-[#1E293B] text-white'
+                    : 'bg-[#F1F5F9] text-[#64748B] hover:bg-[#E2E8F0]'
+                }`}
+              >
+                {tradeType.name}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Target Selection */}
         <div className="border border-[#E2E8F0] rounded-lg overflow-hidden max-h-[280px] overflow-y-auto">
