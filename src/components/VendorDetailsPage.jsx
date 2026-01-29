@@ -131,8 +131,9 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
   const [step, setStep] = useState(1); // Step 1: Select items, Step 2: Enter details
   const [selectedItems, setSelectedItems] = useState([]);
   const [expandedItems, setExpandedItems] = useState({});
+  // itemDetails now contains skuEntries array, each with its own options
+  // { itemId: { skuEntries: [{ id, vendorSku, unitPurchaseCost, remarks, optionIds }] } }
   const [itemDetails, setItemDetails] = useState({});
-  const [selectedOptions, setSelectedOptions] = useState({}); // { itemId: ['opt1', 'opt2', ...] }
   const [validationErrors, setValidationErrors] = useState({});
   const totalPages = 80;
 
@@ -142,27 +143,40 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
     return item.options.filter(opt => opt.available);
   };
 
+  // Get options already assigned to other SKUs for this item
+  const getAssignedOptionIds = (itemId, excludeSkuId = null) => {
+    const details = itemDetails[itemId];
+    if (!details || !details.skuEntries) return [];
+    return details.skuEntries
+      .filter(sku => sku.id !== excludeSkuId)
+      .flatMap(sku => sku.optionIds || []);
+  };
+
+  // Get unassigned options for an item
+  const getUnassignedOptions = (item, excludeSkuId = null) => {
+    const availableOpts = getAvailableOptions(item);
+    const assignedIds = getAssignedOptionIds(item.id, excludeSkuId);
+    return availableOpts.filter(opt => !assignedIds.includes(opt.id));
+  };
+
   const handleItemSelect = (item, checked) => {
     if (checked) {
       setSelectedItems(prev => [...prev, item]);
-      // Initialize item details with default values
+      // Initialize with one SKU entry, all options selected by default
+      const availableOpts = getAvailableOptions(item);
       setItemDetails(prev => ({
         ...prev,
         [item.id]: {
-          vendorSku: '',
-          unitPurchaseCost: item.unitCost.toString(),
-          remarks: ''
+          skuEntries: [{
+            id: `sku_${Date.now()}`,
+            vendorSku: '',
+            unitPurchaseCost: item.unitCost.toString(),
+            remarks: '',
+            optionIds: availableOpts.map(opt => opt.id)
+          }]
         }
       }));
       setExpandedItems(prev => ({ ...prev, [item.id]: true }));
-      // Initialize all available options as selected by default
-      const availableOpts = getAvailableOptions(item);
-      if (availableOpts.length > 0) {
-        setSelectedOptions(prev => ({
-          ...prev,
-          [item.id]: availableOpts.map(opt => opt.id)
-        }));
-      }
     } else {
       setSelectedItems(prev => prev.filter(i => i.id !== item.id));
       setItemDetails(prev => {
@@ -175,11 +189,6 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
         delete newExpanded[item.id];
         return newExpanded;
       });
-      setSelectedOptions(prev => {
-        const newOptions = { ...prev };
-        delete newOptions[item.id];
-        return newOptions;
-      });
       setValidationErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors[item.id];
@@ -188,53 +197,127 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
     }
   };
 
-  // Toggle option selection for an item
-  const toggleOptionSelection = (itemId, optionId) => {
-    setSelectedOptions(prev => {
-      const currentSelected = prev[itemId] || [];
-      const isSelected = currentSelected.includes(optionId);
-      
-      if (isSelected) {
-        return {
-          ...prev,
-          [itemId]: currentSelected.filter(id => id !== optionId)
-        };
-      } else {
-        return {
-          ...prev,
-          [itemId]: [...currentSelected, optionId]
-        };
+  // Add a new SKU entry for an item
+  const addSkuEntry = (itemId, item) => {
+    const unassignedOpts = getUnassignedOptions(item);
+    if (unassignedOpts.length === 0) return; // No more options to assign
+    
+    setItemDetails(prev => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        skuEntries: [
+          ...(prev[itemId]?.skuEntries || []),
+          {
+            id: `sku_${Date.now()}`,
+            vendorSku: '',
+            unitPurchaseCost: item.unitCost.toString(),
+            remarks: '',
+            optionIds: [] // User must select options for new SKU
+          }
+        ]
       }
+    }));
+  };
+
+  // Remove a SKU entry
+  const removeSkuEntry = (itemId, skuId) => {
+    setItemDetails(prev => {
+      const entries = prev[itemId]?.skuEntries || [];
+      if (entries.length <= 1) return prev; // Keep at least one SKU
+      return {
+        ...prev,
+        [itemId]: {
+          ...prev[itemId],
+          skuEntries: entries.filter(sku => sku.id !== skuId)
+        }
+      };
     });
-    // Clear validation error when user selects an option
+  };
+
+  // Update SKU entry field
+  const updateSkuEntry = (itemId, skuId, field, value) => {
+    setItemDetails(prev => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        skuEntries: (prev[itemId]?.skuEntries || []).map(sku =>
+          sku.id === skuId ? { ...sku, [field]: value } : sku
+        )
+      }
+    }));
+    // Clear validation error
     setValidationErrors(prev => {
       const newErrors = { ...prev };
-      delete newErrors[itemId];
+      delete newErrors[`${itemId}_${skuId}`];
       return newErrors;
     });
   };
 
-  // Select all options for an item
-  const selectAllOptions = (item) => {
-    const availableOpts = getAvailableOptions(item);
-    setSelectedOptions(prev => ({
+  // Toggle option for a specific SKU
+  const toggleSkuOption = (itemId, skuId, optionId) => {
+    setItemDetails(prev => ({
       ...prev,
-      [item.id]: availableOpts.map(opt => opt.id)
+      [itemId]: {
+        ...prev[itemId],
+        skuEntries: (prev[itemId]?.skuEntries || []).map(sku => {
+          if (sku.id !== skuId) return sku;
+          const currentOptions = sku.optionIds || [];
+          const isSelected = currentOptions.includes(optionId);
+          return {
+            ...sku,
+            optionIds: isSelected
+              ? currentOptions.filter(id => id !== optionId)
+              : [...currentOptions, optionId]
+          };
+        })
+      }
     }));
+    // Clear validation error
     setValidationErrors(prev => {
       const newErrors = { ...prev };
-      delete newErrors[item.id];
+      delete newErrors[`${itemId}_${skuId}`];
       return newErrors;
     });
   };
 
-  // Clear all options for an item
-  const clearAllOptions = (item) => {
-    setSelectedOptions(prev => ({
+  // Select all unassigned options for a SKU
+  const selectAllForSku = (itemId, skuId, item) => {
+    const unassignedOpts = getUnassignedOptions(item, skuId);
+    const currentSku = itemDetails[itemId]?.skuEntries?.find(s => s.id === skuId);
+    const currentOptions = currentSku?.optionIds || [];
+    
+    // Add all unassigned options to this SKU
+    const allOptionIds = [...new Set([...currentOptions, ...unassignedOpts.map(o => o.id)])];
+    
+    setItemDetails(prev => ({
       ...prev,
-      [item.id]: []
+      [itemId]: {
+        ...prev[itemId],
+        skuEntries: (prev[itemId]?.skuEntries || []).map(sku =>
+          sku.id === skuId ? { ...sku, optionIds: allOptionIds } : sku
+        )
+      }
     }));
   };
+
+  // Clear all options for a SKU
+  const clearAllForSku = (itemId, skuId) => {
+    setItemDetails(prev => ({
+      ...prev,
+      [itemId]: {
+        ...prev[itemId],
+        skuEntries: (prev[itemId]?.skuEntries || []).map(sku =>
+          sku.id === skuId ? { ...sku, optionIds: [] } : sku
+        )
+      }
+    }));
+  };
+
+  // Legacy functions for backward compatibility (no longer used)
+  const toggleOptionSelection = () => {};
+  const selectAllOptions = () => {};
+  const clearAllOptions = () => {};
 
   const handleRemoveItem = (itemId) => {
     setSelectedItems(prev => prev.filter(i => i.id !== itemId));
@@ -248,30 +331,20 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
       delete newExpanded[itemId];
       return newExpanded;
     });
-    setSelectedOptions(prev => {
-      const newOptions = { ...prev };
-      delete newOptions[itemId];
-      return newOptions;
-    });
     setValidationErrors(prev => {
       const newErrors = { ...prev };
-      delete newErrors[itemId];
+      // Remove all validation errors for this item
+      Object.keys(newErrors).forEach(key => {
+        if (key.startsWith(itemId)) {
+          delete newErrors[key];
+        }
+      });
       return newErrors;
     });
   };
 
   const toggleItemExpanded = (itemId) => {
     setExpandedItems(prev => ({ ...prev, [itemId]: !prev[itemId] }));
-  };
-
-  const updateItemDetail = (itemId, field, value) => {
-    setItemDetails(prev => ({
-      ...prev,
-      [itemId]: {
-        ...prev[itemId],
-        [field]: value
-      }
-    }));
   };
 
   const handleNext = () => {
@@ -286,16 +359,22 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
   };
 
   const handleAddItem = () => {
-    // Validate options - ensure at least one option is selected for items with options
+    // Validate each SKU entry - ensure required fields and at least one option
     const errors = {};
     selectedItems.forEach(item => {
       const availableOpts = getAvailableOptions(item);
-      if (availableOpts.length > 0) {
-        const selected = selectedOptions[item.id] || [];
-        if (selected.length === 0) {
-          errors[item.id] = `Select at least one option for ${item.name}`;
+      const skuEntries = itemDetails[item.id]?.skuEntries || [];
+      
+      skuEntries.forEach(sku => {
+        // Validate Vendor SKU is filled
+        if (!sku.vendorSku.trim()) {
+          errors[`${item.id}_${sku.id}_sku`] = 'Vendor SKU is required';
         }
-      }
+        // Validate at least one option if item has options
+        if (availableOpts.length > 0 && (!sku.optionIds || sku.optionIds.length === 0)) {
+          errors[`${item.id}_${sku.id}_options`] = `Select at least one option for this SKU`;
+        }
+      });
     });
 
     if (Object.keys(errors).length > 0) {
@@ -303,14 +382,14 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
       return;
     }
 
-    onAddProduct && onAddProduct(selectedItems, itemDetails, selectedOptions);
+    // Pass itemDetails which now contains skuEntries with linked options
+    onAddProduct && onAddProduct(selectedItems, itemDetails);
     onClose();
     // Reset state
     setStep(1);
     setSelectedItems([]);
     setItemDetails({});
     setExpandedItems({});
-    setSelectedOptions({});
     setValidationErrors({});
   };
 
@@ -321,7 +400,6 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
     setSelectedItems([]);
     setItemDetails({});
     setExpandedItems({});
-    setSelectedOptions({});
     setValidationErrors({});
   };
 
@@ -501,155 +579,207 @@ function LineItemPickerModal({ isOpen, onClose, onAddProduct }) {
                       </div>
                     </div>
 
-                    {/* Item Details Form */}
+                    {/* Item Details Form - SKU Entries with linked Options */}
                     {expandedItems[item.id] && (
                       <div className="px-[16px] pb-[16px] bg-white">
-                        {/* Labels Row */}
-                        <div className="grid grid-cols-3 gap-[16px] mb-[8px]">
-                          <div>
-                            <label className="text-[13px] font-medium text-[#334155]">
-                              Vendor SKU <span className="text-[#EF4444]">*</span>
-                            </label>
-                          </div>
-                          <div>
-                            <label className="text-[13px] font-medium text-[#334155]">
-                              Unit Purchase Cost <span className="text-[#EF4444]">*</span>
-                            </label>
-                          </div>
-                          <div>
-                            <label className="text-[13px] font-medium text-[#334155]">
-                              Remarks
-                            </label>
-                          </div>
-                        </div>
-
-                        {/* Input Fields Row */}
-                        <div className="grid grid-cols-3 gap-[16px] mb-[12px]">
-                          <div>
-                            <input
-                              type="text"
-                              placeholder="Eg: 1234"
-                              value={itemDetails[item.id]?.vendorSku || ''}
-                              onChange={(e) => updateItemDetail(item.id, 'vendorSku', e.target.value)}
-                              className="w-full h-[40px] px-[12px] border border-[#E2E8F0] rounded-[6px] text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6]"
-                            />
-                          </div>
-                          <div className="flex">
-                            <div className="h-[40px] px-[12px] flex items-center bg-[#F8FAFC] border border-r-0 border-[#E2E8F0] rounded-l-[6px] text-[14px] text-[#64748B]">
-                              USD
-                            </div>
-                            <input
-                              type="text"
-                              value={itemDetails[item.id]?.unitPurchaseCost || ''}
-                              onChange={(e) => updateItemDetail(item.id, 'unitPurchaseCost', e.target.value)}
-                              className="flex-1 h-[40px] px-[12px] border border-[#E2E8F0] rounded-r-[6px] text-[14px] text-[#334155] outline-none focus:border-[#3B82F6]"
-                            />
-                          </div>
-                          <div>
-                            <input
-                              type="text"
-                              value={itemDetails[item.id]?.remarks || ''}
-                              onChange={(e) => updateItemDetail(item.id, 'remarks', e.target.value)}
-                              className="w-full h-[40px] px-[12px] border border-[#E2E8F0] rounded-[6px] text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6]"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Add SKU Button */}
-                        <button className="flex items-center gap-[6px] text-[13px] font-medium text-[#64748B] hover:text-[#334155] transition-colors">
-                          <IconPlus size={16} stroke={2} />
-                          Add SKU
-                        </button>
-
-                        {/* Options Selection Section - Only show for items with options */}
                         {(() => {
+                          const skuEntries = itemDetails[item.id]?.skuEntries || [];
                           const availableOpts = getAvailableOptions(item);
-                          if (availableOpts.length === 0) return null;
-                          
-                          const selectedCount = (selectedOptions[item.id] || []).length;
-                          const totalCount = availableOpts.length;
+                          const hasOptions = availableOpts.length > 0;
                           
                           return (
-                            <>
-                              {/* Divider */}
-                              <div className="border-t border-dashed border-[#E2E8F0] my-[16px]" />
-                              
-                              {/* Options Header */}
-                              <div className="flex items-center justify-between mb-[12px]">
-                                <div className="flex items-center gap-[8px]">
-                                  <span className="text-[13px] font-medium text-[#334155]">
-                                    Options available from this vendor
-                                  </span>
-                                  <span className="text-[12px] text-[#64748B]">
-                                    ({selectedCount} of {totalCount} selected)
-                                  </span>
-                                </div>
-                              </div>
-
-                              {/* Options Grid */}
-                              <div className="grid grid-cols-4 gap-[12px] mb-[12px]">
-                                {availableOpts.map((option) => {
-                                  const isSelected = (selectedOptions[item.id] || []).includes(option.id);
-                                  return (
-                                    <div
-                                      key={option.id}
-                                      onClick={() => toggleOptionSelection(item.id, option.id)}
-                                      className={`
-                                        relative p-[12px] rounded-[8px] border cursor-pointer transition-all
-                                        ${isSelected 
-                                          ? 'border-[#E44A19] bg-[#FEF7F5]' 
-                                          : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1]'
-                                        }
-                                      `}
-                                    >
-                                      {/* Checkbox */}
-                                      <div className="absolute top-[8px] left-[8px]">
-                                        <input
-                                          type="checkbox"
-                                          checked={isSelected}
-                                          onChange={() => {}}
-                                          className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
-                                        />
+                            <div className="space-y-[16px]">
+                              {skuEntries.map((sku, skuIndex) => {
+                                // Get options available for this SKU (not assigned to other SKUs)
+                                const assignedToOtherSkus = getAssignedOptionIds(item.id, sku.id);
+                                const availableForThisSku = availableOpts.filter(
+                                  opt => !assignedToOtherSkus.includes(opt.id) || (sku.optionIds || []).includes(opt.id)
+                                );
+                                const selectedCount = (sku.optionIds || []).length;
+                                
+                                return (
+                                  <div key={sku.id} className={`${skuIndex > 0 ? 'pt-[16px] border-t border-[#E2E8F0]' : ''}`}>
+                                    {/* SKU Header for multiple SKUs */}
+                                    {skuEntries.length > 1 && (
+                                      <div className="flex items-center justify-between mb-[12px]">
+                                        <span className="text-[13px] font-semibold text-[#475569]">
+                                          SKU {skuIndex + 1}
+                                        </span>
+                                        <button
+                                          onClick={() => removeSkuEntry(item.id, sku.id)}
+                                          className="text-[12px] text-[#EF4444] hover:text-[#DC2626] font-medium transition-colors"
+                                        >
+                                          Remove
+                                        </button>
                                       </div>
-                                      
-                                      {/* Option Color Swatch */}
-                                      <div 
-                                        className="w-[48px] h-[48px] mx-auto mb-[8px] rounded-[6px] overflow-hidden border border-[#E2E8F0]"
-                                        style={{ backgroundColor: option.color || '#CBD5E1' }}
-                                      />
-                                      
-                                      {/* Option Name */}
-                                      <div className="text-[12px] text-center text-[#334155] font-medium truncate">
-                                        {option.name}
+                                    )}
+                                    
+                                    {/* Labels Row */}
+                                    <div className="grid grid-cols-3 gap-[16px] mb-[8px]">
+                                      <div>
+                                        <label className="text-[13px] font-medium text-[#334155]">
+                                          Vendor SKU <span className="text-[#EF4444]">*</span>
+                                        </label>
+                                      </div>
+                                      <div>
+                                        <label className="text-[13px] font-medium text-[#334155]">
+                                          Unit Purchase Cost <span className="text-[#EF4444]">*</span>
+                                        </label>
+                                      </div>
+                                      <div>
+                                        <label className="text-[13px] font-medium text-[#334155]">
+                                          Remarks
+                                        </label>
                                       </div>
                                     </div>
-                                  );
-                                })}
-                              </div>
 
-                              {/* Quick Actions */}
-                              <div className="flex items-center gap-[16px]">
-                                <button
-                                  onClick={() => selectAllOptions(item)}
-                                  className="text-[13px] text-[#3B82F6] hover:text-[#2563EB] font-medium transition-colors"
-                                >
-                                  Select All
-                                </button>
-                                <button
-                                  onClick={() => clearAllOptions(item)}
-                                  className="text-[13px] text-[#64748B] hover:text-[#334155] font-medium transition-colors"
-                                >
-                                  Clear All
-                                </button>
-                              </div>
+                                    {/* Input Fields Row */}
+                                    <div className="grid grid-cols-3 gap-[16px]">
+                                      <div>
+                                        <input
+                                          type="text"
+                                          placeholder="Eg: IKOCAMB-STD"
+                                          value={sku.vendorSku}
+                                          onChange={(e) => updateSkuEntry(item.id, sku.id, 'vendorSku', e.target.value)}
+                                          className={`w-full h-[40px] px-[12px] border rounded-[6px] text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] ${
+                                            validationErrors[`${item.id}_${sku.id}_sku`] ? 'border-[#EF4444]' : 'border-[#E2E8F0]'
+                                          }`}
+                                        />
+                                        {validationErrors[`${item.id}_${sku.id}_sku`] && (
+                                          <div className="mt-[4px] text-[12px] text-[#EF4444]">
+                                            {validationErrors[`${item.id}_${sku.id}_sku`]}
+                                          </div>
+                                        )}
+                                      </div>
+                                      <div className="flex">
+                                        <div className="h-[40px] px-[12px] flex items-center bg-[#F8FAFC] border border-r-0 border-[#E2E8F0] rounded-l-[6px] text-[14px] text-[#64748B]">
+                                          USD
+                                        </div>
+                                        <input
+                                          type="text"
+                                          value={sku.unitPurchaseCost}
+                                          onChange={(e) => updateSkuEntry(item.id, sku.id, 'unitPurchaseCost', e.target.value)}
+                                          className="flex-1 h-[40px] px-[12px] border border-[#E2E8F0] rounded-r-[6px] text-[14px] text-[#334155] outline-none focus:border-[#3B82F6]"
+                                        />
+                                      </div>
+                                      <div>
+                                        <input
+                                          type="text"
+                                          placeholder="Notes..."
+                                          value={sku.remarks}
+                                          onChange={(e) => updateSkuEntry(item.id, sku.id, 'remarks', e.target.value)}
+                                          className="w-full h-[40px] px-[12px] border border-[#E2E8F0] rounded-[6px] text-[14px] text-[#334155] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6]"
+                                        />
+                                      </div>
+                                    </div>
 
-                              {/* Validation Error */}
-                              {validationErrors[item.id] && (
-                                <div className="mt-[8px] text-[13px] text-[#EF4444]">
-                                  {validationErrors[item.id]}
-                                </div>
-                              )}
-                            </>
+                                    {/* Options Selection for this SKU - Only show for items with options */}
+                                    {hasOptions && (
+                                      <div className="mt-[16px]">
+                                        {/* Options Header */}
+                                        <div className="flex items-center justify-between mb-[10px]">
+                                          <div className="flex items-center gap-[8px]">
+                                            <span className="text-[13px] font-medium text-[#334155]">
+                                              Options for this SKU
+                                            </span>
+                                            <span className="text-[12px] text-[#64748B]">
+                                              ({selectedCount} of {availableForThisSku.length} selected)
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center gap-[12px]">
+                                            <button
+                                              onClick={() => selectAllForSku(item.id, sku.id, item)}
+                                              className="text-[12px] text-[#3B82F6] hover:text-[#2563EB] font-medium transition-colors"
+                                            >
+                                              Select All
+                                            </button>
+                                            <button
+                                              onClick={() => clearAllForSku(item.id, sku.id)}
+                                              className="text-[12px] text-[#64748B] hover:text-[#334155] font-medium transition-colors"
+                                            >
+                                              Clear
+                                            </button>
+                                          </div>
+                                        </div>
+
+                                        {/* Options Grid - Compact with swatches and names */}
+                                        <div className="flex flex-wrap gap-[8px]">
+                                          {availableForThisSku.map((option) => {
+                                            const isSelected = (sku.optionIds || []).includes(option.id);
+                                            return (
+                                              <div
+                                                key={option.id}
+                                                onClick={() => toggleSkuOption(item.id, sku.id, option.id)}
+                                                className={`
+                                                  flex items-center gap-[8px] px-[10px] py-[6px] rounded-[6px] border cursor-pointer transition-all
+                                                  ${isSelected 
+                                                    ? 'border-[#E44A19] bg-[#FEF7F5]' 
+                                                    : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1]'
+                                                  }
+                                                `}
+                                              >
+                                                <input
+                                                  type="checkbox"
+                                                  checked={isSelected}
+                                                  onChange={() => {}}
+                                                  className="w-[14px] h-[14px] rounded border-[#CBD5E1] text-[#E44A19] focus:ring-[#E44A19] cursor-pointer"
+                                                />
+                                                <div 
+                                                  className="w-[20px] h-[20px] rounded-[4px] border border-[#E2E8F0] flex-shrink-0"
+                                                  style={{ backgroundColor: option.color || '#CBD5E1' }}
+                                                />
+                                                <span className="text-[13px] text-[#334155] font-medium whitespace-nowrap">
+                                                  {option.name}
+                                                </span>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+
+                                        {/* Validation Error */}
+                                        {validationErrors[`${item.id}_${sku.id}_options`] && (
+                                          <div className="mt-[8px] text-[12px] text-[#EF4444]">
+                                            {validationErrors[`${item.id}_${sku.id}_options`]}
+                                          </div>
+                                        )}
+                                        
+                                        {/* Show assigned options info if some are unavailable */}
+                                        {assignedToOtherSkus.length > 0 && skuEntries.length > 1 && (
+                                          <div className="mt-[8px] text-[11px] text-[#94A3B8]">
+                                            {assignedToOtherSkus.length} option(s) already assigned to other SKUs
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                              
+                              {/* Add SKU Button - Only show if there are unassigned options OR no options at all */}
+                              {(() => {
+                                const unassignedOpts = getUnassignedOptions(item);
+                                const canAddSku = !hasOptions || unassignedOpts.length > 0;
+                                
+                                if (!canAddSku) return null;
+                                
+                                return (
+                                  <div className="pt-[12px] border-t border-dashed border-[#E2E8F0]">
+                                    <button 
+                                      onClick={() => addSkuEntry(item.id, item)}
+                                      className="flex items-center gap-[6px] text-[13px] font-medium text-[#3B82F6] hover:text-[#2563EB] transition-colors"
+                                    >
+                                      <IconPlus size={16} stroke={2} />
+                                      Add another SKU
+                                      {hasOptions && unassignedOpts.length > 0 && (
+                                        <span className="text-[11px] text-[#94A3B8] ml-[4px]">
+                                          ({unassignedOpts.length} options available)
+                                        </span>
+                                      )}
+                                    </button>
+                                  </div>
+                                );
+                              })()}
+                            </div>
                           );
                         })()}
                       </div>
@@ -711,38 +841,66 @@ const SHINGLE_OPTIONS = [
   { id: 'opt8', name: 'Estate Gray', color: '#5A5A5A', available: true },
 ];
 
-// Mock data for products
+// Mock data for products - now using skuEntries with linked options
 const MOCK_PRODUCTS = [
-  { id: 1, sku: '#12345 - PLACEHOLDER', category: 'Sidewall SWA', image: null, vendorSku: 'PLACEHOLDER', unitCost: '$0.00', remarks: '---', options: null, selectedOptionIds: null },
+  { 
+    id: 1, 
+    sku: '#12345 - PLACEHOLDER', 
+    category: 'Sidewall SWA', 
+    image: null, 
+    options: null,
+    skuEntries: [
+      { id: 'sku_1', vendorSku: 'PLACEHOLDER', unitCost: '$0.00', remarks: '---', optionIds: [] }
+    ]
+  },
   { 
     id: 2, 
     sku: '#ASP.SHI.24109 - IKO - Architectural - Cambridg...', 
     category: 'Shingles SHI', 
-    image: SHINGLE_IMAGE, 
-    vendorSku: 'IKOCABEN', 
-    unitCost: '$32.67', 
-    remarks: '---',
+    image: SHINGLE_IMAGE,
     options: SHINGLE_OPTIONS,
-    selectedOptionIds: ['opt1', 'opt2', 'opt4', 'opt7'] // 4 of 8 colors available from this vendor
+    // Multiple SKUs with different price points and color groups
+    skuEntries: [
+      { 
+        id: 'sku_2a', 
+        vendorSku: 'IKOCAMB-STD', 
+        unitCost: '$32.67', 
+        remarks: 'Standard colors',
+        optionIds: ['opt1', 'opt2', 'opt4', 'opt7'] // Charcoal, Weathered Wood, Dual Black, Barkwood
+      },
+      { 
+        id: 'sku_2b', 
+        vendorSku: 'IKOCAMB-PREM', 
+        unitCost: '$35.00', 
+        remarks: 'Premium colors',
+        optionIds: ['opt3', 'opt5', 'opt6'] // Desert Tan, Slate, Driftwood
+      }
+    ]
   },
   { 
     id: 3, 
     sku: '#ASP.SHI.40918 - IKO - Architectural - Cambridg...', 
     category: 'Shingles SHI', 
-    image: SHINGLE_IMAGE, 
-    vendorSku: 'IKOCABEN', 
-    unitCost: '$32.67', 
-    remarks: '---',
+    image: SHINGLE_IMAGE,
     options: SHINGLE_OPTIONS,
-    selectedOptionIds: ['opt1', 'opt2', 'opt3', 'opt4', 'opt5', 'opt6', 'opt7', 'opt8'] // All 8 colors
+    // Single SKU with all colors
+    skuEntries: [
+      { 
+        id: 'sku_3a', 
+        vendorSku: 'IKOCABEN', 
+        unitCost: '$32.67', 
+        remarks: '---',
+        optionIds: ['opt1', 'opt2', 'opt3', 'opt4', 'opt5', 'opt6', 'opt7', 'opt8'] // All 8 colors
+      }
+    ]
   },
-  { id: 4, sku: '#ASP.SHI.74824 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
-  { id: 5, sku: '#ASP.SHI.95785 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
-  { id: 6, sku: '#ASP.SHI.48522 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
-  { id: 7, sku: '#ASP.SHI.73459 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
-  { id: 8, sku: '#ASP.SHI.86264 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
-  { id: 9, sku: '#ASP.SHI.31413 - IKO - Architectural - Cambridge...', category: 'Shingles SHI', image: null, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
-  { id: 10, sku: '#ASP.SHI.74281 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', options: null, selectedOptionIds: null },
+  { id: 4, sku: '#ASP.SHI.74824 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, options: null, skuEntries: [{ id: 'sku_4', vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', optionIds: [] }] },
+  { id: 5, sku: '#ASP.SHI.95785 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, options: null, skuEntries: [{ id: 'sku_5', vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', optionIds: [] }] },
+  { id: 6, sku: '#ASP.SHI.48522 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, options: null, skuEntries: [{ id: 'sku_6', vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', optionIds: [] }] },
+  { id: 7, sku: '#ASP.SHI.73459 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, options: null, skuEntries: [{ id: 'sku_7', vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', optionIds: [] }] },
+  { id: 8, sku: '#ASP.SHI.86264 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null, options: null, skuEntries: [{ id: 'sku_8', vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', optionIds: [] }] },
+  { id: 9, sku: '#ASP.SHI.31413 - IKO - Architectural - Cambridge...', category: 'Shingles SHI', image: null, options: null, skuEntries: [{ id: 'sku_9', vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', optionIds: [] }] },
+  { id: 10, sku: '#ASP.SHI.74281 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null, options: null, skuEntries: [{ id: 'sku_10', vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---', optionIds: [] }] },
 ];
 
 // Vendor data
@@ -753,24 +911,41 @@ const VENDOR_DATA = {
   address: '2318 North 23rd Street, Wilmington, North Carolina, United States, 28405',
 };
 
-// Edit Options Modal Component
+// Edit Options Modal Component - Now works with SKU-specific options
 function EditOptionsModal({ isOpen, onClose, product, onSave }) {
   const [selectedOptionIds, setSelectedOptionIds] = useState([]);
   const [validationError, setValidationError] = useState('');
 
+  // Get the SKU being edited
+  const editingSkuId = product?.editingSkuId;
+  const editingSku = product?.skuEntries?.find(s => s.id === editingSkuId);
+  
+  // Get options assigned to OTHER SKUs (can't be selected for this SKU)
+  const getOtherSkuOptionIds = () => {
+    if (!product?.skuEntries || !editingSkuId) return [];
+    return product.skuEntries
+      .filter(s => s.id !== editingSkuId)
+      .flatMap(s => s.optionIds || []);
+  };
+
   // Initialize selected options when modal opens
   React.useEffect(() => {
-    if (isOpen && product) {
-      setSelectedOptionIds(product.selectedOptionIds || []);
+    if (isOpen && product && editingSku) {
+      setSelectedOptionIds(editingSku.optionIds || []);
       setValidationError('');
     }
-  }, [isOpen, product]);
+  }, [isOpen, product, editingSku]);
 
-  if (!isOpen || !product) return null;
+  if (!isOpen || !product || !editingSku) return null;
 
   const availableOptions = (product.options || []).filter(opt => opt.available);
+  const otherSkuOptionIds = getOtherSkuOptionIds();
+  // Options available for this SKU (not assigned to other SKUs OR already in this SKU)
+  const selectableOptions = availableOptions.filter(
+    opt => !otherSkuOptionIds.includes(opt.id) || selectedOptionIds.includes(opt.id)
+  );
   const selectedCount = selectedOptionIds.length;
-  const totalCount = availableOptions.length;
+  const totalCount = selectableOptions.length;
 
   const toggleOption = (optionId) => {
     setSelectedOptionIds(prev => {
@@ -784,7 +959,7 @@ function EditOptionsModal({ isOpen, onClose, product, onSave }) {
   };
 
   const selectAll = () => {
-    setSelectedOptionIds(availableOptions.map(opt => opt.id));
+    setSelectedOptionIds(selectableOptions.map(opt => opt.id));
     setValidationError('');
   };
 
@@ -797,7 +972,7 @@ function EditOptionsModal({ isOpen, onClose, product, onSave }) {
       setValidationError('Select at least one option');
       return;
     }
-    onSave(product.id, selectedOptionIds);
+    onSave(product.id, editingSkuId, selectedOptionIds);
     onClose();
   };
 
@@ -820,16 +995,21 @@ function EditOptionsModal({ isOpen, onClose, product, onSave }) {
 
         {/* Content */}
         <div className="flex-1 overflow-auto min-h-0 p-[24px]">
-          {/* Product Info */}
-          <div className="mb-[16px]">
-            <div className="text-[14px] font-medium text-[#1E293B] truncate">{product.sku}</div>
+          {/* Product & SKU Info */}
+          <div className="mb-[16px] p-[12px] bg-[#F8FAFC] rounded-[6px]">
+            <div className="text-[14px] font-medium text-[#1E293B] truncate mb-[4px]">{product.sku}</div>
+            <div className="flex items-center gap-[8px] text-[13px]">
+              <span className="text-[#64748B]">Editing options for SKU:</span>
+              <span className="font-semibold text-[#334155]">{editingSku.vendorSku}</span>
+              <span className="text-[#94A3B8]">({editingSku.unitCost})</span>
+            </div>
           </div>
 
           {/* Options Header */}
           <div className="flex items-center justify-between mb-[16px]">
             <div className="flex items-center gap-[8px]">
               <span className="text-[13px] font-medium text-[#334155]">
-                Select options available from this vendor
+                Select options for this SKU
               </span>
               <span className="text-[12px] text-[#64748B]">
                 ({selectedCount} of {totalCount} selected)
@@ -837,9 +1017,16 @@ function EditOptionsModal({ isOpen, onClose, product, onSave }) {
             </div>
           </div>
 
+          {/* Info about other SKU assignments */}
+          {otherSkuOptionIds.length > 0 && (
+            <div className="mb-[12px] text-[12px] text-[#94A3B8]">
+              {otherSkuOptionIds.length} option(s) assigned to other SKUs are not shown
+            </div>
+          )}
+
           {/* Options Grid */}
           <div className="grid grid-cols-4 gap-[12px] mb-[16px]">
-            {availableOptions.map((option) => {
+            {selectableOptions.map((option) => {
               const isSelected = selectedOptionIds.includes(option.id);
               return (
                 <div
@@ -932,13 +1119,17 @@ function VendorDetailsPage({ onBack }) {
   const [editOptionsProduct, setEditOptionsProduct] = useState(null); // Product being edited
   const totalPages = 17;
 
-  // Handle saving options from edit modal
-  const handleSaveOptions = (productId, selectedOptionIds) => {
-    setProducts(prev => prev.map(p => 
-      p.id === productId 
-        ? { ...p, selectedOptionIds } 
-        : p
-    ));
+  // Handle saving options from edit modal - now updates specific SKU's options
+  const handleSaveOptions = (productId, skuId, selectedOptionIds) => {
+    setProducts(prev => prev.map(p => {
+      if (p.id !== productId) return p;
+      return {
+        ...p,
+        skuEntries: (p.skuEntries || []).map(sku =>
+          sku.id === skuId ? { ...sku, optionIds: selectedOptionIds } : sku
+        )
+      };
+    }));
   };
   
   const toggleRowExpand = (productId) => {
@@ -1127,15 +1318,10 @@ function VendorDetailsPage({ onBack }) {
               {/* Table Body */}
               {products.map((product) => {
                 const isExpanded = expandedRows.includes(product.id);
-                // Get available options for this product
                 const availableOptions = (product.options || []).filter(opt => opt.available);
-                const selectedOptions = availableOptions.filter(opt => 
-                  (product.selectedOptionIds || []).includes(opt.id)
-                );
                 const hasOptions = availableOptions.length > 0;
+                const skuEntries = product.skuEntries || [];
                 const maxVisibleSwatches = 6;
-                const visibleOptions = selectedOptions.slice(0, maxVisibleSwatches);
-                const overflowCount = selectedOptions.length - maxVisibleSwatches;
                 
                 return (
                   <div key={product.id} className="border-b border-[#E2E8F0]">
@@ -1173,74 +1359,101 @@ function VendorDetailsPage({ onBack }) {
                       </div>
                     </div>
                     
-                    {/* Expanded Details - Table-like layout */}
+                    {/* Expanded Details - SKU Groups with linked Options */}
                     {isExpanded && (
                       <div className="bg-white border-t border-[#E2E8F0]">
                         {/* Header Row */}
                         <div className="flex border-b border-[#E2E8F0] text-[13px] font-medium text-[#64748B]">
-                          <div className="w-[33%] py-[10px] px-[14px] pl-[35px]">Vendor SKU</div>
-                          <div className="w-[33%] py-[10px] px-[14px]">Unit Purchase Cost</div>
-                          <div className="w-[34%] py-[10px] px-[14px]">Remarks</div>
+                          <div className="w-[25%] py-[10px] px-[14px] pl-[35px]">Vendor SKU</div>
+                          <div className="w-[20%] py-[10px] px-[14px]">Price</div>
+                          <div className="w-[20%] py-[10px] px-[14px]">Remarks</div>
+                          <div className="w-[35%] py-[10px] px-[14px]">{hasOptions ? 'Options' : ''}</div>
                         </div>
-                        {/* Data Row */}
-                        <div className="flex text-[13px] text-[#1E293B]">
-                          <div className="w-[33%] py-[10px] px-[14px] pl-[35px]">{product.vendorSku}</div>
-                          <div className="w-[33%] py-[10px] px-[14px]">{product.unitCost}</div>
-                          <div className="w-[34%] py-[10px] px-[14px]">{product.remarks}</div>
-                        </div>
-
-                        {/* Options Row - Only show for products with options */}
-                        {hasOptions && (
-                          <div className="flex items-center py-[12px] px-[14px] pl-[35px] border-t border-[#E2E8F0] bg-[#FAFAFA]">
-                            {/* Label and Counter */}
-                            <div className="flex items-center gap-[8px] min-w-[120px]">
-                              <span className="text-[13px] font-medium text-[#64748B]">Options</span>
-                              <span className="text-[12px] text-[#94A3B8]">
-                                ({selectedOptions.length} of {availableOptions.length})
-                              </span>
-                            </div>
-
-                            {/* Swatches */}
-                            <div className="flex items-center gap-[6px] flex-1 ml-[16px]">
-                              {visibleOptions.map((option) => (
-                                <div
-                                  key={option.id}
-                                  className="relative group"
-                                >
-                                  <div 
-                                    className="w-[28px] h-[28px] rounded-[4px] border border-[#E2E8F0] cursor-default"
-                                    style={{ backgroundColor: option.color || '#CBD5E1' }}
-                                  />
-                                  {/* Tooltip */}
-                                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-[6px] px-[8px] py-[4px] bg-[#1E293B] text-white text-[11px] rounded-[4px] whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                                    {option.name}
-                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1E293B]" />
-                                  </div>
-                                </div>
-                              ))}
-                              
-                              {/* Overflow indicator */}
-                              {overflowCount > 0 && (
-                                <div className="relative group">
-                                  <div className="w-[28px] h-[28px] rounded-[4px] border border-[#E2E8F0] bg-[#F1F5F9] flex items-center justify-center text-[11px] font-medium text-[#64748B] cursor-default">
-                                    +{overflowCount}
-                                  </div>
-                                  {/* Overflow Tooltip */}
-                                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-[6px] px-[8px] py-[6px] bg-[#1E293B] text-white text-[11px] rounded-[4px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 max-w-[200px]">
-                                    {selectedOptions.slice(maxVisibleSwatches).map(opt => opt.name).join(', ')}
-                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1E293B]" />
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Edit Button */}
-                            <button
-                              onClick={() => setEditOptionsProduct(product)}
-                              className="w-[28px] h-[28px] flex items-center justify-center rounded-[4px] hover:bg-[#F1F5F9] transition-colors ml-auto"
-                              title="Edit options"
+                        
+                        {/* SKU Entry Rows */}
+                        {skuEntries.map((sku, skuIdx) => {
+                          const skuOptions = hasOptions 
+                            ? availableOptions.filter(opt => (sku.optionIds || []).includes(opt.id))
+                            : [];
+                          const visibleOptions = skuOptions.slice(0, maxVisibleSwatches);
+                          const overflowCount = skuOptions.length - maxVisibleSwatches;
+                          
+                          return (
+                            <div 
+                              key={sku.id} 
+                              className={`flex text-[13px] text-[#1E293B] ${skuIdx > 0 ? 'border-t border-dashed border-[#E2E8F0]' : ''} ${skuIdx % 2 === 1 ? 'bg-[#FAFAFA]' : ''}`}
                             >
-                              <IconPencil size={16} stroke={1.5} className="text-[#64748B]" />
+                              <div className="w-[25%] py-[12px] px-[14px] pl-[35px] font-medium">
+                                {sku.vendorSku}
+                              </div>
+                              <div className="w-[20%] py-[12px] px-[14px]">
+                                {sku.unitCost}
+                              </div>
+                              <div className="w-[20%] py-[12px] px-[14px] text-[#64748B]">
+                                {sku.remarks || '---'}
+                              </div>
+                              <div className="w-[35%] py-[10px] px-[14px] flex items-center">
+                                {hasOptions && skuOptions.length > 0 && (
+                                  <div className="flex items-center gap-[8px] flex-1">
+                                    {/* Option Swatches with Names */}
+                                    <div className="flex items-center gap-[6px] flex-wrap">
+                                      {visibleOptions.map((option) => (
+                                        <div
+                                          key={option.id}
+                                          className="relative group flex items-center gap-[4px] px-[6px] py-[3px] rounded-[4px] bg-[#F8FAFC] border border-[#E2E8F0]"
+                                        >
+                                          <div 
+                                            className="w-[16px] h-[16px] rounded-[2px] border border-[#E2E8F0] flex-shrink-0"
+                                            style={{ backgroundColor: option.color || '#CBD5E1' }}
+                                          />
+                                          <span className="text-[11px] text-[#475569] font-medium whitespace-nowrap">
+                                            {option.name}
+                                          </span>
+                                        </div>
+                                      ))}
+                                      
+                                      {/* Overflow indicator */}
+                                      {overflowCount > 0 && (
+                                        <div className="relative group">
+                                          <div className="px-[6px] py-[3px] rounded-[4px] border border-[#E2E8F0] bg-[#F1F5F9] text-[11px] font-medium text-[#64748B] cursor-default">
+                                            +{overflowCount} more
+                                          </div>
+                                          {/* Overflow Tooltip */}
+                                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-[6px] px-[8px] py-[6px] bg-[#1E293B] text-white text-[11px] rounded-[4px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 max-w-[200px]">
+                                            {skuOptions.slice(maxVisibleSwatches).map(opt => opt.name).join(', ')}
+                                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1E293B]" />
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                    
+                                    {/* Edit Button */}
+                                    <button
+                                      onClick={() => setEditOptionsProduct({ ...product, editingSkuId: sku.id })}
+                                      className="w-[24px] h-[24px] flex items-center justify-center rounded-[4px] hover:bg-[#E2E8F0] transition-colors ml-auto flex-shrink-0"
+                                      title="Edit options"
+                                    >
+                                      <IconPencil size={14} stroke={1.5} className="text-[#64748B]" />
+                                    </button>
+                                  </div>
+                                )}
+                                {hasOptions && skuOptions.length === 0 && (
+                                  <span className="text-[12px] text-[#94A3B8] italic">No options selected</span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        
+                        {/* Add SKU button for products with options */}
+                        {hasOptions && (
+                          <div className="py-[10px] px-[14px] pl-[35px] border-t border-dashed border-[#E2E8F0] bg-[#FAFAFA]">
+                            <button 
+                              onClick={() => {/* TODO: Add new SKU to existing product */}}
+                              className="text-[12px] font-medium text-[#3B82F6] hover:text-[#2563EB] transition-colors flex items-center gap-[4px]"
+                            >
+                              <IconPlus size={14} stroke={2} />
+                              Add another SKU
                             </button>
                           </div>
                         )}
