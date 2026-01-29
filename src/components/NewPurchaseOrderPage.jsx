@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   IconChevronDown,
   IconChevronUp,
@@ -27,7 +27,95 @@ import {
   IconNotes,
   IconSearch,
   IconDotsVertical,
+  IconCheck,
 } from '@tabler/icons-react';
+
+// Custom Option Dropdown Component with color swatches
+const OptionDropdown = ({ options, value, onChange, placeholder = "Select option", disabled = false }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.id === value);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      {/* Trigger Button */}
+      <button
+        type="button"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        className={`w-full h-[36px] px-[10px] pr-[28px] bg-white border rounded-[6px] text-[13px] text-left focus:outline-none transition-colors flex items-center gap-[8px] ${
+          disabled 
+            ? 'bg-[#F8FAFC] border-[#E2E8F0] cursor-not-allowed text-[#94A3B8]' 
+            : 'border-[#E2E8F0] hover:border-[#CBD5E1] focus:border-[#3B82F6] cursor-pointer'
+        }`}
+      >
+        {selectedOption ? (
+          <>
+            {selectedOption.color && (
+              <div 
+                className="w-[16px] h-[16px] rounded-[4px] border border-[#E2E8F0] flex-shrink-0"
+                style={{ backgroundColor: selectedOption.color }}
+              />
+            )}
+            <span className="text-[#1E293B] truncate">{selectedOption.name}</span>
+          </>
+        ) : (
+          <span className="text-[#94A3B8]">{placeholder}</span>
+        )}
+        <IconChevronDown 
+          size={14} 
+          className={`absolute right-[10px] top-1/2 -translate-y-1/2 text-[#64748B] transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+        />
+      </button>
+
+      {/* Dropdown Menu */}
+      {isOpen && !disabled && (
+        <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-white border border-[#E2E8F0] rounded-[6px] shadow-lg z-50 py-[4px] max-h-[200px] overflow-auto">
+          {options.length === 0 ? (
+            <div className="px-[10px] py-[8px] text-[13px] text-[#94A3B8]">No options available</div>
+          ) : (
+            options.map(option => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => {
+                  onChange(option);
+                  setIsOpen(false);
+                }}
+                className={`w-full px-[10px] py-[8px] text-left text-[13px] flex items-center gap-[8px] hover:bg-[#F1F5F9] transition-colors ${
+                  option.id === value ? 'bg-[#F8FAFC]' : ''
+                }`}
+              >
+                {option.color && (
+                  <div 
+                    className="w-[16px] h-[16px] rounded-[4px] border border-[#E2E8F0] flex-shrink-0"
+                    style={{ backgroundColor: option.color }}
+                  />
+                )}
+                <span className="text-[#1E293B] flex-1">{option.name}</span>
+                {option.id === value && (
+                  <IconCheck size={14} className="text-[#3B82F6] flex-shrink-0" />
+                )}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Asset paths from Figma
 const LOCATION_PREVIEW = '/assets/5e8b95356d01faaee0e40c41704ee724c45dd548.png';
@@ -486,14 +574,13 @@ function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS S
                                   </div>
                                 </div>
                                 <div>
-                                  <select
-                                    className="w-full h-[36px] px-[10px] pr-[28px] bg-[#F8FAFC] border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#94A3B8] focus:outline-none appearance-none cursor-not-allowed"
-                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}
-                                    disabled
-                                    value=""
-                                  >
-                                    <option value="">Select option</option>
-                                  </select>
+                                  <OptionDropdown
+                                    options={sku.options.filter(opt => opt.available)}
+                                    value={null}
+                                    onChange={() => {}}
+                                    placeholder="Select option"
+                                    disabled={true}
+                                  />
                                 </div>
                                 <div>
                                   <input
@@ -536,25 +623,16 @@ function POLineItemPickerModal({ isOpen, onClose, onAddItems, vendorName = 'SS S
                                       </div>
                                     </div>
                                     <div>
-                                      <select
-                                        className="w-full h-[36px] px-[10px] pr-[28px] bg-white border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] focus:outline-none focus:border-[#3B82F6] appearance-none cursor-pointer"
-                                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 10px center' }}
-                                        value={lineItem.optionId || ''}
-                                        onChange={(e) => {
-                                          const option = sku.options.find(o => o.id === e.target.value);
-                                          if (option) {
-                                            setLineItems(prev => prev.map((item, i) => 
-                                              i === lineItemGlobalIndex ? { ...item, optionId: option.id, optionName: option.name, optionColor: option.color } : item
-                                            ));
-                                          }
+                                      <OptionDropdown
+                                        options={sku.options.filter(opt => opt.available && (opt.id === lineItem.optionId || !skuLineItems.some(li => li !== lineItem && li.optionId === opt.id)))}
+                                        value={lineItem.optionId}
+                                        onChange={(option) => {
+                                          setLineItems(prev => prev.map((item, i) => 
+                                            i === lineItemGlobalIndex ? { ...item, optionId: option.id, optionName: option.name, optionColor: option.color } : item
+                                          ));
                                         }}
-                                      >
-                                        <option value="">Select option</option>
-                                        {/* Show current option + available options */}
-                                        {sku.options.filter(opt => opt.available && (opt.id === lineItem.optionId || !skuLineItems.some(li => li !== lineItem && li.optionId === opt.id))).map(opt => (
-                                          <option key={opt.id} value={opt.id}>{opt.name}</option>
-                                        ))}
-                                      </select>
+                                        placeholder="Select option"
+                                      />
                                     </div>
                                     <div>
                                       <input
