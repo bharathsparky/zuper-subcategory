@@ -6,9 +6,9 @@ import {
   IconFileText,
   IconHome, 
   IconTag, 
-  IconShoppingCart, 
-  IconMessage, 
-  IconChartLine,
+  IconFileInvoice, 
+  IconNote, 
+  IconClock,
   IconSearch,
   IconChevronLeft,
   IconChevronRight,
@@ -43,16 +43,16 @@ const SHINGLE_IMAGE = 'data:image/svg+xml,' + encodeURIComponent(`
 
 // Mock data for products
 const MOCK_PRODUCTS = [
-  { id: 1, sku: '#12345 - PLACEHOLDER', category: 'Sidewall SWA', image: null },
-  { id: 2, sku: '#ASP.SHI.24109 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE },
-  { id: 3, sku: '#ASP.SHI.40918 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE },
-  { id: 4, sku: '#ASP.SHI.74824 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE },
-  { id: 5, sku: '#ASP.SHI.95785 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE },
-  { id: 6, sku: '#ASP.SHI.48522 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE },
-  { id: 7, sku: '#ASP.SHI.73459 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE },
-  { id: 8, sku: '#ASP.SHI.86264 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null },
-  { id: 9, sku: '#ASP.SHI.31413 - IKO - Architectural - Cambridge...', category: 'Shingles SHI', image: null },
-  { id: 10, sku: '#ASP.SHI.74281 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null },
+  { id: 1, sku: '#12345 - PLACEHOLDER', category: 'Sidewall SWA', image: null, vendorSku: 'PLACEHOLDER', unitCost: '$0.00', remarks: '---' },
+  { id: 2, sku: '#ASP.SHI.24109 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
+  { id: 3, sku: '#ASP.SHI.40918 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
+  { id: 4, sku: '#ASP.SHI.74824 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
+  { id: 5, sku: '#ASP.SHI.95785 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
+  { id: 6, sku: '#ASP.SHI.48522 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
+  { id: 7, sku: '#ASP.SHI.73459 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: SHINGLE_IMAGE, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
+  { id: 8, sku: '#ASP.SHI.86264 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
+  { id: 9, sku: '#ASP.SHI.31413 - IKO - Architectural - Cambridge...', category: 'Shingles SHI', image: null, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
+  { id: 10, sku: '#ASP.SHI.74281 - IKO - Architectural - Cambridg...', category: 'Shingles SHI', image: null, vendorSku: 'IKOCABEN', unitCost: '$32.67', remarks: '---' },
 ];
 
 // Vendor data
@@ -67,14 +67,23 @@ function VendorDetailsPage({ onBack }) {
   const [activeTab, setActiveTab] = useState('product-catalog');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandedRows, setExpandedRows] = useState([2]); // Default expanded row 2 like in Figma
   const totalPages = 17;
+  
+  const toggleRowExpand = (productId) => {
+    setExpandedRows(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
 
   const navItems = [
     { id: 'details', label: 'Details', icon: IconHome, count: null },
     { id: 'product-catalog', label: 'Product Catalog', icon: IconTag, count: 161 },
-    { id: 'purchase-orders', label: 'Purchase Orders', icon: IconShoppingCart, count: 17 },
-    { id: 'notes', label: 'Notes', icon: IconMessage, count: null },
-    { id: 'activity', label: 'Activity', icon: IconChartLine, count: null },
+    { id: 'purchase-orders', label: 'Purchase Orders', icon: IconFileInvoice, count: 17 },
+    { id: 'notes', label: 'Notes', icon: IconNote, count: null },
+    { id: 'activity', label: 'Activity', icon: IconClock, count: null },
   ];
 
   return (
@@ -117,26 +126,26 @@ function VendorDetailsPage({ onBack }) {
           <div className="p-[14px] border-b border-[#E2E8F0]">
             <div className="flex justify-center gap-[24px]">
               <button className="flex flex-col items-center gap-[6px] group">
-                <div className="w-[38px] h-[38px] rounded-full bg-[#EFF6FF] flex items-center justify-center group-hover:bg-[#DBEAFE] transition-colors">
-                  <IconPhone size={20} className="text-[#3B82F6]" />
+                <div className="w-[38px] h-[38px] rounded-full bg-[#F0FDFA] flex items-center justify-center group-hover:bg-[#CCFBF1] transition-colors">
+                  <IconPhone size={20} className="text-[#0D9488]" />
                 </div>
                 <span className="text-[12px] text-[#64748B]">Call</span>
               </button>
               <button className="flex flex-col items-center gap-[6px] group">
-                <div className="w-[38px] h-[38px] rounded-full bg-[#EFF6FF] flex items-center justify-center group-hover:bg-[#DBEAFE] transition-colors">
-                  <IconMail size={20} className="text-[#3B82F6]" />
+                <div className="w-[38px] h-[38px] rounded-full bg-[#F0FDFA] flex items-center justify-center group-hover:bg-[#CCFBF1] transition-colors">
+                  <IconMail size={20} className="text-[#0D9488]" />
                 </div>
                 <span className="text-[12px] text-[#64748B]">Mail</span>
               </button>
               <button className="flex flex-col items-center gap-[6px] group">
-                <div className="w-[38px] h-[38px] rounded-full bg-[#EFF6FF] flex items-center justify-center group-hover:bg-[#DBEAFE] transition-colors">
-                  <IconPlus size={20} className="text-[#3B82F6]" />
+                <div className="w-[38px] h-[38px] rounded-full bg-[#F0FDFA] flex items-center justify-center group-hover:bg-[#CCFBF1] transition-colors">
+                  <IconPlus size={20} className="text-[#0D9488]" />
                 </div>
                 <span className="text-[12px] text-[#64748B]">New PO</span>
               </button>
               <button className="flex flex-col items-center gap-[6px] group">
-                <div className="w-[38px] h-[38px] rounded-full bg-[#EFF6FF] flex items-center justify-center group-hover:bg-[#DBEAFE] transition-colors">
-                  <IconNotes size={20} className="text-[#3B82F6]" />
+                <div className="w-[38px] h-[38px] rounded-full bg-[#F0FDFA] flex items-center justify-center group-hover:bg-[#CCFBF1] transition-colors">
+                  <IconNotes size={20} className="text-[#0D9488]" />
                 </div>
                 <span className="text-[12px] text-[#64748B]">Add Note</span>
               </button>
@@ -242,36 +251,66 @@ function VendorDetailsPage({ onBack }) {
               </div>
 
               {/* Table Body */}
-              {MOCK_PRODUCTS.map((product) => (
-                <div 
-                  key={product.id}
-                  className="px-[14px] py-[7px] flex items-center border-b border-[#E2E8F0] hover:bg-[#F8FAFC] transition-colors"
-                >
-                  <div className="w-[45%] flex items-center gap-[14px] pl-[21px]">
-                    {/* Product Image */}
-                    <div className="w-[42px] h-[42px] rounded-[4px] bg-[#F1F5F9] overflow-hidden flex-shrink-0">
-                      {product.image ? (
-                        <img src={product.image} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <IconBox size={20} className="text-[#94A3B8]" />
+              {MOCK_PRODUCTS.map((product) => {
+                const isExpanded = expandedRows.includes(product.id);
+                return (
+                  <div key={product.id} className="border-b border-[#E2E8F0]">
+                    <div 
+                      className="px-[14px] py-[7px] flex items-center hover:bg-[#F8FAFC] transition-colors"
+                    >
+                      <div className="w-[45%] flex items-center gap-[14px] pl-[21px]">
+                        {/* Product Image */}
+                        <div className="w-[42px] h-[42px] rounded-[4px] bg-[#F1F5F9] overflow-hidden flex-shrink-0">
+                          {product.image ? (
+                            <img src={product.image} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <IconBox size={20} className="text-[#94A3B8]" />
+                            </div>
+                          )}
                         </div>
-                      )}
+                        {/* Product SKU */}
+                        <span className="text-[14px] text-[#3B82F6] truncate">{product.sku}</span>
+                      </div>
+                      <div className="w-[35%] text-[14px] text-[#64748B]">{product.category}</div>
+                      <div className="w-[20%] flex items-center justify-center gap-[14px]">
+                        <button className="p-[7px] hover:bg-[#F1F5F9] rounded-[4px] transition-colors">
+                          <IconDotsVertical size={18} className="text-[#94A3B8]" />
+                        </button>
+                        <button 
+                          onClick={() => toggleRowExpand(product.id)}
+                          className="p-[7px] hover:bg-[#F1F5F9] rounded-[4px] transition-colors"
+                        >
+                          <IconChevronDown 
+                            size={18} 
+                            className={`text-[#94A3B8] transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                          />
+                        </button>
+                      </div>
                     </div>
-                    {/* Product SKU */}
-                    <span className="text-[14px] text-[#3B82F6] truncate">{product.sku}</span>
+                    
+                    {/* Expanded Details */}
+                    {isExpanded && (
+                      <div className="px-[14px] py-[14px] pl-[91px] bg-white">
+                        <div className="grid grid-cols-3 gap-[21px] text-[13px]">
+                          <div>
+                            <span className="text-[#64748B] font-medium">Vendor SKU</span>
+                            <p className="text-[#1E293B] mt-[3px]">{product.vendorSku}</p>
+                          </div>
+                          <div>
+                            <span className="text-[#64748B] font-medium">Unit Purchase Cost</span>
+                            <p className="text-[#1E293B] mt-[3px]">{product.unitCost}</p>
+                          </div>
+                          <div>
+                            <span className="text-[#64748B] font-medium">Remarks</span>
+                            <p className="text-[#1E293B] mt-[3px]">{product.remarks}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="w-[35%] text-[14px] text-[#64748B]">{product.category}</div>
-                  <div className="w-[20%] flex items-center justify-center gap-[14px]">
-                    <button className="p-[7px] hover:bg-[#F1F5F9] rounded-[4px] transition-colors">
-                      <IconDotsVertical size={18} className="text-[#94A3B8]" />
-                    </button>
-                    <button className="p-[7px] hover:bg-[#F1F5F9] rounded-[4px] transition-colors">
-                      <IconChevronDown size={18} className="text-[#94A3B8]" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
