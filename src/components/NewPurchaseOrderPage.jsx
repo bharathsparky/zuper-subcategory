@@ -124,113 +124,188 @@ const LOCATION_PREVIEW = '/assets/5e8b95356d01faaee0e40c41704ee724c45dd548.png';
 const VENDOR_CATALOG_DATA = [
   {
     id: 1,
-    partId: '#MQ67DFR1',
-    partName: 'LG Refrigeration Compressors',
-    category: 'Compressors',
-    type: 'Part',
-    image: 'https://picsum.photos/seed/compressor/44/44',
+    partId: '#GAF-HDZ-001',
+    partName: 'GAF Timberline HDZ Shingles',
+    category: 'Asphalt Shingles',
+    type: 'Product',
+    image: 'https://picsum.photos/seed/gaf-shingle/44/44',
     skus: [
       {
         id: 'sku1',
-        vendorSku: '121',
-        unitCost: 7550,
-        remarks: '',
-        options: [] // No options for this SKU
+        vendorSku: 'HDZ-33SQ',
+        unitCost: 42.99,
+        remarks: '33.3 sq ft per bundle',
+        options: [
+          { id: 'opt1', name: 'Charcoal', color: '#36454F', available: true },
+          { id: 'opt2', name: 'Weathered Wood', color: '#8B7355', available: true },
+          { id: 'opt3', name: 'Barkwood', color: '#6B4423', available: true },
+          { id: 'opt4', name: 'Pewter Gray', color: '#8E9196', available: true },
+          { id: 'opt5', name: 'Shakewood', color: '#C4A484', available: true },
+        ]
       },
       {
         id: 'sku2',
-        vendorSku: '1213',
-        unitCost: 7550,
-        remarks: '',
-        options: []
-      },
-      {
-        id: 'sku3',
-        vendorSku: '123',
-        unitCost: 7550,
-        remarks: '',
-        options: []
+        vendorSku: 'HDZ-PREM',
+        unitCost: 48.99,
+        remarks: 'Premium line - Lifetime warranty',
+        options: [
+          { id: 'opt6', name: 'Hunter Green', color: '#355E3B', available: true },
+          { id: 'opt7', name: 'Slate', color: '#708090', available: true },
+          { id: 'opt8', name: 'Mission Brown', color: '#5C4033', available: true },
+        ]
       }
     ]
   },
   {
     id: 2,
-    partId: '#ABC123',
-    partName: 'HK Vision RE120',
-    category: 'HVAC',
-    type: 'Part',
-    image: 'https://picsum.photos/seed/hvac/44/44',
+    partId: '#OC-DUR-002',
+    partName: 'Owens Corning Duration Shingles',
+    category: 'Asphalt Shingles',
+    type: 'Product',
+    image: 'https://picsum.photos/seed/oc-shingle/44/44',
     skus: [
       {
-        id: 'sku4',
-        vendorSku: 'HK-STD',
-        unitCost: 2500,
-        remarks: 'Standard model',
+        id: 'sku3',
+        vendorSku: 'DUR-ARCH',
+        unitCost: 45.99,
+        remarks: 'Architectural style',
         options: [
-          { id: 'opt1', name: '120V', color: '#3B82F6', available: true },
-          { id: 'opt2', name: '240V', color: '#10B981', available: true },
-          { id: 'opt3', name: '480V', color: '#F59E0B', available: true },
+          { id: 'opt9', name: 'Onyx Black', color: '#0F0F0F', available: true },
+          { id: 'opt10', name: 'Estate Gray', color: '#6E6E6E', available: true },
+          { id: 'opt11', name: 'Desert Tan', color: '#C4A77D', available: true },
+          { id: 'opt12', name: 'Teak', color: '#B48455', available: true },
         ]
       },
       {
-        id: 'sku5',
-        vendorSku: 'HK-PRO',
-        unitCost: 3200,
-        remarks: 'Professional model',
+        id: 'sku4',
+        vendorSku: 'DUR-STORM',
+        unitCost: 52.99,
+        remarks: 'SureNail Technology - 130 MPH wind rating',
         options: [
-          { id: 'opt4', name: '120V Pro', color: '#3B82F6', available: true },
-          { id: 'opt5', name: '240V Pro', color: '#10B981', available: true },
+          { id: 'opt13', name: 'Driftwood', color: '#B8A082', available: true },
+          { id: 'opt14', name: 'Brownwood', color: '#5C4827', available: true },
         ]
       }
     ]
   },
   {
     id: 3,
-    partId: '#ABC124',
-    partName: 'Pipe V Connector',
-    category: 'Plumbing',
-    type: 'Part',
-    image: 'https://picsum.photos/seed/pipe/44/44',
+    partId: '#SYN-UND-003',
+    partName: 'Synthetic Roof Underlayment',
+    category: 'Underlayment',
+    type: 'Product',
+    image: 'https://picsum.photos/seed/underlayment/44/44',
     skus: [
       {
+        id: 'sku5',
+        vendorSku: 'SYNFELT-10SQ',
+        unitCost: 89.99,
+        remarks: '10 square roll',
+        options: []
+      },
+      {
         id: 'sku6',
-        vendorSku: 'PVC-1',
-        unitCost: 45,
-        remarks: '',
+        vendorSku: 'SYNFELT-4SQ',
+        unitCost: 42.99,
+        remarks: '4 square roll',
         options: []
       }
     ]
   },
   {
     id: 4,
-    partId: '#ASP.SHI.24109',
-    partName: 'IKO Architectural - Cambridge',
-    category: 'Shingles',
+    partId: '#IWS-004',
+    partName: 'Ice & Water Shield',
+    category: 'Underlayment',
     type: 'Product',
-    image: 'https://picsum.photos/seed/shingle/44/44',
+    image: 'https://picsum.photos/seed/ice-water/44/44',
     skus: [
       {
         id: 'sku7',
-        vendorSku: 'IKOCAMB-STD',
-        unitCost: 32.67,
-        remarks: 'Standard colors',
-        options: [
-          { id: 'opt6', name: 'Charcoal', color: '#36454F', available: true },
-          { id: 'opt7', name: 'Weathered Wood', color: '#A0826D', available: true },
-          { id: 'opt8', name: 'Dual Black', color: '#1a1a1a', available: true },
-          { id: 'opt9', name: 'Barkwood', color: '#6B4423', available: true },
-        ]
-      },
+        vendorSku: 'IWS-200SF',
+        unitCost: 124.99,
+        remarks: '200 sq ft roll - Self-adhesive',
+        options: []
+      }
+    ]
+  },
+  {
+    id: 5,
+    partId: '#DRP-EDG-005',
+    partName: 'Aluminum Drip Edge',
+    category: 'Flashing',
+    type: 'Product',
+    image: 'https://picsum.photos/seed/drip-edge/44/44',
+    skus: [
       {
         id: 'sku8',
-        vendorSku: 'IKOCAMB-PREM',
-        unitCost: 35.00,
-        remarks: 'Premium colors',
+        vendorSku: 'DRIP-10FT',
+        unitCost: 8.49,
+        remarks: '10 ft length - 2x2 inch',
         options: [
-          { id: 'opt10', name: 'Desert Tan', color: '#C4A77D', available: true },
-          { id: 'opt11', name: 'Slate', color: '#708090', available: true },
-          { id: 'opt12', name: 'Driftwood', color: '#B8A082', available: true },
+          { id: 'opt15', name: 'White', color: '#FFFFFF', available: true },
+          { id: 'opt16', name: 'Brown', color: '#5C4033', available: true },
+          { id: 'opt17', name: 'Black', color: '#1a1a1a', available: true },
+          { id: 'opt18', name: 'Mill Finish', color: '#C0C0C0', available: true },
         ]
+      }
+    ]
+  },
+  {
+    id: 6,
+    partId: '#RDG-VNT-006',
+    partName: 'Ridge Vent - ShingleVent II',
+    category: 'Ventilation',
+    type: 'Product',
+    image: 'https://picsum.photos/seed/ridge-vent/44/44',
+    skus: [
+      {
+        id: 'sku9',
+        vendorSku: 'RDGVNT-4FT',
+        unitCost: 18.99,
+        remarks: '4 ft sections',
+        options: []
+      }
+    ]
+  },
+  {
+    id: 7,
+    partId: '#NAIL-007',
+    partName: 'Roofing Coil Nails',
+    category: 'Fasteners',
+    type: 'Product',
+    image: 'https://picsum.photos/seed/roofing-nails/44/44',
+    skus: [
+      {
+        id: 'sku10',
+        vendorSku: 'NAIL-1.25-7200',
+        unitCost: 54.99,
+        remarks: '1-1/4" - 7200 count coil',
+        options: []
+      },
+      {
+        id: 'sku11',
+        vendorSku: 'NAIL-1.5-7200',
+        unitCost: 58.99,
+        remarks: '1-1/2" - 7200 count coil',
+        options: []
+      }
+    ]
+  },
+  {
+    id: 8,
+    partId: '#STRT-CAP-008',
+    partName: 'Starter Strip Shingles',
+    category: 'Asphalt Shingles',
+    type: 'Product',
+    image: 'https://picsum.photos/seed/starter-strip/44/44',
+    skus: [
+      {
+        id: 'sku12',
+        vendorSku: 'START-PRO',
+        unitCost: 32.99,
+        remarks: '105 linear ft per bundle',
+        options: []
       }
     ]
   },
