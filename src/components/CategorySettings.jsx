@@ -177,7 +177,7 @@ function RowActionsMenu({ onEdit, onDelete, onAddSubCategory, onMove, isParent =
                 } text-[#1E293B]`}
               >
                 <IconCornerDownRight size={15} className="text-[#64748B]" stroke={2} />
-                {isParent ? 'Convert to Subcategory' : 'Change Parent'}
+                {isParent ? 'Make Subcategory' : 'Change Parent'}
               </button>
             )}
           </Menu.Item>
@@ -859,7 +859,7 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isSubCategory ? "Change Parent Category" : "Convert to Subcategory"}
+      title={isSubCategory ? "Change Parent" : "Make Subcategory"}
       maxWidth="max-w-[520px]"
       footer={
         <>
@@ -880,8 +880,8 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
         {/* Info */}
         <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-lg p-3">
           <p className="text-[13px] text-[#475569]">
-            {isSubCategory ? 'Changing parent of' : 'Converting'} <strong className="text-[#1E293B]">"{category?.name}"</strong>
-            {isSubCategory ? '' : ' to a subcategory'}
+            {isSubCategory ? 'Change parent of' : 'Make'} <strong className="text-[#1E293B]">"{category?.name}"</strong>
+            {isSubCategory ? '' : ' a subcategory'}
           </p>
           {currentTradeType && (
             <div className="flex items-center gap-2 mt-2">
@@ -1018,7 +1018,7 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
         {/* Trade Type Inheritance Warning */}
         {hasTradeTypeMismatch && selectedTarget && (
           <div className="bg-[#FEF3C7] border border-[#FCD34D] rounded-lg p-3 text-[12px] text-[#92400E]">
-            <strong>Trade Type Change:</strong> {isSubCategory ? 'This subcategory' : 'The converted category'} will inherit the trade type from the new parent.
+            <strong>Trade Type Change:</strong> Will inherit trade type from new parent.
             <div className="mt-2 flex items-center gap-2">
               <span className="text-[11px]">Current:</span>
               <span className="font-medium">{currentTradeType?.name || 'None'}</span>
@@ -1032,16 +1032,14 @@ function MoveCategoryModal({ isOpen, onClose, onMove, category, categories }) {
         {/* Warning for parent categories with sub-categories */}
         {hasSubCategories && selectedTargetId && !hasTradeTypeMismatch && (
           <div className="bg-[#FEF3C7] border border-[#FCD34D] rounded-lg p-3 text-[12px] text-[#92400E]">
-            <strong>Note:</strong> Converting this category will also include its {category?.subCategories?.length} sub-categories. 
-            They will become nested under the new parent.
+            <strong>Note:</strong> This will also include {category?.subCategories?.length} sub-categories under the new parent.
           </div>
         )}
 
         {/* Combined warning when both conditions are true */}
         {hasSubCategories && selectedTargetId && hasTradeTypeMismatch && (
           <div className="bg-[#FEF2F2] border border-[#FECACA] rounded-lg p-3 text-[12px] text-[#991B1B]">
-            <strong>Note:</strong> Converting this category will also include its {category?.subCategories?.length} sub-categories. 
-            All items will inherit the new trade type.
+            <strong>Note:</strong> This will also include {category?.subCategories?.length} sub-categories. All will inherit the new trade type.
           </div>
         )}
       </div>
