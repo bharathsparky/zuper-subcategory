@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 // Import the proper Zuper logo from Figma
 import zuperLogo from '../assets/6718db1f1d1ce90fa5eb49c325d04010b62ca586.png';
+
+// Icons for cart submenu
+import { IconUsers, IconClipboardList, IconShoppingCart } from '@tabler/icons-react';
 
 // Exact icons from Figma in the correct order
 const SIDEBAR_ICONS = {
@@ -38,7 +41,35 @@ const sidebarItems = [
   { id: 'workflow', icon: SIDEBAR_ICONS.workflow, label: 'Workflow' },
 ];
 
+// Cart submenu items
+const CART_SUBMENU = [
+  { id: 'vendors', label: 'Vendors', icon: IconUsers },
+  { id: 'material-requests', label: 'Material Requests', icon: IconClipboardList, badge: 'Beta' },
+  { id: 'purchase-orders', label: 'Purchase Orders', icon: IconShoppingCart, badge: 'Beta' },
+];
+
 function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavigateToWorkspace, onNavigateToReports, onNavigateToJobsListing, onNavigateToNewQuote, currentView }) {
+  const [cartMenuOpen, setCartMenuOpen] = useState(false);
+  const cartMenuRef = useRef(null);
+  const cartButtonRef = useRef(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        cartMenuRef.current && 
+        !cartMenuRef.current.contains(event.target) &&
+        cartButtonRef.current &&
+        !cartButtonRef.current.contains(event.target)
+      ) {
+        setCartMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   // Determine which item should be active based on current view
   const getActiveItemId = () => {
     if (currentView === 'jobs-listing') return 'jobs';
@@ -65,8 +96,12 @@ function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavi
       {/* Navigation Icons - each item is 45px tall with icon area */}
       <nav className="flex-1 flex flex-col items-center">
         {sidebarItems.map((item) => {
-          const isActive = item.id === activeItemId;
+          const isActive = item.id === activeItemId || (item.id === 'cart' && cartMenuOpen);
           const handleClick = () => {
+            if (item.id === 'cart') {
+              setCartMenuOpen(!cartMenuOpen);
+              return;
+            }
             if (item.id === 'jobs' && onNavigateToJobsListing) {
               onNavigateToJobsListing();
             } else if (item.id === 'briefcase' && onNavigateToJobDetails) {
@@ -82,9 +117,10 @@ function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavi
           return (
             <div 
               key={item.id} 
-              className="w-full h-[45px] flex items-center justify-center px-[13.5px]"
+              className="w-full h-[45px] flex items-center justify-center px-[13.5px] relative"
             >
               <button
+                ref={item.id === 'cart' ? cartButtonRef : null}
                 onClick={handleClick}
                 className={`
                   w-[38px] h-[40px] flex items-center justify-center rounded transition-colors
@@ -106,6 +142,33 @@ function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavi
                   />
                 </div>
               </button>
+              
+              {/* Cart Flyout Menu */}
+              {item.id === 'cart' && cartMenuOpen && (
+                <div 
+                  ref={cartMenuRef}
+                  className="absolute left-full top-0 ml-0 bg-[#12344D] rounded-r-lg shadow-xl z-50 py-2 min-w-[220px]"
+                >
+                  {CART_SUBMENU.map((subItem) => (
+                    <button
+                      key={subItem.id}
+                      onClick={() => {
+                        setCartMenuOpen(false);
+                        // Handle navigation for submenu items if needed
+                      }}
+                      className="w-full px-4 py-3 flex items-center gap-3 hover:bg-[#1E4A6D] transition-colors text-left"
+                    >
+                      <subItem.icon size={22} className="text-[#94A3B8]" stroke={1.5} />
+                      <span className="text-[14px] text-white font-medium">{subItem.label}</span>
+                      {subItem.badge && (
+                        <span className="ml-auto px-2 py-0.5 bg-[#2563EB] text-white text-[11px] font-semibold rounded">
+                          {subItem.badge}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           );
         })}
