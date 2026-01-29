@@ -48,7 +48,7 @@ const CART_SUBMENU = [
   { id: 'purchase-orders', label: 'Purchase Orders', icon: IconShoppingCart, badge: 'Beta' },
 ];
 
-function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavigateToWorkspace, onNavigateToReports, onNavigateToJobsListing, onNavigateToNewQuote, currentView }) {
+function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavigateToWorkspace, onNavigateToReports, onNavigateToJobsListing, onNavigateToNewQuote, onNavigateToVendorDetails, currentView }) {
   const [cartMenuOpen, setCartMenuOpen] = useState(false);
   const cartMenuRef = useRef(null);
   const cartButtonRef = useRef(null);
@@ -76,6 +76,7 @@ function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavi
     if (currentView === 'job-details') return 'briefcase';
     if (currentView === 'reports') return 'pieChart';
     if (currentView === 'new-quote') return 'table';
+    if (currentView === 'vendor-details') return 'cart';
     if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service') return 'tag';
     return 'tag';
   };
@@ -154,7 +155,9 @@ function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavi
                       key={subItem.id}
                       onClick={() => {
                         setCartMenuOpen(false);
-                        // Handle navigation for submenu items if needed
+                        if (subItem.id === 'vendors' && onNavigateToVendorDetails) {
+                          onNavigateToVendorDetails();
+                        }
                       }}
                       className="w-full px-4 py-3 flex items-center gap-3 hover:bg-[#1E4A6D] transition-colors text-left"
                     >
