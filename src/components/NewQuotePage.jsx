@@ -20,6 +20,7 @@ import {
   IconSearch,
   IconX,
   IconPackage,
+  IconCheck,
 } from '@tabler/icons-react';
 
 // Searchable User Dropdown Component
@@ -180,9 +181,10 @@ const QUOTE_LINE_ITEMS_DATA = [
     unitSellingPrice: '7500',
     hasOptions: true,
     options: [
-      { id: 'opt-1', name: 'Model A', color: '#3B82F6' },
-      { id: 'opt-2', name: 'Model B', color: '#22C55E' },
-      { id: 'opt-3', name: 'Model C', color: '#F59E0B' },
+      { id: 'opt-1', name: 'Model A - Standard', color: '#3B82F6' },
+      { id: 'opt-2', name: 'Model B - Premium', color: '#22C55E' },
+      { id: 'opt-3', name: 'Model C - Industrial', color: '#F59E0B' },
+      { id: 'opt-4', name: 'Model D - Heavy Duty', color: '#EF4444' },
     ],
   },
   {
@@ -214,8 +216,13 @@ const QUOTE_LINE_ITEMS_DATA = [
     unitCost: '1080',
     markup: '',
     unitSellingPrice: '450',
-    hasOptions: false,
-    options: [],
+    hasOptions: true,
+    options: [
+      { id: 'opt-1', name: 'Brass', color: '#D4A574' },
+      { id: 'opt-2', name: 'Chrome', color: '#C0C0C0' },
+      { id: 'opt-3', name: 'PVC White', color: '#F8FAFC' },
+      { id: 'opt-4', name: 'Copper', color: '#B87333' },
+    ],
   },
   {
     id: 4,
@@ -246,10 +253,76 @@ const QUOTE_LINE_ITEMS_DATA = [
     unitCost: '66',
     markup: '',
     unitSellingPrice: '123',
-    hasOptions: false,
-    options: [],
+    hasOptions: true,
+    options: [
+      { id: 'opt-1', name: '12V Standard', color: '#1F2937' },
+      { id: 'opt-2', name: '12V Deep Cycle', color: '#166534' },
+      { id: 'opt-3', name: '12V AGM', color: '#7C3AED' },
+    ],
   },
 ];
+
+// Option Selector for Quote Line Item Picker
+function QuotePickerOptionSelector({ options, selectedOption, onChange }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  if (!options || options.length === 0) {
+    return <span className="text-[13px] text-[#94A3B8]">—</span>;
+  }
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="min-w-[140px] h-[36px] flex items-center gap-[8px] px-[10px] border border-[#E2E8F0] rounded-[4px] text-[13px] bg-white hover:bg-[#F8FAFC] transition-colors"
+      >
+        {selectedOption ? (
+          <>
+            <div 
+              className="w-[16px] h-[16px] rounded-[3px] border border-[#E2E8F0] flex-shrink-0"
+              style={{ backgroundColor: selectedOption.color }}
+            />
+            <span className="text-[#334155] truncate flex-1 text-left">{selectedOption.name}</span>
+          </>
+        ) : (
+          <span className="text-[#94A3B8]">Select Option</span>
+        )}
+        <IconChevronDown size={14} stroke={1.5} className="text-[#94A3B8] flex-shrink-0" />
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <div className="absolute top-full left-0 mt-1 w-[200px] bg-white border border-[#E2E8F0] rounded-lg shadow-lg z-50 py-1 max-h-[240px] overflow-y-auto">
+            {options.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => {
+                  onChange(option);
+                  setIsOpen(false);
+                }}
+                className={`w-full flex items-center gap-[10px] px-[12px] py-[8px] hover:bg-[#F8FAFC] transition-colors text-left ${
+                  selectedOption?.id === option.id ? 'bg-[#EFF6FF]' : ''
+                }`}
+              >
+                <div 
+                  className="w-[20px] h-[20px] rounded-[4px] border border-[#E2E8F0] flex-shrink-0"
+                  style={{ backgroundColor: option.color }}
+                />
+                <span className="text-[13px] text-[#334155] flex-1">{option.name}</span>
+                {selectedOption?.id === option.id && (
+                  <IconCheck size={14} stroke={2} className="text-[#2563EB] flex-shrink-0" />
+                )}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 // Choose Line Item Modal Component for Quote
 function ChooseLineItemModal({ isOpen, onClose, onAddProduct }) {
@@ -257,12 +330,20 @@ function ChooseLineItemModal({ isOpen, onClose, onAddProduct }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedItems, setSelectedItems] = useState({});
   const [itemValues, setItemValues] = useState({});
+  const [selectedOptions, setSelectedOptions] = useState({});
   const totalPages = 20;
 
   const handleCheckboxChange = (itemId) => {
     setSelectedItems(prev => ({
       ...prev,
       [itemId]: !prev[itemId]
+    }));
+  };
+
+  const handleOptionChange = (itemId, option) => {
+    setSelectedOptions(prev => ({
+      ...prev,
+      [itemId]: option
     }));
   };
 
@@ -357,6 +438,7 @@ function ChooseLineItemModal({ isOpen, onClose, onAddProduct }) {
               <tr className="border-b border-[#E2E8F0]">
                 <th className="w-[40px] text-left px-[16px] py-[14px] bg-white"></th>
                 <th className="text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Item</th>
+                <th className="w-[160px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Option</th>
                 <th className="w-[80px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Category</th>
                 <th className="w-[70px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Type</th>
                 <th className="w-[180px] text-left px-[12px] py-[14px] text-[11px] font-semibold text-[#64748B] uppercase tracking-wider bg-white">Location</th>
@@ -407,6 +489,18 @@ function ChooseLineItemModal({ isOpen, onClose, onAddProduct }) {
                         )}
                       </div>
                     </div>
+                  </td>
+                  {/* Option Selector */}
+                  <td className="px-[12px] py-[16px]">
+                    {item.hasOptions ? (
+                      <QuotePickerOptionSelector
+                        options={item.options}
+                        selectedOption={selectedOptions[item.id]}
+                        onChange={(option) => handleOptionChange(item.id, option)}
+                      />
+                    ) : (
+                      <span className="text-[13px] text-[#94A3B8]">—</span>
+                    )}
                   </td>
                   {/* Category */}
                   <td className="px-[12px] py-[16px] text-[13px] text-[#64748B]">{item.category}</td>
