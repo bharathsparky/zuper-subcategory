@@ -738,9 +738,9 @@ function CategoryModal({
                       />
                     </div>
                     
-                    {/* Trade Type Filter Chips */}
+                    {/* Trade Type Filter Chips - Show only first 3 */}
                     <div className="flex flex-wrap gap-1.5">
-                      {TRADE_TYPES.map(t => {
+                      {TRADE_TYPES.slice(0, 3).map(t => {
                         const isSelected = parentTradeTypeFilter.includes(t.name);
                         return (
                           <button
