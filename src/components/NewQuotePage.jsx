@@ -24,7 +24,7 @@ import {
   IconGripVertical,
   IconDotsVertical,
   IconTrash,
-  IconLayoutGrid,
+  IconColumns,
 } from '@tabler/icons-react';
 
 // Searchable User Dropdown Component
@@ -639,6 +639,38 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
   ]);
   const [depositAmount, setDepositAmount] = useState('1575');
   const [remarks, setRemarks] = useState('Wifi Fitting');
+  
+  // Column visibility state
+  const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState({
+    unitCost: true,
+    markup: true,
+    taxPreference: true,
+    location: true,
+    option: true,
+    brand: true,
+    specification: true,
+  });
+  
+  const columnDropdownRef = useRef(null);
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (columnDropdownRef.current && !columnDropdownRef.current.contains(event.target)) {
+        setIsColumnDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  
+  const toggleColumnVisibility = (column) => {
+    setVisibleColumns(prev => ({
+      ...prev,
+      [column]: !prev[column]
+    }));
+  };
 
   // Form state
   const [formData, setFormData] = useState({
@@ -1016,9 +1048,57 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
                   <IconPlus size={14} stroke={2} />
                   <span>Add</span>
                 </button>
-                <button className="w-[29px] h-[32px] flex items-center justify-center border border-[#E2E8F0] rounded-[4px] hover:bg-[#F8FAFC] transition-colors">
-                  <IconLayoutGrid size={14} stroke={1.5} className="text-[#64748B]" />
-                </button>
+                {/* Column Customization Button */}
+                <div className="relative" ref={columnDropdownRef}>
+                  <button 
+                    onClick={() => setIsColumnDropdownOpen(!isColumnDropdownOpen)}
+                    className={`w-[29px] h-[32px] flex items-center justify-center border rounded-[4px] transition-colors ${
+                      isColumnDropdownOpen 
+                        ? 'border-[#3B82F6] bg-[#EFF6FF]' 
+                        : 'border-[#E2E8F0] hover:bg-[#F8FAFC]'
+                    }`}
+                  >
+                    <IconColumns size={14} stroke={1.5} className={isColumnDropdownOpen ? 'text-[#3B82F6]' : 'text-[#64748B]'} />
+                  </button>
+                  
+                  {/* Column Customization Dropdown */}
+                  {isColumnDropdownOpen && (
+                    <div className="absolute top-full right-0 mt-[4px] w-[200px] bg-white border border-[#E2E8F0] rounded-[8px] shadow-lg z-50">
+                      <div className="px-[16px] py-[12px] border-b border-[#E2E8F0]">
+                        <span className="text-[14px] font-semibold text-[#1E293B]">Columns</span>
+                      </div>
+                      <div className="py-[8px]">
+                        {[
+                          { key: 'unitCost', label: 'Unit Cost' },
+                          { key: 'markup', label: 'Markup' },
+                          { key: 'taxPreference', label: 'Tax Preference' },
+                          { key: 'location', label: 'Location' },
+                          { key: 'option', label: 'Option' },
+                          { key: 'brand', label: 'Brand' },
+                          { key: 'specification', label: 'Specification' },
+                        ].map((column) => (
+                          <div 
+                            key={column.key}
+                            className="flex items-center gap-[10px] px-[16px] py-[8px] hover:bg-[#F8FAFC] cursor-pointer"
+                            onClick={() => toggleColumnVisibility(column.key)}
+                          >
+                            <IconGripVertical size={14} className="text-[#CBD5E1]" />
+                            <div className={`w-[18px] h-[18px] rounded-[4px] flex items-center justify-center ${
+                              visibleColumns[column.key] 
+                                ? 'bg-[#3B82F6]' 
+                                : 'border-2 border-[#CBD5E1]'
+                            }`}>
+                              {visibleColumns[column.key] && (
+                                <IconCheck size={12} stroke={3} className="text-white" />
+                              )}
+                            </div>
+                            <span className="text-[14px] text-[#334155]">{column.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -1033,33 +1113,34 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
               /* Parts Table */
               <div className="overflow-x-auto">
                 {/* Table Header */}
-                <div className="grid grid-cols-[40px_40px_240px_100px_80px_100px_140px_100px_120px_100px_60px] gap-0 border-b border-[#E2E8F0] bg-[#F8FAFC]">
-                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">#</div>
-                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase"></div>
-                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Product / Service</div>
-                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Unit Cost</div>
-                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Markup</div>
-                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Tax Preference</div>
-                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Location</div>
-                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Option</div>
-                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Specification</div>
-                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Price</div>
-                  <div className="px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase">Action</div>
+                <div className="flex border-b border-[#E2E8F0] bg-[#F8FAFC]">
+                  <div className="w-[40px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">#</div>
+                  <div className="w-[40px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0"></div>
+                  <div className="w-[240px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Product / Service</div>
+                  {visibleColumns.unitCost && <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Unit Cost</div>}
+                  {visibleColumns.markup && <div className="w-[80px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Markup</div>}
+                  {visibleColumns.taxPreference && <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Tax Preference</div>}
+                  {visibleColumns.location && <div className="w-[140px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Location</div>}
+                  {visibleColumns.option && <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Option</div>}
+                  {visibleColumns.brand && <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Brand</div>}
+                  {visibleColumns.specification && <div className="w-[120px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Specification</div>}
+                  <div className="w-[100px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Price</div>
+                  <div className="w-[60px] px-[12px] py-[12px] text-[11px] font-semibold text-[#64748B] uppercase flex-shrink-0">Action</div>
                 </div>
 
                 {/* Table Body */}
                 {partsItems.map((item, index) => (
-                  <div key={item.id} className="grid grid-cols-[40px_40px_240px_100px_80px_100px_140px_100px_120px_100px_60px] gap-0 border-b border-[#E2E8F0] hover:bg-[#F8FAFC]">
+                  <div key={item.id} className="flex border-b border-[#E2E8F0] hover:bg-[#F8FAFC]">
                     {/* Drag Handle */}
-                    <div className="px-[12px] py-[16px] flex items-start">
+                    <div className="w-[40px] px-[12px] py-[16px] flex items-start flex-shrink-0">
                       <IconGripVertical size={16} className="text-[#CBD5E1] cursor-grab" />
                     </div>
                     {/* Checkbox */}
-                    <div className="px-[12px] py-[16px] flex items-start">
+                    <div className="w-[40px] px-[12px] py-[16px] flex items-start flex-shrink-0">
                       <input type="checkbox" className="w-[16px] h-[16px] rounded border-[#CBD5E1] text-[#3B82F6] focus:ring-[#3B82F6]" />
                     </div>
                     {/* Product / Service */}
-                    <div className="px-[12px] py-[16px]">
+                    <div className="w-[240px] px-[12px] py-[16px] flex-shrink-0">
                       <div className="flex gap-[12px]">
                         <img 
                           src={item.image} 
@@ -1074,47 +1155,65 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
                       </div>
                     </div>
                     {/* Unit Cost */}
-                    <div className="px-[12px] py-[16px]">
-                      <span className="text-[13px] text-[#1E293B]">${item.unitCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-                    </div>
+                    {visibleColumns.unitCost && (
+                      <div className="w-[100px] px-[12px] py-[16px] flex-shrink-0">
+                        <span className="text-[13px] text-[#1E293B]">${item.unitCost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                    )}
                     {/* Markup */}
-                    <div className="px-[12px] py-[16px]">
-                      <span className="text-[13px] text-[#64748B]">{item.markup || '-'}</span>
-                    </div>
+                    {visibleColumns.markup && (
+                      <div className="w-[80px] px-[12px] py-[16px] flex-shrink-0">
+                        <span className="text-[13px] text-[#64748B]">{item.markup || '-'}</span>
+                      </div>
+                    )}
                     {/* Tax Preference */}
-                    <div className="px-[12px] py-[16px]">
-                      <span className="text-[13px] text-[#1E293B]">{item.taxPreference}</span>
-                    </div>
+                    {visibleColumns.taxPreference && (
+                      <div className="w-[100px] px-[12px] py-[16px] flex-shrink-0">
+                        <span className="text-[13px] text-[#1E293B]">{item.taxPreference}</span>
+                      </div>
+                    )}
                     {/* Location */}
-                    <div className="px-[12px] py-[16px]">
-                      <span className="text-[13px] text-[#1E293B]">{item.location}</span>
-                    </div>
+                    {visibleColumns.location && (
+                      <div className="w-[140px] px-[12px] py-[16px] flex-shrink-0">
+                        <span className="text-[13px] text-[#1E293B]">{item.location}</span>
+                      </div>
+                    )}
                     {/* Option */}
-                    <div className="px-[12px] py-[16px]">
-                      {item.option ? (
-                        <div className="flex items-center gap-[6px]">
-                          <div 
-                            className="w-[16px] h-[16px] rounded-[3px] border border-[#E2E8F0] flex-shrink-0"
-                            style={{ backgroundColor: item.option.color }}
-                          />
-                          <span className="text-[13px] text-[#1E293B] truncate">{item.option.name}</span>
-                        </div>
-                      ) : (
-                        <span className="text-[13px] text-[#64748B]">---</span>
-                      )}
-                    </div>
+                    {visibleColumns.option && (
+                      <div className="w-[100px] px-[12px] py-[16px] flex-shrink-0">
+                        {item.option ? (
+                          <div className="flex items-center gap-[6px]">
+                            <div 
+                              className="w-[16px] h-[16px] rounded-[3px] border border-[#E2E8F0] flex-shrink-0"
+                              style={{ backgroundColor: item.option.color }}
+                            />
+                            <span className="text-[13px] text-[#1E293B] truncate">{item.option.name}</span>
+                          </div>
+                        ) : (
+                          <span className="text-[13px] text-[#64748B]">---</span>
+                        )}
+                      </div>
+                    )}
+                    {/* Brand */}
+                    {visibleColumns.brand && (
+                      <div className="w-[100px] px-[12px] py-[16px] flex-shrink-0">
+                        <span className="text-[13px] text-[#64748B]">{item.brand || '---'}</span>
+                      </div>
+                    )}
                     {/* Specification */}
-                    <div className="px-[12px] py-[16px]">
-                      <span className="text-[13px] text-[#64748B]">{item.specification || '---'}</span>
-                    </div>
+                    {visibleColumns.specification && (
+                      <div className="w-[120px] px-[12px] py-[16px] flex-shrink-0">
+                        <span className="text-[13px] text-[#64748B]">{item.specification || '---'}</span>
+                      </div>
+                    )}
                     {/* Price / Qty */}
-                    <div className="px-[12px] py-[16px]">
+                    <div className="w-[100px] px-[12px] py-[16px] flex-shrink-0">
                       <div className="text-[13px] text-[#1E293B]">{item.quantity}</div>
                       <div className="text-[12px] text-[#64748B]">{item.unit}</div>
                       <div className="text-[12px] text-[#64748B]">{item.tax}</div>
                     </div>
                     {/* Actions */}
-                    <div className="px-[12px] py-[16px]">
+                    <div className="w-[60px] px-[12px] py-[16px] flex-shrink-0">
                       <button className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9]">
                         <IconDotsVertical size={16} className="text-[#64748B]" />
                       </button>
