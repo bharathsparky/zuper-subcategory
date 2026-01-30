@@ -16,6 +16,7 @@ import NewQuotePage from './components/NewQuotePage'
 import QuoteDetailsPage from './components/QuoteDetailsPage'
 import VendorDetailsPage from './components/VendorDetailsPage'
 import NewPurchaseOrderPage from './components/NewPurchaseOrderPage'
+import PurchaseOrderDetailsPage from './components/PurchaseOrderDetailsPage'
 
 function App() {
   // Check if we're on the /mobile, /mobile/quote, or /listing route
@@ -101,6 +102,11 @@ function App() {
     window.history.pushState({}, '', '/')
     setCurrentView('purchase-orders')
   }
+  const navigateToPurchaseOrderDetails = () => {
+    setIsListingRoute(false)
+    window.history.pushState({}, '', '/')
+    setCurrentView('purchase-order-details')
+  }
 
   // If on mobile quote route, render the mobile quote details page
   if (isMobileQuoteRoute) {
@@ -141,7 +147,7 @@ function App() {
     )
   }
 
-  if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service' || currentView === 'job-details' || currentView === 'reports' || currentView === 'new-quote' || currentView === 'quote-details' || currentView === 'vendor-details' || currentView === 'purchase-orders') {
+  if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service' || currentView === 'job-details' || currentView === 'reports' || currentView === 'new-quote' || currentView === 'quote-details' || currentView === 'vendor-details' || currentView === 'purchase-orders' || currentView === 'purchase-order-details') {
     // Workspace view: Full-height sidebar on left, header + content on right
     return (
       <div className="flex h-screen overflow-hidden">
@@ -162,9 +168,14 @@ function App() {
         <div className="flex flex-col flex-1 overflow-hidden">
           <Header currentView={currentView} onNavigateToSettings={navigateToSettings} />
 <main className="flex-1 overflow-hidden bg-white">
-                {currentView === 'purchase-orders' ? (
+                {currentView === 'purchase-order-details' ? (
+                  <PurchaseOrderDetailsPage 
+                    onBack={navigateToPurchaseOrders}
+                  />
+                ) : currentView === 'purchase-orders' ? (
                   <NewPurchaseOrderPage 
                     onNavigateBack={navigateToWorkspace}
+                    onSaveAndSend={navigateToPurchaseOrderDetails}
                   />
                 ) : currentView === 'vendor-details' ? (
                   <VendorDetailsPage 

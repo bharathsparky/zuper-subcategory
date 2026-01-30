@@ -904,7 +904,7 @@ const NO_PARTS_FOUND_SVG = '/assets/b0ce5152600488fbb3eaae7160f16ad08fd4db7b.svg
 const SERVICE_ADDRESS_PLACEHOLDER_SVG = '/assets/a3e4f039c6cedc946b5963bc8bfb1ff07266d844.svg';
 const ATTACHMENT_PLACEHOLDER_SVG = '/assets/013866c89a0e6b228e4b3ec894f98ff85d971fbd.svg';
 
-const NewPurchaseOrderPage = ({ onNavigateBack }) => {
+const NewPurchaseOrderPage = ({ onNavigateBack, onSaveAndSend }) => {
   const [primaryDetailsExpanded, setPrimaryDetailsExpanded] = useState(true);
   const [poItemsExpanded, setPoItemsExpanded] = useState(true);
   const [vendorExpanded, setVendorExpanded] = useState(true);
@@ -977,7 +977,10 @@ const NewPurchaseOrderPage = ({ onNavigateBack }) => {
             <span className="text-[12.6px] font-medium text-[#334155]">Save as Draft</span>
           </button>
           <div className="flex">
-            <button className="flex items-center gap-[7px] px-[14px] py-[5.8px] bg-[#E44A19] rounded-l-[5.25px] border-r border-white hover:bg-[#D94315]">
+            <button 
+              onClick={onSaveAndSend}
+              className="flex items-center gap-[7px] px-[14px] py-[5.8px] bg-[#E44A19] rounded-l-[5.25px] border-r border-white hover:bg-[#D94315]"
+            >
               <SendIcon />
               <span className="text-[12.6px] font-medium text-white">Save & Submit</span>
             </button>
