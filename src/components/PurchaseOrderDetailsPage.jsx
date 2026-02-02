@@ -263,17 +263,119 @@ const ReceiveItemsModal = ({ isOpen, onClose, onSave, items }) => {
     });
   };
 
+  const handleVendorCostChange = (index, value) => {
+    setReceiveItems(prev => {
+      const updated = [...prev];
+      updated[index].vendorCost = value;
+      return updated;
+    });
+  };
+
+  const handleLocationChange = (index, value) => {
+    setReceiveItems(prev => {
+      const updated = [...prev];
+      updated[index].location = value;
+      return updated;
+    });
+  };
+
+  // Upload state management
+  const [uploadState, setUploadState] = useState({}); // { itemId: { status: 'idle' | 'uploading' | 'success' | 'error', progress: 0, error: '' } }
+  const [uploadError, setUploadError] = useState({ show: false, message: '' });
+
+  const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB in bytes
+  const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
   // Handle image upload for proof of receipt
   const handleImageUpload = (index, files) => {
     if (!files || files.length === 0) return;
     
-    const newImages = Array.from(files).map(file => URL.createObjectURL(file));
+    const item = receiveItems[index];
+    const fileArray = Array.from(files);
     
-    setReceiveItems(prev => {
-      const updated = [...prev];
-      updated[index].proofImages = [...(updated[index].proofImages || []), ...newImages];
-      return updated;
+    // Validate files
+    const invalidFiles = [];
+    const oversizedFiles = [];
+    const validFiles = [];
+    
+    fileArray.forEach(file => {
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        invalidFiles.push(file.name);
+      } else if (file.size > MAX_FILE_SIZE) {
+        oversizedFiles.push({ name: file.name, size: (file.size / (1024 * 1024)).toFixed(1) });
+      } else {
+        validFiles.push(file);
+      }
     });
+    
+    // Show error for invalid files
+    if (invalidFiles.length > 0) {
+      setUploadError({
+        show: true,
+        message: `Invalid file type: ${invalidFiles.join(', ')}. Only images (JPEG, PNG, GIF, WebP) are allowed.`
+      });
+      setTimeout(() => setUploadError({ show: false, message: '' }), 4000);
+    }
+    
+    // Show error for oversized files
+    if (oversizedFiles.length > 0) {
+      const fileNames = oversizedFiles.map(f => `${f.name} (${f.size} MB)`).join(', ');
+      setUploadError({
+        show: true,
+        message: `File too large: ${fileNames}. Maximum size is 20 MB per file.`
+      });
+      setTimeout(() => setUploadError({ show: false, message: '' }), 4000);
+    }
+    
+    if (validFiles.length === 0) return;
+    
+    // Set uploading state
+    setUploadState(prev => ({
+      ...prev,
+      [item.id]: { status: 'uploading', progress: 0, error: '' }
+    }));
+    
+    // Simulate upload progress (in real app, this would be actual upload progress)
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+      progress += Math.random() * 30;
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(progressInterval);
+        
+        // Upload complete - add images
+        const newImages = validFiles.map(file => ({
+          url: URL.createObjectURL(file),
+          name: file.name,
+          size: file.size
+        }));
+        
+        setReceiveItems(prev => {
+          const updated = [...prev];
+          updated[index].proofImages = [...(updated[index].proofImages || []), ...newImages];
+          return updated;
+        });
+        
+        // Set success state
+        setUploadState(prev => ({
+          ...prev,
+          [item.id]: { status: 'success', progress: 100, error: '' }
+        }));
+        
+        // Reset to idle after animation
+        setTimeout(() => {
+          setUploadState(prev => ({
+            ...prev,
+            [item.id]: { status: 'idle', progress: 0, error: '' }
+          }));
+        }, 1500);
+      } else {
+        setUploadState(prev => ({
+          ...prev,
+          [item.id]: { status: 'uploading', progress, error: '' }
+        }));
+      }
+    }, 150);
   };
 
   // Remove an uploaded image
@@ -341,6 +443,12 @@ const ReceiveItemsModal = ({ isOpen, onClose, onSave, items }) => {
 
   // Receive all items
   const handleReceiveAll = () => {
+    // Clear search query to show all items after receiving
+    setSearchQuery('');
+    
+    // Clear any selections
+    setSelectedItems(new Set());
+    
     setReceiveItems(prev => 
       prev.map(item => ({
         ...item,
@@ -385,6 +493,29 @@ const ReceiveItemsModal = ({ isOpen, onClose, onSave, items }) => {
               <path d="M13.3333 4L6 11.3333L2.66667 8" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             <span>All items received — click "Save & Close" to confirm</span>
+          </div>
+        </div>
+
+        {/* Upload Error Toast */}
+        <div className={`fixed top-4 right-4 z-[60] transition-all duration-300 ${uploadError.show ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'}`}>
+          <div className="bg-[#FEF2F2] border border-[#FECACA] text-[#991B1B] px-4 py-3 rounded-lg shadow-lg flex items-start gap-3 max-w-[400px]">
+            <div className="flex-shrink-0 mt-0.5">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8 5.33333V8M8 10.6667H8.00667M14.6667 8C14.6667 11.6819 11.6819 14.6667 8 14.6667C4.3181 14.6667 1.33333 11.6819 1.33333 8C1.33333 4.3181 4.3181 1.33333 8 1.33333C11.6819 1.33333 14.6667 4.3181 14.6667 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <div className="flex-1">
+              <div className="text-[12px] font-semibold mb-0.5">Upload Failed</div>
+              <div className="text-[11px] text-[#B91C1C] leading-relaxed">{uploadError.message}</div>
+            </div>
+            <button 
+              onClick={() => setUploadError({ show: false, message: '' })}
+              className="flex-shrink-0 text-[#991B1B] hover:text-[#7F1D1D] transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10.5 3.5L3.5 10.5M3.5 3.5L10.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -591,26 +722,34 @@ const ReceiveItemsModal = ({ isOpen, onClose, onSave, items }) => {
                         type="text"
                         value={item.receivingQty}
                         onChange={(e) => handleReceivingQtyChange(actualIndex, e.target.value)}
-                        className={`w-full h-[32px] px-2.5 bg-white border rounded text-[12px] font-medium text-center transition-colors focus:outline-none ${
-                          received 
-                            ? 'border-[#94A3B8] text-[#64748B] bg-[#F8FAFC]' 
-                            : 'border-[#E2E8F0] text-[#1E293B] focus:border-[#94A3B8]'
-                        }`}
+                        className="w-full h-[32px] px-2.5 bg-white border border-[#E2E8F0] rounded text-[12px] font-medium text-[#1E293B] text-center transition-colors focus:outline-none focus:border-[#94A3B8]"
                       />
                     </td>
                     
                     {/* Vendor Cost */}
                     <td className="px-3 py-2.5 border-b border-[#E2E8F0]">
-                      <span className="text-[11px] text-[#64748B]">${item.vendorCost}</span>
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] text-[#64748B]">$</span>
+                        <input
+                          type="text"
+                          value={item.vendorCost}
+                          onChange={(e) => handleVendorCostChange(actualIndex, e.target.value)}
+                          className="w-full h-[32px] pl-5 pr-2.5 bg-white border border-[#E2E8F0] rounded text-[11px] text-[#1E293B] focus:outline-none focus:border-[#94A3B8] transition-colors"
+                        />
+                      </div>
                     </td>
                     
                     {/* Location */}
                     <td className="px-3 py-2.5 border-b border-[#E2E8F0]">
-                      <select className="w-full h-[32px] px-2 bg-[#F8FAFC] border border-[#E2E8F0] rounded text-[11px] text-[#64748B] focus:outline-none focus:border-[#94A3B8] cursor-pointer">
-                        <option>No Location</option>
-                        <option>Warehouse A</option>
-                        <option>Warehouse B</option>
-                        <option>Job Site</option>
+                      <select 
+                        value={item.location}
+                        onChange={(e) => handleLocationChange(actualIndex, e.target.value)}
+                        className="w-full h-[32px] px-2 bg-white border border-[#E2E8F0] rounded text-[11px] text-[#1E293B] focus:outline-none focus:border-[#94A3B8] cursor-pointer transition-colors"
+                      >
+                        <option value="No Location">No Location</option>
+                        <option value="Warehouse A">Warehouse A</option>
+                        <option value="Warehouse B">Warehouse B</option>
+                        <option value="Job Site">Job Site</option>
                       </select>
                     </td>
                     
@@ -621,7 +760,7 @@ const ReceiveItemsModal = ({ isOpen, onClose, onSave, items }) => {
                         placeholder="Serial #"
                         value={item.serialNo}
                         onChange={(e) => handleSerialNoChange(actualIndex, e.target.value)}
-                        className="w-full h-[32px] px-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded text-[11px] text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#94A3B8]"
+                        className="w-full h-[32px] px-2.5 bg-white border border-[#E2E8F0] rounded text-[11px] text-[#1E293B] placeholder:text-[#94A3B8] focus:outline-none focus:border-[#94A3B8] transition-colors"
                       />
                     </td>
                     
@@ -679,26 +818,72 @@ const ReceiveItemsModal = ({ isOpen, onClose, onSave, items }) => {
                           </div>
                         )}
                         
-                        {/* Upload button */}
-                        <label className="relative cursor-pointer">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            multiple
-                            onChange={(e) => handleImageUpload(actualIndex, e.target.files)}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                          />
-                          <div className={`h-[28px] px-2 flex items-center gap-1 rounded border border-dashed transition-colors ${
-                            item.proofImages && item.proofImages.length > 0 
-                              ? 'border-[#CBD5E1] text-[#94A3B8] hover:border-[#94A3B8] hover:text-[#64748B]' 
-                              : 'border-[#CBD5E1] text-[#64748B] hover:border-[#94A3B8] hover:bg-[#F8FAFC]'
-                          }`}>
-                            <IconUploadImage />
-                            {(!item.proofImages || item.proofImages.length === 0) && (
-                              <span className="text-[10px] font-medium">Upload</span>
-                            )}
-                          </div>
-                        </label>
+                        {/* Upload button with progress */}
+                        {(() => {
+                          const itemUploadState = uploadState[item.id] || { status: 'idle', progress: 0 };
+                          const isUploading = itemUploadState.status === 'uploading';
+                          const isSuccess = itemUploadState.status === 'success';
+                          
+                          return (
+                            <div className="relative group">
+                              <label className={`relative cursor-pointer ${isUploading ? 'pointer-events-none' : ''}`}>
+                                <input
+                                  type="file"
+                                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                                  multiple
+                                  onChange={(e) => {
+                                    handleImageUpload(actualIndex, e.target.files);
+                                    e.target.value = ''; // Reset input
+                                  }}
+                                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                  disabled={isUploading}
+                                />
+                                <div className={`h-[28px] px-2 flex items-center gap-1.5 rounded border transition-all ${
+                                  isUploading 
+                                    ? 'border-[#3B82F6] bg-[#EFF6FF]' 
+                                    : isSuccess
+                                      ? 'border-[#10B981] bg-[#ECFDF5]'
+                                      : item.proofImages && item.proofImages.length > 0 
+                                        ? 'border-dashed border-[#CBD5E1] text-[#94A3B8] hover:border-[#94A3B8] hover:text-[#64748B]' 
+                                        : 'border-dashed border-[#CBD5E1] text-[#64748B] hover:border-[#94A3B8] hover:bg-[#F8FAFC]'
+                                }`}>
+                                  {isUploading ? (
+                                    <>
+                                      <svg className="w-3.5 h-3.5 animate-spin text-[#3B82F6]" viewBox="0 0 24 24" fill="none">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3"/>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                                      </svg>
+                                      <span className="text-[10px] font-medium text-[#3B82F6]">{Math.round(itemUploadState.progress)}%</span>
+                                    </>
+                                  ) : isSuccess ? (
+                                    <>
+                                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="text-[#10B981]">
+                                        <path d="M11.6667 3.5L5.25 9.91667L2.33334 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                      </svg>
+                                      <span className="text-[10px] font-medium text-[#10B981]">Done</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <IconUploadImage />
+                                      {(!item.proofImages || item.proofImages.length === 0) && (
+                                        <span className="text-[10px] font-medium">Upload</span>
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              </label>
+                              
+                              {/* Tooltip with file size limit */}
+                              {!isUploading && !isSuccess && (
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 bg-[#1E293B] text-white text-[10px] rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
+                                  <div className="font-medium">Upload proof images</div>
+                                  <div className="text-[#94A3B8]">Max 20 MB per file • JPEG, PNG, GIF, WebP</div>
+                                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-[#1E293B]"/>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                     </td>
                   </tr>
@@ -1074,7 +1259,7 @@ export default function PurchaseOrderDetailsPage({ onBack }) {
                                       <path d="M5 1V5.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                                       <circle cx="5" cy="8" r="0.75" fill="currentColor"/>
                                     </svg>
-                                    Partial
+                                    Partially Received
                                   </span>
                                 )}
                               </div>
