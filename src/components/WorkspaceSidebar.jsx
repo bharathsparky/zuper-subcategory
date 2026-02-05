@@ -48,7 +48,7 @@ const CART_SUBMENU = [
   { id: 'purchase-orders', label: 'Purchase Orders', icon: IconShoppingCart, badge: 'Beta' },
 ];
 
-function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavigateToWorkspace, onNavigateToReports, onNavigateToJobsListing, onNavigateToNewQuote, onNavigateToVendorDetails, onNavigateToPurchaseOrders, currentView }) {
+function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavigateToWorkspace, onNavigateToReports, onNavigateToJobsListing, onNavigateToNewQuote, onNavigateToVendorDetails, onNavigateToPurchaseOrders, onNavigateToMaterialRequests, currentView }) {
   const [cartMenuOpen, setCartMenuOpen] = useState(false);
   const cartMenuRef = useRef(null);
   const cartButtonRef = useRef(null);
@@ -78,6 +78,7 @@ function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavi
     if (currentView === 'new-quote') return 'table';
     if (currentView === 'vendor-details') return 'cart';
     if (currentView === 'purchase-orders') return 'cart';
+    if (currentView === 'material-requests' || currentView === 'new-material-request') return 'cart';
     if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service') return 'tag';
     return 'tag';
   };
@@ -160,6 +161,8 @@ function WorkspaceSidebar({ onNavigateToSettings, onNavigateToJobDetails, onNavi
                           onNavigateToVendorDetails();
                         } else if (subItem.id === 'purchase-orders' && onNavigateToPurchaseOrders) {
                           onNavigateToPurchaseOrders();
+                        } else if (subItem.id === 'material-requests' && onNavigateToMaterialRequests) {
+                          onNavigateToMaterialRequests();
                         }
                       }}
                       className="w-full px-4 py-3 flex items-center gap-3 hover:bg-[#1E4A6D] transition-colors text-left"

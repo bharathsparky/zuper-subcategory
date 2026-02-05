@@ -17,6 +17,7 @@ import QuoteDetailsPage from './components/QuoteDetailsPage'
 import VendorDetailsPage from './components/VendorDetailsPage'
 import NewPurchaseOrderPage from './components/NewPurchaseOrderPage'
 import PurchaseOrderDetailsPage from './components/PurchaseOrderDetailsPage'
+import NewMaterialRequestPage from './components/NewMaterialRequestPage'
 
 function App() {
   // Check if we're on the /mobile, /mobile/quote, or /listing route
@@ -107,6 +108,11 @@ function App() {
     window.history.pushState({}, '', '/')
     setCurrentView('purchase-order-details')
   }
+  const navigateToMaterialRequests = () => {
+    setIsListingRoute(false)
+    window.history.pushState({}, '', '/')
+    setCurrentView('new-material-request')
+  }
 
   // If on mobile quote route, render the mobile quote details page
   if (isMobileQuoteRoute) {
@@ -131,6 +137,7 @@ function App() {
           onNavigateToNewQuote={navigateToNewQuote}
           onNavigateToVendorDetails={navigateToVendorDetails}
           onNavigateToPurchaseOrders={navigateToPurchaseOrders}
+          onNavigateToMaterialRequests={navigateToMaterialRequests}
           currentView="jobs-listing"
         />
         <div className="flex flex-col flex-1 overflow-hidden">
@@ -147,7 +154,7 @@ function App() {
     )
   }
 
-  if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service' || currentView === 'job-details' || currentView === 'reports' || currentView === 'new-quote' || currentView === 'quote-details' || currentView === 'vendor-details' || currentView === 'purchase-orders' || currentView === 'purchase-order-details') {
+  if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service' || currentView === 'job-details' || currentView === 'reports' || currentView === 'new-quote' || currentView === 'quote-details' || currentView === 'vendor-details' || currentView === 'purchase-orders' || currentView === 'purchase-order-details' || currentView === 'new-material-request') {
     // Workspace view: Full-height sidebar on left, header + content on right
     return (
       <div className="flex h-screen overflow-hidden">
@@ -161,6 +168,7 @@ function App() {
           onNavigateToNewQuote={navigateToNewQuote}
           onNavigateToVendorDetails={navigateToVendorDetails}
           onNavigateToPurchaseOrders={navigateToPurchaseOrders}
+          onNavigateToMaterialRequests={navigateToMaterialRequests}
           currentView={currentView}
         />
         
@@ -168,7 +176,11 @@ function App() {
         <div className="flex flex-col flex-1 overflow-hidden">
           <Header currentView={currentView} onNavigateToSettings={navigateToSettings} />
 <main className="flex-1 overflow-hidden bg-white">
-                {currentView === 'purchase-order-details' ? (
+                {currentView === 'new-material-request' ? (
+                  <NewMaterialRequestPage 
+                    onBack={navigateToWorkspace}
+                  />
+                ) : currentView === 'purchase-order-details' ? (
                   <PurchaseOrderDetailsPage 
                     onBack={navigateToPurchaseOrders}
                   />

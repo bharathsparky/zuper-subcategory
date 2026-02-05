@@ -32,6 +32,7 @@ import {
   IconPrinter,
   IconDotsVertical,
   IconX,
+  IconEye,
 } from '@tabler/icons-react';
 
 // Sample job data
@@ -171,7 +172,7 @@ const LINE_ITEMS_DATA = [
     hasOptions: true,
     options: [
       { id: 'opt-1', name: 'Charcoal', color: '#374151' },
-      { id: 'opt-2', name: 'Weathered Wood', color: '#78716C' },
+      { id: 'opt-2', name: 'Weathered Wood', color: null, image: null }, // Empty state - no image uploaded
       { id: 'opt-3', name: 'Onyx Black', color: '#1F2937' },
       { id: 'opt-4', name: 'Slate Gray', color: '#64748B' },
       { id: 'opt-5', name: 'Barkwood', color: '#92400E' },
@@ -237,7 +238,7 @@ const LINE_ITEMS_DATA = [
     hasOptions: true,
     options: [
       { id: 'opt-1', name: 'Charcoal', color: '#374151' },
-      { id: 'opt-2', name: 'Weathered Wood', color: '#78716C' },
+      { id: 'opt-2', name: 'Weathered Wood', color: null, image: null }, // Empty state - no image uploaded
       { id: 'opt-3', name: 'Onyx Black', color: '#1F2937' },
     ],
   },
@@ -474,11 +475,24 @@ function OptionPreviewModal({ isOpen, onClose, option, onSelect, showSelectButto
                 alt={option.name}
                 className="w-[280px] h-[280px] object-cover rounded-[8px] border border-[#E2E8F0]"
               />
-            ) : (
+            ) : option.color ? (
               <div 
                 className="w-[280px] h-[280px] rounded-[8px] border-2 border-[#E2E8F0]"
                 style={{ backgroundColor: option.color }}
               />
+            ) : (
+              /* Empty state - no image uploaded */
+              <div className="w-[280px] h-[280px] rounded-[8px] border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] flex flex-col items-center justify-center gap-[12px]">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <div className="text-center">
+                  <p className="text-[14px] font-medium text-[#64748B]">No Image</p>
+                  <p className="text-[12px] text-[#94A3B8] mt-1">Image not uploaded for this option</p>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -887,7 +901,7 @@ function EditLineItemModal({ isOpen, onClose, item, onSave }) {
 }
 
 // Kebab Menu Dropdown Component
-function LineItemKebabMenu({ onEdit, onDelete }) {
+function LineItemKebabMenu({ onEdit, onDelete, onViewDetails }) {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -902,7 +916,17 @@ function LineItemKebabMenu({ onEdit, onDelete }) {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute top-full right-0 mt-1 w-[140px] bg-white border border-[#E2E8F0] rounded-lg shadow-lg z-50 py-1">
+          <div className="absolute top-full right-0 mt-1 w-[160px] bg-white border border-[#E2E8F0] rounded-lg shadow-lg z-50 py-1">
+            <button
+              onClick={() => {
+                onViewDetails();
+                setIsOpen(false);
+              }}
+              className="w-full h-[36px] px-[12px] flex items-center gap-[10px] hover:bg-[#F8FAFC] transition-colors text-left"
+            >
+              <IconEye size={16} stroke={1.5} className="text-[#64748B]" />
+              <span className="text-[13px] text-[#334155]">View details</span>
+            </button>
             <button
               onClick={() => {
                 onEdit();
@@ -930,6 +954,110 @@ function LineItemKebabMenu({ onEdit, onDelete }) {
   );
 }
 
+// Line Item Details Modal Component
+function LineItemDetailsModal({ item, onClose }) {
+  if (!item) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/50"
+        onClick={onClose}
+      />
+      
+      {/* Modal */}
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-[600px] mx-4">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0]">
+          <h2 className="text-[18px] font-semibold text-[#1E293B] uppercase">
+            '{item.name}' Details
+          </h2>
+          <button 
+            onClick={onClose}
+            className="p-1 hover:bg-[#F1F5F9] rounded transition-colors"
+          >
+            <IconX size={20} className="text-[#64748B]" />
+          </button>
+        </div>
+        
+        {/* Content */}
+        <div className="px-6 py-6 space-y-6">
+          {/* Row 1: Product, Location, Brand */}
+          <div className="grid grid-cols-3 gap-6">
+            <div>
+              <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Product</h4>
+              <p className="text-[14px] text-[#1E293B]">{item.partId} - {item.name}</p>
+            </div>
+            <div>
+              <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Location</h4>
+              <p className="text-[14px] text-[#1E293B]">{item.location || '---'}</p>
+            </div>
+            <div>
+              <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Brand</h4>
+              <p className="text-[14px] text-[#1E293B]">{item.brand || '---'}</p>
+            </div>
+          </div>
+
+          {/* Row 2: Selected Option, Markup, Quantity */}
+          <div className="grid grid-cols-3 gap-6">
+            <div>
+              <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Selected Option</h4>
+              {item.selectedOption ? (
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-[20px] h-[20px] rounded border border-[#E2E8F0]"
+                    style={{ backgroundColor: item.selectedOption.color }}
+                  />
+                  <span className="text-[14px] text-[#1E293B]">{item.selectedOption.name}</span>
+                </div>
+              ) : (
+                <p className="text-[14px] text-[#1E293B]">---</p>
+              )}
+            </div>
+            <div>
+              <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Markup</h4>
+              <p className="text-[14px] text-[#1E293B]">{item.markup || '---'}</p>
+            </div>
+            <div>
+              <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Quantity</h4>
+              <p className="text-[14px] text-[#1E293B]">{item.qty}</p>
+            </div>
+          </div>
+          
+          {/* Row 3: Serial Number */}
+          <div>
+            <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Serial Number</h4>
+            <p className="text-[14px] text-[#1E293B]">{item.serialNumber || '---'}</p>
+          </div>
+          
+          {/* Row 4: Specification */}
+          <div>
+            <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Specification</h4>
+            <p className="text-[14px] text-[#1E293B]">{item.specification || '---'}</p>
+          </div>
+          
+          {/* Row 5: Product Description */}
+          <div>
+            <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Product Description</h4>
+            <p className="text-[14px] text-[#1E293B]">{item.description || '---'}</p>
+          </div>
+        </div>
+        
+        {/* Footer */}
+        <div className="flex justify-end px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC]">
+          <button 
+            onClick={onClose}
+            className="px-6 py-2 border border-[#E2E8F0] rounded-lg text-[14px] font-medium text-[#1E293B] hover:bg-[#F1F5F9] transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Option Selector for Picker - with preview support
 function PickerOptionSelector({ options, selectedOption, onChange, onPreview }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -947,10 +1075,27 @@ function PickerOptionSelector({ options, selectedOption, onChange, onPreview }) 
       >
         {selectedOption ? (
           <>
-            <div 
-              className="w-[16px] h-[16px] rounded-[3px] border border-[#E2E8F0] flex-shrink-0"
-              style={{ backgroundColor: selectedOption.color }}
-            />
+            {selectedOption.image ? (
+              <img 
+                src={selectedOption.image} 
+                alt={selectedOption.name}
+                className="w-[16px] h-[16px] rounded-[3px] object-cover border border-[#E2E8F0] flex-shrink-0"
+              />
+            ) : selectedOption.color ? (
+              <div 
+                className="w-[16px] h-[16px] rounded-[3px] border border-[#E2E8F0] flex-shrink-0"
+                style={{ backgroundColor: selectedOption.color }}
+              />
+            ) : (
+              /* Empty state swatch */
+              <div className="w-[16px] h-[16px] rounded-[3px] border border-dashed border-[#CBD5E1] bg-[#F8FAFC] flex items-center justify-center flex-shrink-0">
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+              </div>
+            )}
             <span className="text-[#334155] truncate flex-1 text-left">{selectedOption.name}</span>
           </>
         ) : (
@@ -986,11 +1131,20 @@ function PickerOptionSelector({ options, selectedOption, onChange, onPreview }) 
                       alt={option.name}
                       className="w-[28px] h-[28px] rounded-[4px] object-cover border border-[#E2E8F0] group-hover:ring-2 group-hover:ring-[#3B82F6]"
                     />
-                  ) : (
+                  ) : option.color ? (
                     <div 
                       className="w-[28px] h-[28px] rounded-[4px] border border-[#E2E8F0] group-hover:ring-2 group-hover:ring-[#3B82F6] transition-all"
                       style={{ backgroundColor: option.color }}
                     />
+                  ) : (
+                    /* Empty state - no image uploaded */
+                    <div className="w-[28px] h-[28px] rounded-[4px] border border-dashed border-[#CBD5E1] bg-[#F8FAFC] flex items-center justify-center group-hover:ring-2 group-hover:ring-[#3B82F6] group-hover:border-[#3B82F6] transition-all">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                      </svg>
+                    </div>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-[4px] opacity-0 group-hover:opacity-100 transition-opacity">
                     <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2">
@@ -1373,6 +1527,7 @@ function JobDetailsPage({ onBack }) {
   const [editingItem, setEditingItem] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [previewOption, setPreviewOption] = useState(null);
+  const [detailsModalItem, setDetailsModalItem] = useState(null);
 
   const handleEditItem = (item) => {
     setEditingItem(item);
@@ -1382,6 +1537,10 @@ function JobDetailsPage({ onBack }) {
   const handleDeleteItem = (item) => {
     console.log('Deleting item:', item);
     // In real app, would remove from state/API
+  };
+
+  const handleViewDetails = (item) => {
+    setDetailsModalItem(item);
   };
 
   const handleSaveItem = (updatedItem) => {
@@ -1727,6 +1886,7 @@ function JobDetailsPage({ onBack }) {
                         <td className="px-[12px] py-[16px] text-[13px] text-[#1E293B]">{item.qty} {item.unit}</td>
                         <td className="px-[12px] py-[16px]">
                           <LineItemKebabMenu
+                            onViewDetails={() => handleViewDetails(item)}
                             onEdit={() => handleEditItem(item)}
                             onDelete={() => handleDeleteItem(item)}
                           />
@@ -1829,6 +1989,14 @@ function JobDetailsPage({ onBack }) {
         option={previewOption}
         showSelectButton={false}
       />
+
+      {/* Line Item Details Modal */}
+      {detailsModalItem && (
+        <LineItemDetailsModal
+          item={detailsModalItem}
+          onClose={() => setDetailsModalItem(null)}
+        />
+      )}
     </div>
   );
 }

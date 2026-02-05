@@ -25,7 +25,112 @@ import {
   IconDotsVertical,
   IconTrash,
   IconColumns2,
+  IconEye,
 } from '@tabler/icons-react';
+
+// Item Details Modal Component
+function ItemDetailsModal({ item, onClose }) {
+  if (!item) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/50"
+        onClick={onClose}
+      />
+      
+      {/* Modal */}
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-[600px] mx-4">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0]">
+          <h2 className="text-[18px] font-semibold text-[#1E293B] uppercase">
+            '{item.name}' Details
+          </h2>
+          <button 
+            onClick={onClose}
+            className="p-1 hover:bg-[#F1F5F9] rounded transition-colors"
+          >
+            <IconX size={20} className="text-[#64748B]" />
+          </button>
+        </div>
+        
+        {/* Content */}
+        <div className="px-6 py-6 space-y-6">
+          {/* Row 1: Product, Location, Brand */}
+          <div className="grid grid-cols-3 gap-6">
+            <div>
+              <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Product</h4>
+              <p className="text-[14px] text-[#1E293B]">{item.itemId} - {item.name}</p>
+            </div>
+            <div>
+              <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Location</h4>
+              <p className="text-[14px] text-[#1E293B]">{item.location || '---'}</p>
+            </div>
+            <div>
+              <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Brand</h4>
+              <p className="text-[14px] text-[#1E293B]">{item.brand || '---'}</p>
+            </div>
+          </div>
+
+          {/* Row 2: Selected Option, Markup, Quantity */}
+          <div className="grid grid-cols-3 gap-6">
+            <div>
+              <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Selected Option</h4>
+              {item.option ? (
+                <div className="flex items-center gap-2">
+                  <div 
+                    className="w-[20px] h-[20px] rounded border border-[#E2E8F0]"
+                    style={{ backgroundColor: item.option.color }}
+                  />
+                  <span className="text-[14px] text-[#1E293B]">{item.option.name}</span>
+                </div>
+              ) : (
+                <p className="text-[14px] text-[#1E293B]">---</p>
+              )}
+            </div>
+            <div>
+              <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Markup</h4>
+              <p className="text-[14px] text-[#1E293B]">{item.markup || '---'}</p>
+            </div>
+            <div>
+              <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Quantity</h4>
+              <p className="text-[14px] text-[#1E293B]">{item.quantity}</p>
+            </div>
+          </div>
+          
+          {/* Row 3: Serial Number */}
+          <div>
+            <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Serial Number</h4>
+            <p className="text-[14px] text-[#1E293B]">{item.serialNumber || '---'}</p>
+          </div>
+          
+          {/* Row 4: Specification */}
+          <div>
+            <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Specification</h4>
+            <p className="text-[14px] text-[#1E293B]">{item.specification || '---'}</p>
+          </div>
+          
+          {/* Row 5: Product Description */}
+          <div>
+            <h4 className="text-[14px] font-semibold text-[#1E293B] mb-2">Product Description</h4>
+            <p className="text-[14px] text-[#1E293B]">{item.description || '---'}</p>
+          </div>
+        </div>
+        
+        {/* Footer */}
+        <div className="flex justify-end px-6 py-4 border-t border-[#E2E8F0] bg-[#F8FAFC]">
+          <button 
+            onClick={onClose}
+            className="px-6 py-2 border border-[#E2E8F0] rounded-lg text-[14px] font-medium text-[#1E293B] hover:bg-[#F1F5F9] transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Searchable User Dropdown Component
 const SearchableUserDropdown = ({ users, value, onChange, onClear, placeholder = "Select a user" }) => {
@@ -653,13 +758,29 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
   ]);
   const [draggedColumn, setDraggedColumn] = useState(null);
   
+  // Item details modal state
+  const [detailsModalItem, setDetailsModalItem] = useState(null);
+  const [openKebabMenuId, setOpenKebabMenuId] = useState(null);
+  
   const columnDropdownRef = useRef(null);
+  const kebabMenuRef = useRef(null);
   
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (columnDropdownRef.current && !columnDropdownRef.current.contains(event.target)) {
         setIsColumnDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  
+  // Close kebab menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (kebabMenuRef.current && !kebabMenuRef.current.contains(event.target)) {
+        setOpenKebabMenuId(null);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -1242,9 +1363,41 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
                     </div>
                     {/* Actions */}
                     <div className="w-[60px] px-[12px] py-[16px] flex-shrink-0">
-                      <button className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9]">
-                        <IconDotsVertical size={16} className="text-[#64748B]" />
-                      </button>
+                      <div className="relative" ref={openKebabMenuId === item.id ? kebabMenuRef : null}>
+                        <button 
+                          onClick={() => setOpenKebabMenuId(openKebabMenuId === item.id ? null : item.id)}
+                          className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9] text-[#64748B] hover:text-[#334155]"
+                        >
+                          <IconDotsVertical size={16} />
+                        </button>
+                        
+                        {/* Kebab Menu Dropdown */}
+                        {openKebabMenuId === item.id && (
+                          <div className="absolute right-0 top-full mt-1 bg-white border border-[#E2E8F0] rounded-lg shadow-lg z-10 min-w-[160px] py-1">
+                            <button
+                              onClick={() => {
+                                setDetailsModalItem(item);
+                                setOpenKebabMenuId(null);
+                              }}
+                              className="w-full px-4 py-2 text-left text-[13px] text-[#334155] hover:bg-[#F8FAFC] flex items-center gap-2"
+                            >
+                              <IconEye size={16} className="text-[#64748B]" />
+                              View details
+                            </button>
+                            <button
+                              onClick={() => {
+                                // Delete item logic here
+                                setPartsItems(partsItems.filter(p => p.id !== item.id));
+                                setOpenKebabMenuId(null);
+                              }}
+                              className="w-full px-4 py-2 text-left text-[13px] text-[#EF4444] hover:bg-[#FEF2F2] flex items-center gap-2"
+                            >
+                              <IconTrash size={16} />
+                              Delete
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1471,6 +1624,14 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
           console.log('Adding products to quote...');
         }}
       />
+      
+      {/* Item Details Modal */}
+      {detailsModalItem && (
+        <ItemDetailsModal
+          item={detailsModalItem}
+          onClose={() => setDetailsModalItem(null)}
+        />
+      )}
     </div>
   );
 }

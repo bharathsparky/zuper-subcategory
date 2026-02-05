@@ -32,6 +32,8 @@ import {
   IconUpload,
   IconGripVertical,
   IconAlertCircle,
+  IconPencil,
+  IconX,
 } from '@tabler/icons-react';
 
 // Hierarchical category data structure
@@ -71,18 +73,88 @@ const CATEGORY_HIERARCHY = [
 ];
 
 // Collapsible Section Component
-function CollapsibleSection({ title, icon: Icon, defaultExpanded = true, children, headerRight }) {
+function CollapsibleSection({ title, icon: Icon, defaultExpanded = true, children, headerRight, editable = false, onTitleChange }) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState('');
+  const inputRef = useRef(null);
+
+  const handleEditClick = (e) => {
+    e.stopPropagation();
+    // Extract just the base title without the count
+    const baseTitle = title.replace(/\s*\(\d+\)$/, '');
+    setEditedTitle(baseTitle);
+    setIsEditingTitle(true);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const handleSaveTitle = (e) => {
+    e?.stopPropagation();
+    if (editedTitle.trim() && onTitleChange) {
+      onTitleChange(editedTitle.trim());
+    }
+    setIsEditingTitle(false);
+  };
+
+  const handleCancelEdit = (e) => {
+    e?.stopPropagation();
+    setIsEditingTitle(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSaveTitle();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
+    }
+  };
 
   return (
     <div className="bg-white border border-[#E2E8F0] rounded-lg overflow-hidden">
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => !isEditingTitle && setIsExpanded(!isExpanded)}
         className="w-full h-[49px] px-[14px] flex items-center justify-between hover:bg-[#F8FAFC] transition-colors"
       >
         <div className="flex items-center gap-[10.5px]">
           {Icon && <Icon size={17.5} className="text-[#64748B]" stroke={1.5} />}
-          <span className="text-[15px] font-semibold text-[#334155]">{title}</span>
+          {isEditingTitle ? (
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+              <input
+                ref={inputRef}
+                type="text"
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="text-[15px] font-semibold text-[#334155] border border-[#3B82F6] rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#3B82F6]/20"
+                placeholder="Enter title..."
+              />
+              <button
+                onClick={handleSaveTitle}
+                className="p-1 text-[#22C55E] hover:bg-[#22C55E]/10 rounded"
+              >
+                <IconCheck size={16} stroke={2} />
+              </button>
+              <button
+                onClick={handleCancelEdit}
+                className="p-1 text-[#EF4444] hover:bg-[#EF4444]/10 rounded"
+              >
+                <IconX size={16} stroke={2} />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-[15px] font-semibold text-[#334155]">{title}</span>
+              {editable && (
+                <button
+                  onClick={handleEditClick}
+                  className="p-1 text-[#64748B] hover:text-[#3B82F6] hover:bg-[#3B82F6]/10 rounded transition-colors"
+                  title="Edit title"
+                >
+                  <IconPencil size={14} stroke={2} />
+                </button>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {headerRight}
@@ -627,7 +699,7 @@ function SortableOptionRow({
 }
 
 // Options Section Content
-function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, onCustomerSelectionChange }) {
+function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, onCustomerSelectionChange, customerLabel = 'Options', onCustomerLabelChange }) {
   const MAX_OPTIONS = 20;
   const MAX_NAME_LENGTH = 200;
 
@@ -697,10 +769,36 @@ function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, on
     }
   };
 
+  // Customer Label Input Component
+  const CustomerLabelInput = () => (
+    <div className="mb-4 pb-4 border-b border-[#E2E8F0]">
+      <div className="flex flex-col gap-[6px]">
+        <label className="text-[13px] font-medium text-[#334155]">
+          Customer Facing Label
+        </label>
+        <div className="flex items-center gap-3">
+          <input
+            type="text"
+            value={customerLabel}
+            onChange={(e) => onCustomerLabelChange?.(e.target.value)}
+            placeholder="e.g., Colors, Variants, Sizes"
+            className="flex-1 max-w-[300px] h-[38px] px-[12px] border border-[#E2E8F0] rounded-[6px] text-[14px] text-[#1E293B] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors bg-white"
+          />
+          <span className="text-[12px] text-[#64748B]">
+            This label will be shown to customers in public proposals
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+
   // Empty State
   if (options.length === 0) {
     return (
       <div className="pt-[14px]">
+        {/* Customer Label Input */}
+        <CustomerLabelInput />
+        
         {/* Empty State - Just placeholder image and text */}
         <NoDataPlaceholder
           title="No Options Added"
@@ -713,6 +811,9 @@ function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, on
   // Options Table
   return (
     <div className="pt-[14px]">
+      {/* Customer Label Input */}
+      <CustomerLabelInput />
+      
       {/* Options Table */}
       <div className="border border-[#E2E8F0] rounded-lg overflow-hidden">
         {/* Table Header */}
@@ -801,6 +902,7 @@ function NewPartServicePage({ onCancel, onSave }) {
     locationAvailableQty: '',
     locationMinimumQty: '',
     // Options (Color/Variant Picker)
+    optionTitle: 'Options', // Customer-facing label shown in public proposals - can be "Variants", "Colors", etc.
     options: [],
     customerSelectionEnabled: false,
   });
@@ -1054,6 +1156,8 @@ function NewPartServicePage({ onCancel, onSave }) {
                 onOptionsChange={(options) => handleChange('options', options)}
                 customerSelectionEnabled={formData.customerSelectionEnabled}
                 onCustomerSelectionChange={(enabled) => handleChange('customerSelectionEnabled', enabled)}
+                customerLabel={formData.optionTitle}
+                onCustomerLabelChange={(label) => handleChange('optionTitle', label)}
               />
             </CollapsibleSection>
 

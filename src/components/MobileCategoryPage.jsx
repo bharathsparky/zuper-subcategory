@@ -6,6 +6,7 @@ import {
   IconSearch,
   IconCheck,
   IconChevronDown,
+  IconChevronUp,
   IconAdjustmentsHorizontal,
   IconPlus,
   IconScan,
@@ -16,7 +17,15 @@ import {
   IconPencil,
   IconTrash,
   IconPhoto,
-  IconInfoCircle
+  IconInfoCircle,
+  IconDotsVertical,
+  IconShare,
+  IconQrcode,
+  IconRefresh,
+  IconCopy,
+  IconPrinter,
+  IconArchive,
+  IconPalette
 } from '@tabler/icons-react';
 
 // Sample categories with subcategories
@@ -86,6 +95,111 @@ const CATEGORY_IMAGES = {
   'On Demand Service': 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400&h=240&fit=crop',
   'Consumable': 'https://images.unsplash.com/photo-1607082349566-187342175e2f?w=400&h=240&fit=crop',
 };
+
+// Sample parts data for the listing page - matching screenshot design
+const SAMPLE_PARTS = [
+  {
+    id: 1,
+    name: '10 mm Screw -',
+    partId: '758323',
+    sku: '758323',
+    category: 'Manpower',
+    subCategory: null,
+    quantity: 128.00,
+    unitPrice: '$120.00',
+    sellingPrice: '$120.00',
+    status: 'Unavailable',
+    type: 'PART',
+    location: 'Redmond Warehouse',
+    unitOfMeasurement: 'Unit',
+    description: null,
+    createdOn: 'Jan 15, 2024',
+    options: [],
+    customerSelectionEnabled: false,
+  },
+  {
+    id: 2,
+    name: '10 mm screw',
+    partId: '004',
+    sku: '004',
+    category: 'Tools',
+    subCategory: null,
+    quantity: 8.00,
+    unitPrice: '$20.00',
+    sellingPrice: '$20.00',
+    status: 'Unavailable',
+    type: 'PART',
+    location: 'Main Warehouse',
+    unitOfMeasurement: 'Unit',
+    description: 'Description of the part',
+    createdOn: 'Feb 10, 2024',
+    options: [],
+    customerSelectionEnabled: false,
+  },
+  {
+    id: 3,
+    name: '10001',
+    partId: '10001',
+    sku: '10001',
+    category: 'Tools',
+    subCategory: null,
+    quantity: 1118.00,
+    unitPrice: '$1,000.00',
+    sellingPrice: '$1,000.00',
+    status: 'In Stock',
+    type: 'PART',
+    location: 'Redmond Warehouse',
+    unitOfMeasurement: 'Unit',
+    description: null,
+    createdOn: 'Mar 5, 2024',
+    options: [],
+    customerSelectionEnabled: false,
+  },
+  {
+    id: 4,
+    name: '12W Battery edited',
+    partId: '12344',
+    sku: '12344',
+    category: 'Labor',
+    subCategory: null,
+    quantity: 98.00,
+    unitPrice: '$123.00',
+    sellingPrice: '$123.00',
+    status: 'In Stock',
+    type: 'PART',
+    location: 'Main Warehouse',
+    unitOfMeasurement: 'Unit',
+    description: 'descrption',
+    createdOn: 'Apr 12, 2024',
+    options: [
+      { id: 1, name: 'Charcoal', color: '#36454F', available: true },
+      { id: 2, name: 'Weathered Wood', color: '#8B7355', available: true },
+      { id: 3, name: 'Onyx Black', color: '#181818', available: false },
+      { id: 4, name: 'Slate Gray', color: '#708090', available: true },
+      { id: 5, name: 'Barkwood', color: '#4A3728', available: true },
+    ],
+    customerSelectionEnabled: true,
+  },
+  {
+    id: 5,
+    name: '5W Battery - Edited',
+    partId: '12345',
+    sku: '12345',
+    category: 'Labor',
+    subCategory: null,
+    quantity: 45.00,
+    unitPrice: '$85.00',
+    sellingPrice: '$85.00',
+    status: 'In Stock',
+    type: 'PART',
+    location: 'Redmond Warehouse',
+    unitOfMeasurement: 'Unit',
+    description: 'Battery description',
+    createdOn: 'May 20, 2024',
+    options: [],
+    customerSelectionEnabled: false,
+  },
+];
 
 // Sample products data with appropriate product images
 const SAMPLE_PRODUCTS = [
@@ -1009,6 +1123,368 @@ function CategoryPickerScreen({
   );
 }
 
+// Mobile Part Details Page Component
+function MobilePartDetailsPage({ part, onBack }) {
+  const [activeTab, setActiveTab] = useState('details');
+  const [showMoreActions, setShowMoreActions] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    attachments: true,
+    options: true,
+  });
+
+  if (!part) return null;
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  // Determine availability status
+  const isOutOfStock = part.status !== 'In Stock' && part.status !== 'Available';
+
+  return (
+    <div className="fixed inset-0 z-50 bg-[#F8F9FA] flex flex-col">
+      {/* Header - Light theme with "< Back" text */}
+      <div className="flex items-center justify-between px-4 py-3 bg-white">
+        <button onClick={onBack} className="flex items-center gap-1 text-[#1F2937]">
+          <IconChevronLeft size={20} className="text-[#1F2937]" />
+          <span className="text-sm font-medium">Back</span>
+        </button>
+        <button 
+          onClick={() => setShowMoreActions(!showMoreActions)}
+          className="p-1"
+        >
+          <IconDotsVertical size={20} className="text-[#6B7280]" />
+        </button>
+      </div>
+
+      {/* More Actions Dropdown */}
+      {showMoreActions && (
+        <div className="absolute top-12 right-4 bg-white rounded-lg shadow-lg z-10 py-2 min-w-[180px] border border-gray-100">
+          <button className="w-full px-4 py-3 flex items-center gap-3 text-[#1F2937] hover:bg-gray-50">
+            <IconPencil size={18} className="text-[#6B7280]" />
+            <span className="text-sm">Edit</span>
+          </button>
+          <button className="w-full px-4 py-3 flex items-center gap-3 text-[#1F2937] hover:bg-gray-50">
+            <IconCopy size={18} className="text-[#6B7280]" />
+            <span className="text-sm">Duplicate</span>
+          </button>
+          <button className="w-full px-4 py-3 flex items-center gap-3 text-[#1F2937] hover:bg-gray-50">
+            <IconQrcode size={18} className="text-[#6B7280]" />
+            <span className="text-sm">QR Code</span>
+          </button>
+          <button className="w-full px-4 py-3 flex items-center gap-3 text-[#1F2937] hover:bg-gray-50">
+            <IconRefresh size={18} className="text-[#6B7280]" />
+            <span className="text-sm">Update Stock</span>
+          </button>
+          <button className="w-full px-4 py-3 flex items-center gap-3 text-[#1F2937] hover:bg-gray-50">
+            <IconPrinter size={18} className="text-[#6B7280]" />
+            <span className="text-sm">Print</span>
+          </button>
+          <div className="border-t border-gray-100 my-1"></div>
+          <button className="w-full px-4 py-3 flex items-center gap-3 text-[#EF4444] hover:bg-gray-50">
+            <IconArchive size={18} />
+            <span className="text-sm">Archive</span>
+          </button>
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto pb-20">
+        {/* Part Card with Image and Info - Light theme */}
+        <div className="mx-4 mt-4 bg-white rounded-xl p-4 shadow-sm">
+          <div className="flex gap-4 items-center">
+            {/* Part Image Placeholder - Light blue background */}
+            <div className="w-16 h-16 bg-[#E8F4FD] rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
+                <path d="M20 8L32 15V29L20 36L8 29V15L20 8Z" fill="#B3DDFF" stroke="#90CAF9" strokeWidth="1"/>
+                <path d="M20 8L32 15L20 22L8 15L20 8Z" fill="#DBEAFE"/>
+                <path d="M20 22V36L8 29V15L20 22Z" fill="#93C5FD"/>
+                <path d="M20 22V36L32 29V15L20 22Z" fill="#B3DDFF"/>
+              </svg>
+            </div>
+            
+            {/* Part Name and SKU */}
+            <div className="flex-1">
+              <h1 className="text-[#1F2937] font-semibold text-lg">{part.name}</h1>
+              <p className="text-[#6B7280] text-sm mt-0.5">{part.partId}</p>
+            </div>
+          </div>
+          
+          {/* Action Buttons - 3 buttons like Figma */}
+          <div className="flex gap-3 mt-5">
+            <button className="flex flex-col items-center gap-2 flex-1">
+              <div className="w-12 h-12 bg-[#FFF7ED] rounded-xl flex items-center justify-center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#EA580C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+              </div>
+              <span className="text-[#6B7280] text-xs">Update stock</span>
+            </button>
+            <button className="flex flex-col items-center gap-2 flex-1">
+              <div className="w-12 h-12 bg-[#FFF7ED] rounded-xl flex items-center justify-center">
+                <IconQrcode size={22} className="text-[#EA580C]" />
+              </div>
+              <span className="text-[#6B7280] text-xs">Barcode</span>
+            </button>
+            <button className="flex flex-col items-center gap-2 flex-1">
+              <div className="w-12 h-12 bg-[#FFF7ED] rounded-xl flex items-center justify-center">
+                <IconPlus size={22} className="text-[#EA580C]" />
+              </div>
+              <span className="text-[#6B7280] text-xs">Add Note</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Navigation - Light theme with 4 tabs */}
+        <div className="flex mt-4 px-4 bg-white border-b border-gray-100">
+          <button 
+            onClick={() => setActiveTab('details')}
+            className={`flex-1 py-3 text-center text-sm font-medium relative ${
+              activeTab === 'details' ? 'text-[#1F2937]' : 'text-[#9CA3AF]'
+            }`}
+          >
+            Details
+            {activeTab === 'details' && (
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-[#EA580C] rounded-full" />
+            )}
+          </button>
+          <button 
+            onClick={() => setActiveTab('location')}
+            className={`flex-1 py-3 text-center text-sm font-medium relative ${
+              activeTab === 'location' ? 'text-[#1F2937]' : 'text-[#9CA3AF]'
+            }`}
+          >
+            Location
+            {activeTab === 'location' && (
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-[#EA580C] rounded-full" />
+            )}
+          </button>
+          <button 
+            onClick={() => setActiveTab('notes')}
+            className={`flex-1 py-3 text-center text-sm font-medium relative ${
+              activeTab === 'notes' ? 'text-[#1F2937]' : 'text-[#9CA3AF]'
+            }`}
+          >
+            Notes
+            {activeTab === 'notes' && (
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-[#EA580C] rounded-full" />
+            )}
+          </button>
+          <button 
+            onClick={() => setActiveTab('activity')}
+            className={`flex-1 py-3 text-center text-sm font-medium relative ${
+              activeTab === 'activity' ? 'text-[#1F2937]' : 'text-[#9CA3AF]'
+            }`}
+          >
+            Activity
+            {activeTab === 'activity' && (
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-10 h-0.5 bg-[#EA580C] rounded-full" />
+            )}
+          </button>
+        </div>
+
+        {/* Details Tab Content - Light theme */}
+        {activeTab === 'details' && (
+          <div className="bg-white">
+            {/* Availability Row */}
+            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
+              <span className="text-[#6B7280] text-sm">Availability</span>
+              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                isOutOfStock 
+                  ? 'bg-[#FEF2F2] text-[#EF4444] border border-[#FECACA]' 
+                  : 'bg-[#F0FDF4] text-[#22C55E] border border-[#BBF7D0]'
+              }`}>
+                {isOutOfStock ? 'Out of stock' : 'In Stock'}
+              </span>
+            </div>
+
+            {/* Unit Selling Price Row */}
+            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
+              <span className="text-[#6B7280] text-sm">Unit Selling Price</span>
+              <span className="text-[#1F2937] text-sm font-medium">USD {part.sellingPrice?.replace('$', '') || '0'}</span>
+            </div>
+
+            {/* Category Row */}
+            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
+              <span className="text-[#6B7280] text-sm">Category</span>
+              <span className="text-[#1F2937] text-sm">{part.category}</span>
+            </div>
+
+            {/* Type Row */}
+            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
+              <span className="text-[#6B7280] text-sm">Type</span>
+              <span className="text-[#1F2937] text-sm">{part.type === 'SERVICE' ? 'Service' : 'Product'}</span>
+            </div>
+
+            {/* Available Quantity Row */}
+            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
+              <span className="text-[#6B7280] text-sm">Available Quantity</span>
+              <span className="text-[#1F2937] text-sm">{part.quantity !== null ? part.quantity : 0}</span>
+            </div>
+
+            {/* Options Section - Only show if part has options */}
+            {part.options && part.options.length > 0 && (
+              <div className="mt-3 mx-4">
+                <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                  <button 
+                    onClick={() => toggleSection('options')}
+                    className="w-full px-4 py-4 flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#1F2937] text-sm font-medium">Options ({part.options.length})</span>
+                      {part.customerSelectionEnabled && (
+                        <span className="text-[10px] text-[#3B82F6] bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#BFDBFE]">
+                          Customer Selection
+                        </span>
+                      )}
+                    </div>
+                    {expandedSections.options ? (
+                      <IconChevronUp size={18} className="text-[#9CA3AF]" />
+                    ) : (
+                      <IconChevronDown size={18} className="text-[#9CA3AF]" />
+                    )}
+                  </button>
+                  
+                  {expandedSections.options && (
+                    <div className="px-4 pb-4 border-t border-gray-100">
+                      <div className="space-y-2 mt-3">
+                        {part.options.map((option) => (
+                          <div 
+                            key={option.id}
+                            className="flex items-center gap-3 p-3 bg-[#F9FAFB] rounded-lg border border-gray-100"
+                          >
+                            {/* Option Color/Image */}
+                            <div 
+                              className="w-10 h-10 rounded-lg border-2 border-white shadow-sm flex-shrink-0"
+                              style={{ backgroundColor: option.color || '#E5E7EB' }}
+                            >
+                              {!option.color && (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <span className="text-xs text-[#6B7280] font-medium">{option.name.charAt(0)}</span>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Option Name */}
+                            <div className="flex-1">
+                              <p className="text-[#1F2937] text-sm font-medium">{option.name}</p>
+                            </div>
+                            
+                            {/* Availability Badge */}
+                            <div>
+                              {option.available ? (
+                                <span className="flex items-center gap-1 text-[#22C55E] text-xs font-medium">
+                                  <IconCheck size={14} />
+                                  Available
+                                </span>
+                              ) : (
+                                <span className="flex items-center gap-1 text-[#EF4444] text-xs font-medium">
+                                  <IconX size={14} />
+                                  Unavailable
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Attachments Section - Light theme */}
+            <div className="mt-3 mx-4">
+              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                <button 
+                  onClick={() => toggleSection('attachments')}
+                  className="w-full px-4 py-4 flex items-center justify-between"
+                >
+                  <span className="text-[#1F2937] text-sm font-medium">Attachments (0)</span>
+                  {expandedSections.attachments ? (
+                    <IconChevronUp size={18} className="text-[#9CA3AF]" />
+                  ) : (
+                    <IconChevronDown size={18} className="text-[#9CA3AF]" />
+                  )}
+                </button>
+                
+                {expandedSections.attachments && (
+                  <div className="px-4 pb-4 border-t border-gray-100">
+                    <button className="mt-3 w-full py-3 border border-gray-200 rounded-lg text-[#1F2937] text-sm font-medium hover:bg-gray-50 transition-colors">
+                      Add Attachment
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Location Tab Content - Light theme */}
+        {activeTab === 'location' && (
+          <div className="bg-white p-4">
+            <div className="bg-[#F9FAFB] rounded-xl p-4 border border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#FFF7ED] rounded-lg flex items-center justify-center">
+                  <IconMapPin size={20} className="text-[#EA580C]" />
+                </div>
+                <div>
+                  <p className="text-[#1F2937] text-sm font-medium">{part.location || 'No location assigned'}</p>
+                  <p className="text-[#6B7280] text-xs mt-0.5">Primary Location</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Notes Tab Content - Light theme */}
+        {activeTab === 'notes' && (
+          <div className="bg-white p-4">
+            <div className="bg-[#F9FAFB] rounded-xl p-8 text-center border border-gray-100">
+              <div className="w-12 h-12 bg-[#F3F4F6] rounded-full flex items-center justify-center mx-auto mb-3">
+                <IconInfoCircle size={24} className="text-[#9CA3AF]" />
+              </div>
+              <p className="text-[#6B7280] text-sm">No notes added yet</p>
+              <button className="mt-4 px-4 py-2 bg-[#EA580C] text-white text-sm font-medium rounded-lg hover:bg-[#DC2626] transition-colors">
+                Add Note
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Activity Tab Content - Light theme */}
+        {activeTab === 'activity' && (
+          <div className="bg-white p-4">
+            <div className="bg-[#F9FAFB] rounded-xl p-8 text-center border border-gray-100">
+              <div className="w-12 h-12 bg-[#F3F4F6] rounded-full flex items-center justify-center mx-auto mb-3">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="text-[#9CA3AF]">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+                  <path d="M12 6v6l4 2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+              </div>
+              <p className="text-[#6B7280] text-sm">No activity recorded yet</p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Navigation Bar - iOS style */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-8 py-2 pb-6 flex items-center justify-center">
+        <div className="w-32 h-1 bg-[#1F2937] rounded-full"></div>
+      </div>
+
+      {/* Click outside to close more actions */}
+      {showMoreActions && (
+        <div 
+          className="fixed inset-0 z-[5]" 
+          onClick={() => setShowMoreActions(false)}
+        />
+      )}
+    </div>
+  );
+}
+
 // Main Mobile Page Component
 export default function MobileCategoryPage() {
   const [showFilter, setShowFilter] = useState(false);
@@ -1016,6 +1492,7 @@ export default function MobileCategoryPage() {
   const [showAddProducts, setShowAddProducts] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState(null);
+  const [selectedPart, setSelectedPart] = useState(null);
 
   const handleCategorySelect = (category, subCategory) => {
     setSelectedCategory(category);
@@ -1028,91 +1505,138 @@ export default function MobileCategoryPage() {
     return selectedCategory;
   };
 
+  const handlePartClick = (part) => {
+    setSelectedPart(part);
+  };
+
+  const handleBackFromDetails = () => {
+    setSelectedPart(null);
+  };
+
+  // If a part is selected, show the details page
+  if (selectedPart) {
+    return (
+      <MobilePartDetailsPage 
+        part={selectedPart} 
+        onBack={handleBackFromDetails}
+      />
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#1A1D21]">
-      {/* Mobile Header */}
-      <div className="bg-[#1A1D21] px-4 py-4 border-b border-[#2D3339]">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-white text-xl font-semibold">Parts & Services</h1>
-          <button 
-            onClick={() => setShowAddProducts(true)}
-            className="bg-[#F97316] text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
-          >
-            <IconPlus size={18} />
-            Add Products
-          </button>
-        </div>
-        
-        {/* Search Bar */}
-        <div className="relative mb-4">
-          <IconSearch size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
-          <input 
-            type="text"
-            placeholder="Search parts & services..."
-            className="w-full bg-[#2D3339] border border-[#3D4349] rounded-lg pl-10 pr-4 py-3 text-white placeholder-[#6B7280] text-sm"
-          />
-        </div>
-
-        {/* Filter Button */}
-        <button 
-          onClick={() => setShowFilter(true)}
-          className="flex items-center gap-2 bg-[#2D3339] px-4 py-2.5 rounded-lg"
-        >
-          <IconAdjustmentsHorizontal size={18} className="text-[#6B7280]" />
-          <span className="text-white text-sm">Filter</span>
-          {selectedCategory && (
-            <span className="bg-[#F97316] text-white text-xs px-2 py-0.5 rounded-full ml-2">1</span>
-          )}
-        </button>
-
-        {/* Selected Category Chip */}
-        {selectedCategory && (
-          <div className="mt-3 flex items-center gap-2">
-            <span className="bg-[#3B82F6]/20 text-[#93C5FD] text-sm px-3 py-1.5 rounded-full flex items-center gap-2">
-              {getDisplayCategory()}
-              <button 
-                onClick={() => {
-                  setSelectedCategory(null);
-                  setSelectedSubCategory(null);
-                }}
-                className="hover:bg-[#3B82F6]/30 rounded-full p-0.5"
-              >
-                <IconX size={14} />
-              </button>
-            </span>
+    <div className="min-h-screen bg-[#F8F9FA]">
+      {/* Mobile Header - Light theme matching screenshot */}
+      <div className="bg-white px-4 py-3 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          {/* Left: Hamburger + Title with dropdown */}
+          <div className="flex items-center gap-3">
+            <button className="p-1">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1F2937" strokeWidth="2">
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+            <button className="flex items-center gap-1">
+              <span className="text-[#1F2937] text-lg font-semibold">Parts & Services (...)</span>
+              <IconChevronDown size={20} className="text-[#6B7280]" />
+            </button>
           </div>
-        )}
+          
+          {/* Right: Search + Filter icons */}
+          <div className="flex items-center gap-2">
+            <button className="p-2">
+              <IconSearch size={22} className="text-[#1F2937]" />
+            </button>
+            <button 
+              onClick={() => setShowFilter(true)}
+              className="p-2"
+            >
+              <IconFilter size={22} className="text-[#1F2937]" />
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Demo Content */}
-      <div className="p-4 space-y-3">
-        {[1, 2, 3, 4, 5].map(i => (
-          <div key={i} className="bg-[#2D3339] rounded-lg p-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-white font-medium">Sample Part #{i}</h3>
-                <p className="text-[#6B7280] text-sm mt-1">Part ID: PRT-00{i}</p>
+      {/* Parts List - Light theme cards */}
+      <div className="p-4 space-y-3 pb-24">
+        {SAMPLE_PARTS.map(part => (
+          <button 
+            key={part.id} 
+            onClick={() => handlePartClick(part)}
+            className="w-full bg-white rounded-xl p-4 text-left shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+          >
+            <div className="flex gap-3">
+              {/* 3D Cube Icon */}
+              <div className="w-14 h-14 bg-[#E8F4FD] rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg width="28" height="28" viewBox="0 0 40 40" fill="none">
+                  <path d="M20 8L32 15V29L20 36L8 29V15L20 8Z" fill="#B3DDFF" stroke="#90CAF9" strokeWidth="1"/>
+                  <path d="M20 8L32 15L20 22L8 15L20 8Z" fill="#DBEAFE"/>
+                  <path d="M20 22V36L8 29V15L20 22Z" fill="#93C5FD"/>
+                  <path d="M20 22V36L32 29V15L20 22Z" fill="#B3DDFF"/>
+                </svg>
               </div>
-              <span className="text-[#10B981] text-sm">In Stock</span>
+              
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                {/* Name + Status badge */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[#1F2937] font-semibold text-base truncate">{part.name}</h3>
+                    <p className="text-[#9CA3AF] text-sm mt-0.5">{part.partId}</p>
+                  </div>
+                  {/* Unavailable badge - only show if unavailable */}
+                  {part.status === 'Unavailable' && (
+                    <span className="px-3 py-1 bg-[#FEF2F2] text-[#EF4444] text-xs font-medium rounded-full border border-[#FECACA] flex-shrink-0">
+                      Unavailable
+                    </span>
+                  )}
+                </div>
+                
+                {/* Description row - only if has description */}
+                {part.description && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <IconInfoCircle size={16} className="text-[#9CA3AF] flex-shrink-0" />
+                    <span className="text-[#6B7280] text-sm truncate">{part.description}</span>
+                  </div>
+                )}
+                
+                {/* Category row */}
+                <div className="flex items-center gap-2 mt-2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="7" height="7" />
+                    <rect x="14" y="3" width="7" height="7" />
+                    <rect x="3" y="14" width="7" height="7" />
+                    <rect x="14" y="14" width="7" height="7" />
+                  </svg>
+                  <span className="text-[#6B7280] text-sm">{part.category}</span>
+                </div>
+                
+                {/* Bottom row: Qty + Price */}
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                  <span className="text-[#6B7280] text-sm">
+                    Qty: <span className="text-[#1F2937] font-medium">{part.quantity !== null ? part.quantity.toFixed(2) : '-'}</span>
+                  </span>
+                  <span className="text-[#3B82F6] font-semibold text-base">{part.sellingPrice}</span>
+                </div>
+              </div>
             </div>
-            <div className="mt-3 flex items-center gap-4 text-sm">
-              <span className="text-[#6B7280]">Category: <span className="text-white">Roofing</span></span>
-              <span className="text-[#6B7280]">Qty: <span className="text-white">50</span></span>
-            </div>
-          </div>
+          </button>
         ))}
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#1A1D21] border-t border-[#2D3339] px-8 py-3 flex items-center justify-around">
-        <button className="flex flex-col items-center gap-1">
-          <div className="w-6 h-0.5 bg-white"></div>
-          <div className="w-6 h-0.5 bg-white mt-1"></div>
-          <div className="w-6 h-0.5 bg-white mt-1"></div>
+      {/* Bottom Navigation - Light theme iOS style */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-8 py-3 pb-6 flex items-center justify-around">
+        <button className="p-2">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
         </button>
-        <button className="w-6 h-6 rounded-full border-2 border-white"></button>
+        <button className="w-6 h-6 rounded-full border-2 border-[#9CA3AF]"></button>
         <button>
-          <IconChevronLeft size={24} className="text-white" />
+          <IconChevronLeft size={24} className="text-[#9CA3AF]" />
         </button>
       </div>
 
