@@ -711,7 +711,7 @@ const AttachmentEmptyIcon = () => (
   </svg>
 );
 
-function NewQuotePage({ onBack, onSaveAndSend }) {
+function NewQuotePage({ onBack, onSaveAndSend, onNavigateToNewProposal }) {
   const [isAddressExpanded, setIsAddressExpanded] = useState(false);
   const [isQuoteDetailsExpanded, setIsQuoteDetailsExpanded] = useState(true);
   const [isOtherDetailsExpanded, setIsOtherDetailsExpanded] = useState(true);
@@ -873,7 +873,12 @@ function NewQuotePage({ onBack, onSaveAndSend }) {
             Quotes
           </button>
           <IconChevronRight size={16} stroke={1.5} className="text-[#94A3B8]" />
-          <span className="text-[14px] font-medium text-[#1E293B]">New Quote</span>
+          <button 
+            onClick={onNavigateToNewProposal}
+            className="text-[14px] font-medium text-[#1E293B] hover:text-[#3B82F6] transition-colors cursor-pointer"
+          >
+            New Quote
+          </button>
         </div>
         
         {/* Action Buttons */}

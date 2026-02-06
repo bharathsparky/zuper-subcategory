@@ -13,6 +13,7 @@ import MobileCategoryPage from './components/MobileCategoryPage'
 import MobileQuoteDetailsPage from './components/MobileQuoteDetailsPage'
 import JobsListingPage from './components/JobsListingPage'
 import NewQuotePage from './components/NewQuotePage'
+import NewProposalPage from './components/NewProposalPage'
 import QuoteDetailsPage from './components/QuoteDetailsPage'
 import VendorDetailsPage from './components/VendorDetailsPage'
 import NewPurchaseOrderPage from './components/NewPurchaseOrderPage'
@@ -113,6 +114,11 @@ function App() {
     window.history.pushState({}, '', '/')
     setCurrentView('new-material-request')
   }
+  const navigateToNewProposal = () => {
+    setIsListingRoute(false)
+    window.history.pushState({}, '', '/')
+    setCurrentView('new-proposal')
+  }
 
   // If on mobile quote route, render the mobile quote details page
   if (isMobileQuoteRoute) {
@@ -154,7 +160,7 @@ function App() {
     )
   }
 
-  if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service' || currentView === 'job-details' || currentView === 'reports' || currentView === 'new-quote' || currentView === 'quote-details' || currentView === 'vendor-details' || currentView === 'purchase-orders' || currentView === 'purchase-order-details' || currentView === 'new-material-request') {
+  if (currentView === 'workspace' || currentView === 'product-details' || currentView === 'new-part-service' || currentView === 'job-details' || currentView === 'reports' || currentView === 'new-quote' || currentView === 'new-proposal' || currentView === 'quote-details' || currentView === 'vendor-details' || currentView === 'purchase-orders' || currentView === 'purchase-order-details' || currentView === 'new-material-request') {
     // Workspace view: Full-height sidebar on left, header + content on right
     return (
       <div className="flex h-screen overflow-hidden">
@@ -197,10 +203,15 @@ function App() {
                   <QuoteDetailsPage 
                     onBack={navigateToNewQuote}
                   />
+                ) : currentView === 'new-proposal' ? (
+                  <NewProposalPage 
+                    onBack={navigateToWorkspace}
+                  />
                 ) : currentView === 'new-quote' ? (
                   <NewQuotePage 
                     onBack={navigateToWorkspace}
                     onSaveAndSend={navigateToQuoteDetails}
+                    onNavigateToNewProposal={navigateToNewProposal}
                   />
                 ) : currentView === 'reports' ? (
                   <ReportsPage 
