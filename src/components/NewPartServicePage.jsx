@@ -824,16 +824,24 @@ function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, on
       </div>
 
       {/* Customer Facing Label - shown only when options exist */}
-      <div className="mt-4 flex items-center gap-3">
-        <label className="text-[13px] font-medium text-[#64748B] whitespace-nowrap">Customer facing label</label>
+      <div className="mt-4 flex items-center justify-between px-[14px] py-[12px] bg-[#F8FAFC] border border-[#E2E8F0] rounded-[8px]">
+        <div className="flex items-center gap-[10px] min-w-0 flex-1">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+            <line x1="7" y1="7" x2="7.01" y2="7" />
+          </svg>
+          <div className="flex flex-col gap-[1px] min-w-0">
+            <span className="text-[12px] font-medium text-[#475569]">Customer facing label</span>
+            <span className="text-[11px] text-[#94A3B8]">This name will be shown to customers in public proposals</span>
+          </div>
+        </div>
         <input
           type="text"
           value={customerLabel}
           onChange={(e) => onCustomerLabelChange?.(e.target.value)}
-          placeholder="e.g., Colors, Variants, Sizes"
-          className="w-[220px] h-[34px] px-[10px] border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors bg-white"
+          placeholder="e.g., Colors, Variants"
+          className="w-[200px] h-[34px] px-[10px] border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] outline-none bg-white focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20 transition-all flex-shrink-0"
         />
-        <span className="text-[11px] text-[#94A3B8]">Shown to customers in proposals</span>
       </div>
 
       {/* Customer Selection Toggle */}
