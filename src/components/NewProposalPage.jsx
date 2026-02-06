@@ -730,7 +730,7 @@ function EditOptionTableSelector({ options, selectedOption, onChange }) {
 }
 
 // ─── Section Configuration Sheet ────────────────────────────────────
-function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdateHidden, onSave, onClose }) {
+function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdateHidden, onUpdateName, onSave, onClose, isNew }) {
   const sectionDisplay = header.sectionDisplay || 'expanded'
   const showSubtotal = header.showSubtotal || false
   const sectionHidden = header.sectionHidden || false
@@ -768,7 +768,7 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
       >
         {/* Sheet Header */}
         <div className="h-[56px] px-[21px] flex items-center justify-between border-b border-[#E2E8F0] flex-shrink-0">
-          <h3 className="text-[16px] font-semibold text-[#1E293B]">Section Configuration</h3>
+          <h3 className="text-[16px] font-semibold text-[#1E293B]">{isNew ? 'Add Section' : 'Section Configuration'}</h3>
           <button
             onClick={onClose}
             className="w-[32px] h-[32px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors"
@@ -782,9 +782,14 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
           {/* Section Name */}
           <div className="space-y-[6px]">
             <label className="text-[13px] font-medium text-[#334155]">Section Name</label>
-            <div className="h-[38px] px-[11px] border border-[#E2E8F0] rounded-[6px] flex items-center bg-[#F8FAFC]">
-              <span className="text-[13px] text-[#1E293B]">{header.name}</span>
-            </div>
+            <input
+              type="text"
+              value={header.name}
+              onChange={(e) => onUpdateName?.(e.target.value)}
+              placeholder="Enter section name"
+              autoFocus={isNew}
+              className="w-full h-[38px] px-[11px] border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors bg-white"
+            />
           </div>
 
           {/* Section Display Mode Selector */}
@@ -899,9 +904,10 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
           </button>
           <button
             onClick={onSave}
-            className="h-[36px] px-[20px] bg-[#E44A19] border border-[#E44A19] rounded-[6px] text-[13px] font-medium text-white hover:bg-[#D03F14] transition-colors"
+            disabled={isNew && !header.name?.trim()}
+            className="h-[36px] px-[20px] bg-[#E44A19] border border-[#E44A19] rounded-[6px] text-[13px] font-medium text-white hover:bg-[#D03F14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save Configuration
+            {isNew ? 'Add Section' : 'Save Configuration'}
           </button>
         </div>
       </div>
@@ -919,6 +925,9 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
   const [showLineItemPicker, setShowLineItemPicker] = useState(false)
   const [sectionConfigOpen, setSectionConfigOpen] = useState(false)
   const [headerBeingConfigured, setHeaderBeingConfigured] = useState(null)
+  const [isAddingNewSection, setIsAddingNewSection] = useState(false)
+  const [sectionKebabOpenId, setSectionKebabOpenId] = useState(null)
+  const sectionKebabRef = useRef(null)
   const addMenuRef = useRef(null)
 
   // Stateful line items - initialized with sample data, updated when items are added from picker
@@ -975,17 +984,29 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
     }
   ])
 
-  // Add a new section header
-  const handleAddSection = () => {
+  // Open config sheet for a brand new section (no dialog step)
+  const handleStartAddSection = () => {
     const newSection = {
       id: Date.now(),
       type: 'header',
-      name: 'Roofing Section',
+      name: '',
       sectionDisplay: 'expanded',
       sectionHidden: false,
       showSubtotal: false,
     }
-    setLineItems(prev => [...prev, newSection])
+    setHeaderBeingConfigured(newSection)
+    setIsAddingNewSection(true)
+    setSectionConfigOpen(true)
+  }
+
+  // Finalize adding the new section from the config sheet
+  const handleFinalizeAddSection = () => {
+    if (!headerBeingConfigured?.name?.trim()) return
+    const sectionToAdd = { ...headerBeingConfigured, name: headerBeingConfigured.name.trim() }
+    setLineItems(prev => [...prev, sectionToAdd])
+    setSectionConfigOpen(false)
+    setHeaderBeingConfigured(null)
+    setIsAddingNewSection(false)
   }
 
   // Handle adding products from the line item picker
@@ -1020,12 +1041,13 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
     })
   }
 
-  // Save section configuration
+  // Save section configuration (for existing sections)
   const handleSaveSectionConfig = () => {
     setLineItems(prev => prev.map(item =>
       item.id === headerBeingConfigured.id
         ? {
             ...item,
+            name: headerBeingConfigured.name,
             sectionDisplay: headerBeingConfigured.sectionDisplay,
             sectionHidden: headerBeingConfigured.sectionHidden,
             showSubtotal: headerBeingConfigured.showSubtotal,
@@ -1034,6 +1056,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
     ))
     setSectionConfigOpen(false)
     setHeaderBeingConfigured(null)
+    setIsAddingNewSection(false)
   }
 
   // Close add menu on click outside
@@ -1048,6 +1071,41 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
     }
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showAddMenu])
+
+  // Close section kebab on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (sectionKebabRef.current && !sectionKebabRef.current.contains(e.target)) {
+        setSectionKebabOpenId(null)
+      }
+    }
+    if (sectionKebabOpenId !== null) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [sectionKebabOpenId])
+
+  // Clone a section
+  const handleCloneSection = (item) => {
+    const cloned = {
+      ...item,
+      id: Date.now(),
+      name: `${item.name} (Copy)`,
+    }
+    setLineItems(prev => {
+      const idx = prev.findIndex(li => li.id === item.id)
+      const updated = [...prev]
+      updated.splice(idx + 1, 0, cloned)
+      return updated
+    })
+    setSectionKebabOpenId(null)
+  }
+
+  // Remove a section
+  const handleRemoveSection = (itemId) => {
+    setLineItems(prev => prev.filter(li => li.id !== itemId))
+    setSectionKebabOpenId(null)
+  }
 
   const taxes = [
     { name: 'RT (10%)', amount: '$135.000' },
@@ -1151,7 +1209,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                             if (item.id === 'line-item') {
                               setShowLineItemPicker(true)
                             } else if (item.id === 'section') {
-                              handleAddSection()
+                              handleStartAddSection()
                             }
                           }}
                           className="w-full text-left px-[16px] py-[10px] text-[14px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors"
@@ -1210,20 +1268,44 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {lineItems.map((item, idx) => {
+                    {(() => {
+                      // Pre-compute section membership: find parent section for each item
+                      let currentSectionId = null
+                      const sectionMap = [] // { item, sectionId, isLastInSection }
+                      for (let i = 0; i < lineItems.length; i++) {
+                        if (lineItems[i].type === 'header') {
+                          currentSectionId = lineItems[i].id
+                          sectionMap.push({ item: lineItems[i], sectionId: null, isLastInSection: false })
+                        } else {
+                          sectionMap.push({ item: lineItems[i], sectionId: currentSectionId, isLastInSection: false })
+                        }
+                      }
+                      // Mark last child in each section group
+                      for (let i = sectionMap.length - 1; i >= 0; i--) {
+                        if (sectionMap[i].sectionId && sectionMap[i].item.type !== 'header') {
+                          const nextItem = sectionMap[i + 1]
+                          if (!nextItem || nextItem.item.type === 'header' || nextItem.sectionId !== sectionMap[i].sectionId) {
+                            sectionMap[i].isLastInSection = true
+                          }
+                        }
+                      }
+
+                      return sectionMap.map(({ item, sectionId, isLastInSection }, idx) => {
                       // Section Header Row
                       if (item.type === 'header') {
                         const isCollapsed = item.sectionDisplay === 'collapsed'
                         const isHidden = item.sectionDisplay === 'hidden'
                         const isRollUp = isCollapsed && item.sectionHidden
+                        // Check if this section has any children
+                        const hasChildren = sectionMap.some(s => s.sectionId === item.id && s.item.type !== 'header')
 
                         return (
-                          <tr key={item.id} className="bg-[#F8FAFC]">
-                            <td className="px-[14px] py-[10px] border-b border-[#E2E8F0] align-middle">
+                          <tr key={item.id} className="bg-[#EFF6FF]">
+                            <td className={`px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle border-l-[3px] border-l-[#3B82F6]`}>
                               <input type="checkbox" className="w-[13px] h-[13px] rounded-[2.5px] border-[#767676] cursor-pointer" />
                             </td>
-                            <td className="px-[14px] py-[10px] border-b border-[#E2E8F0] align-middle">
-                              <svg width="17.68" height="17.5" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <td className={`px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle`}>
+                              <svg width="17.68" height="17.5" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="4" y1="6" x2="4" y2="6.01" />
                                 <line x1="12" y1="6" x2="12" y2="6.01" />
                                 <line x1="4" y1="12" x2="4" y2="12.01" />
@@ -1232,10 +1314,10 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                 <line x1="12" y1="18" x2="12" y2="18.01" />
                               </svg>
                             </td>
-                            <td colSpan={9} className="px-[14px] py-[10px] border-b border-[#E2E8F0] align-middle">
+                            <td colSpan={9} className={`px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle`}>
                               <div className="flex items-center gap-[10px]">
                                 {/* Section Icon */}
-                                <div className="w-[28px] h-[28px] rounded-[6px] bg-[#EFF6FF] flex items-center justify-center flex-shrink-0">
+                                <div className="w-[28px] h-[28px] rounded-[6px] bg-white/70 flex items-center justify-center flex-shrink-0">
                                   {isCollapsed ? (
                                     <IconChevronRight size={14} stroke={2} className="text-[#3B82F6]" />
                                   ) : isHidden ? (
@@ -1256,7 +1338,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                 />
 
                                 {/* Badges */}
-                                <div className="flex items-center gap-[6px] ml-[4px]">
+                                <div className="flex items-center gap-[6px]">
                                   {/* Hidden Badge */}
                                   {item.sectionHidden && (
                                     <button
@@ -1284,15 +1366,6 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                     {item.sectionDisplay}
                                   </span>
                                 </div>
-
-                                {/* Configure Button */}
-                                <button
-                                  onClick={() => handleOpenSectionConfig(item)}
-                                  className="ml-auto h-[28px] px-[10px] flex items-center gap-[5px] border border-[#E2E8F0] text-[#64748B] bg-white hover:bg-[#F8FAFC] rounded-[5px] text-[11px] font-medium transition-colors"
-                                >
-                                  <IconSettings size={12} stroke={2} />
-                                  Configure
-                                </button>
                               </div>
 
                               {/* Subtotal display when collapsed */}
@@ -1302,32 +1375,85 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                 </div>
                               )}
                             </td>
-                            <td className="w-[72px] px-[14px] py-[10px] border-b border-[#E2E8F0] align-middle sticky right-0 bg-[#F8FAFC]">
-                              <button className="w-[40px] h-[40px] flex items-center justify-center rounded-full hover:bg-white/80 transition-colors">
-                                <IconDotsVertical size={15.5} stroke={2} className="text-[rgba(30,41,59,0.87)]" />
-                              </button>
+                            <td className={`w-[72px] px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle sticky right-0 bg-[#EFF6FF]`}>
+                              <div className="relative" ref={sectionKebabOpenId === item.id ? sectionKebabRef : null}>
+                                <button
+                                  onClick={() => setSectionKebabOpenId(sectionKebabOpenId === item.id ? null : item.id)}
+                                  className="w-[40px] h-[40px] flex items-center justify-center rounded-full hover:bg-white/80 transition-colors"
+                                >
+                                  <IconDotsVertical size={15.5} stroke={2} className="text-[rgba(30,41,59,0.87)]" />
+                                </button>
+                                {sectionKebabOpenId === item.id && (
+                                  <div className="absolute right-0 top-full mt-[4px] w-[180px] bg-white border border-[#E2E8F0] rounded-[8px] shadow-lg z-50 py-[4px] overflow-hidden">
+                                    <button
+                                      onClick={() => {
+                                        setSectionKebabOpenId(null)
+                                        handleOpenSectionConfig(item)
+                                      }}
+                                      className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[8px]"
+                                    >
+                                      <IconSettings size={14} stroke={2} className="text-[#64748B]" />
+                                      Configure
+                                    </button>
+                                    <button
+                                      onClick={() => handleCloneSection(item)}
+                                      className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[8px]"
+                                    >
+                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                      Clone
+                                    </button>
+                                    <div className="my-[2px] mx-[10px] border-t border-[#E2E8F0]" />
+                                    <button
+                                      onClick={() => handleRemoveSection(item.id)}
+                                      className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#DC2626] hover:bg-[#FEF2F2] transition-colors flex items-center gap-[8px]"
+                                    >
+                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                      Remove
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         )
                       }
 
-                      // Regular Item Row
+                      // Regular Item Row — check if it belongs to a section
+                      const isGrouped = !!sectionId
+                      const borderBottom = isLastInSection ? 'border-b-[2px] border-b-[#CBD5E1]' : 'border-b border-[#E2E8F0]'
+                      const rowBg = isGrouped ? 'bg-[#FAFBFF]' : 'bg-white'
+                      const stickyBg = isGrouped ? 'bg-[#FAFBFF]' : 'bg-white'
+
                       return (
-                      <tr key={item.id} className="bg-white">
-                        <td className="px-[14px] py-[14px] border-b border-[#E2E8F0] align-middle">
+                      <tr key={item.id} className={rowBg}>
+                        <td className={`px-[14px] py-[14px] ${borderBottom} align-middle ${isGrouped ? 'border-l-[3px] border-l-[#3B82F6]' : ''}`}>
                           <input type="checkbox" className="w-[13px] h-[13px] rounded-[2.5px] border-[#767676] cursor-pointer" />
                         </td>
-                        <td className="px-[14px] py-[14px] border-b border-[#E2E8F0] align-middle">
-                          <svg width="17.68" height="17.5" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="4" y1="6" x2="4" y2="6.01" />
-                            <line x1="12" y1="6" x2="12" y2="6.01" />
-                            <line x1="4" y1="12" x2="4" y2="12.01" />
-                            <line x1="12" y1="12" x2="12" y2="12.01" />
-                            <line x1="4" y1="18" x2="4" y2="18.01" />
-                            <line x1="12" y1="18" x2="12" y2="18.01" />
-                          </svg>
+                        <td className={`px-[14px] py-[14px] ${borderBottom} align-middle`}>
+                          {isGrouped ? (
+                            <div className="flex items-center">
+                              <div className="w-[2px] h-[14px] bg-[#CBD5E1] rounded-full mr-[8px]" />
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="4" y1="6" x2="4" y2="6.01" />
+                                <line x1="12" y1="6" x2="12" y2="6.01" />
+                                <line x1="4" y1="12" x2="4" y2="12.01" />
+                                <line x1="12" y1="12" x2="12" y2="12.01" />
+                                <line x1="4" y1="18" x2="4" y2="18.01" />
+                                <line x1="12" y1="18" x2="12" y2="18.01" />
+                              </svg>
+                            </div>
+                          ) : (
+                            <svg width="17.68" height="17.5" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="4" y1="6" x2="4" y2="6.01" />
+                              <line x1="12" y1="6" x2="12" y2="6.01" />
+                              <line x1="4" y1="12" x2="4" y2="12.01" />
+                              <line x1="12" y1="12" x2="12" y2="12.01" />
+                              <line x1="4" y1="18" x2="4" y2="18.01" />
+                              <line x1="12" y1="18" x2="12" y2="18.01" />
+                            </svg>
+                          )}
                         </td>
-                        <td className="px-[14px] py-[14px] border-b border-[#E2E8F0] align-top">
+                        <td className={`px-[14px] py-[14px] ${borderBottom} align-top`}>
                           <div className="flex items-start gap-[10.5px]">
                             {item.image ? (
                               <img src={item.image} alt={item.name} className="w-[49px] h-[49px] rounded-[3.5px] border border-[#E2E8F0] object-cover flex-shrink-0" />
@@ -1344,7 +1470,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                             </div>
                           </div>
                         </td>
-                        <td className="px-[14px] py-[14px] border-b border-[#E2E8F0] align-middle">
+                        <td className={`px-[14px] py-[14px] ${borderBottom} align-middle`}>
                           {item.hasOptions && item.options?.length > 0 ? (
                             <EditOptionTableSelector
                               options={item.options}
@@ -1367,22 +1493,22 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                             <span className="text-[12.6px] text-[#94A3B8]">—</span>
                           )}
                         </td>
-                        <td className="px-[14px] py-[14px] border-b border-[#E2E8F0] align-middle">
+                        <td className={`px-[14px] py-[14px] ${borderBottom} align-middle`}>
                           <span className="text-[12.6px] font-medium text-[#1E293B] leading-[18.9px]">{item.brand}</span>
                         </td>
-                        <td className="px-[14px] py-[14px] border-b border-[#E2E8F0] align-middle">
+                        <td className={`px-[14px] py-[14px] ${borderBottom} align-middle`}>
                           <span className="text-[12.6px] font-medium text-[#1E293B] leading-[18.9px]">{item.specification}</span>
                         </td>
-                        <td className="px-[14px] py-[14px] border-b border-[#E2E8F0] align-middle">
+                        <td className={`px-[14px] py-[14px] ${borderBottom} align-middle`}>
                           <span className="text-[12.6px] text-[#1E293B] leading-[18.9px]">{item.location}</span>
                         </td>
-                        <td className="px-[14px] py-[14px] border-b border-[#E2E8F0] align-middle">
+                        <td className={`px-[14px] py-[14px] ${borderBottom} align-middle`}>
                           <span className="text-[12.6px] text-[#1E293B] leading-[18.9px]">{item.unitCost}</span>
                         </td>
-                        <td className="px-[14px] py-[14px] border-b border-[#E2E8F0] align-middle">
+                        <td className={`px-[14px] py-[14px] ${borderBottom} align-middle`}>
                           <span className="text-[12.6px] text-[#1E293B] leading-[18.9px]">{item.markup}</span>
                         </td>
-                        <td className="px-[14px] py-[14px] border-b border-[#E2E8F0] align-middle">
+                        <td className={`px-[14px] py-[14px] ${borderBottom} align-middle`}>
                           <div className="flex items-center gap-0">
                             <span className="text-[12.6px] text-[#1E293B] leading-[18.9px]">{item.priceQty}</span>
                             <span className="mx-[7px]">
@@ -1394,17 +1520,18 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                             <span className="text-[12.6px] text-[#1E293B] leading-[18.9px]">{item.priceAmount}</span>
                           </div>
                         </td>
-                        <td className="px-[14px] py-[14px] border-b border-[#E2E8F0] align-middle">
+                        <td className={`px-[14px] py-[14px] ${borderBottom} align-middle`}>
                           <span className="text-[12.6px] text-[#1E293B] leading-[18.9px]">{item.total}</span>
                         </td>
-                        <td className="w-[72px] px-[14px] py-[14px] border-b border-[#E2E8F0] align-middle sticky right-0 bg-white">
+                        <td className={`w-[72px] px-[14px] py-[14px] ${borderBottom} align-middle sticky right-0 ${stickyBg}`}>
                           <button className="w-[40px] h-[40px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors">
                             <IconDotsVertical size={15.5} stroke={2} className="text-[rgba(30,41,59,0.87)]" />
                           </button>
                         </td>
                       </tr>
                       )
-                    })}
+                    })
+                    })()}
                   </tbody>
                 </table>
               </div>
@@ -1651,15 +1778,17 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
         onAddProducts={handleAddProducts}
       />
 
-      {/* Section Configuration Sheet */}
+      {/* Section Configuration Sheet (also used for adding new sections) */}
       {sectionConfigOpen && headerBeingConfigured && (
         <SectionConfigSheet
           header={headerBeingConfigured}
+          isNew={isAddingNewSection}
           onUpdateDisplay={updateSectionDisplay}
+          onUpdateName={(name) => setHeaderBeingConfigured(prev => ({ ...prev, name }))}
           onUpdateSubtotal={(checked) => setHeaderBeingConfigured(prev => ({ ...prev, showSubtotal: checked }))}
           onUpdateHidden={(checked) => setHeaderBeingConfigured(prev => ({ ...prev, sectionHidden: checked }))}
-          onSave={handleSaveSectionConfig}
-          onClose={() => { setSectionConfigOpen(false); setHeaderBeingConfigured(null) }}
+          onSave={isAddingNewSection ? handleFinalizeAddSection : handleSaveSectionConfig}
+          onClose={() => { setSectionConfigOpen(false); setHeaderBeingConfigured(null); setIsAddingNewSection(false) }}
         />
       )}
     </div>

@@ -769,36 +769,11 @@ function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, on
     }
   };
 
-  // Customer Label Input Component
-  const CustomerLabelInput = () => (
-    <div className="mb-4 pb-4 border-b border-[#E2E8F0]">
-      <div className="flex flex-col gap-[6px]">
-        <label className="text-[13px] font-medium text-[#334155]">
-          Customer Facing Label
-        </label>
-        <div className="flex items-center gap-3">
-          <input
-            type="text"
-            value={customerLabel}
-            onChange={(e) => onCustomerLabelChange?.(e.target.value)}
-            placeholder="e.g., Colors, Variants, Sizes"
-            className="flex-1 max-w-[300px] h-[38px] px-[12px] border border-[#E2E8F0] rounded-[6px] text-[14px] text-[#1E293B] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors bg-white"
-          />
-          <span className="text-[12px] text-[#64748B]">
-            This label will be shown to customers in public proposals
-          </span>
-        </div>
-      </div>
-    </div>
-  );
 
   // Empty State
   if (options.length === 0) {
     return (
       <div className="pt-[14px]">
-        {/* Customer Label Input */}
-        <CustomerLabelInput />
-        
         {/* Empty State - Just placeholder image and text */}
         <NoDataPlaceholder
           title="No Options Added"
@@ -811,9 +786,6 @@ function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, on
   // Options Table
   return (
     <div className="pt-[14px]">
-      {/* Customer Label Input */}
-      <CustomerLabelInput />
-      
       {/* Options Table */}
       <div className="border border-[#E2E8F0] rounded-lg overflow-hidden">
         {/* Table Header */}
@@ -849,6 +821,19 @@ function OptionsSection({ options, onOptionsChange, customerSelectionEnabled, on
             </div>
           </SortableContext>
         </DndContext>
+      </div>
+
+      {/* Customer Facing Label - shown only when options exist */}
+      <div className="mt-4 flex items-center gap-3">
+        <label className="text-[13px] font-medium text-[#64748B] whitespace-nowrap">Customer facing label</label>
+        <input
+          type="text"
+          value={customerLabel}
+          onChange={(e) => onCustomerLabelChange?.(e.target.value)}
+          placeholder="e.g., Colors, Variants, Sizes"
+          className="w-[220px] h-[34px] px-[10px] border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors bg-white"
+        />
+        <span className="text-[11px] text-[#94A3B8]">Shown to customers in proposals</span>
       </div>
 
       {/* Customer Selection Toggle */}
