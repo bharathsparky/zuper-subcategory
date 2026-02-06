@@ -1,4 +1,21 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import {
   IconChevronRight,
   IconChevronDown,
@@ -733,28 +750,33 @@ function EditOptionTableSelector({ options, selectedOption, onChange }) {
 function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdateHidden, onUpdateName, onSave, onClose, isNew }) {
   const sectionDisplay = header.sectionDisplay || 'expanded'
   const showSubtotal = header.showSubtotal || false
-  const sectionHidden = header.sectionHidden || false
+  const showChildPrices = header.showChildPrices !== false // default true
 
   const displayModes = [
     {
       id: 'expanded',
       label: 'Expanded',
-      description: 'Show all child items',
-      icon: IconChevronDown,
+      description: 'Show all',
+      icon: IconEye,
     },
     {
       id: 'collapsed',
       label: 'Collapsed',
       description: 'Hide child items, show section',
-      icon: IconChevronRight,
+      icon: IconStack2,
     },
     {
       id: 'hidden',
       label: 'Hidden',
-      description: 'Hide section header',
+      description: 'Hide all',
       icon: IconEyeOff,
     },
   ]
+
+  // Toggle for showChildPrices
+  const handleToggleChildPrices = () => {
+    onUpdateHidden?.({ showChildPrices: !showChildPrices })
+  }
 
   return (
     <div className="fixed inset-0 z-[70]" onClick={onClose}>
@@ -792,9 +814,15 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
             />
           </div>
 
-          {/* Section Display Mode Selector */}
-          <div className="space-y-[8px]">
-            <label className="text-[13px] font-medium text-[#334155]">Section Display</label>
+          {/* Section Display Card */}
+          <div className="border border-[#E2E8F0] rounded-[12px] p-[20px] space-y-[16px]">
+            {/* Title */}
+            <div>
+              <h4 className="text-[15px] font-semibold text-[#1E293B]">Section Display</h4>
+              <p className="text-[13px] text-[#64748B] mt-[2px]">Control visibility of section and child items</p>
+            </div>
+
+            {/* Display Mode Selector - 3 cards */}
             <div className="grid grid-cols-3 gap-[8px]">
               {displayModes.map((mode) => {
                 const ModeIcon = mode.icon
@@ -803,22 +831,18 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
                   <button
                     key={mode.id}
                     onClick={() => onUpdateDisplay(mode.id)}
-                    className={`flex flex-col items-center gap-[6px] p-[12px] rounded-[8px] border-2 transition-all ${
+                    className={`flex flex-col items-center gap-[8px] py-[16px] px-[8px] rounded-[10px] border-2 transition-all ${
                       isActive
-                        ? 'border-[#E44A19] bg-[#FFF7ED]'
+                        ? 'border-[#E44A19] bg-[#FEF2EE]'
                         : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1] hover:bg-[#F8FAFC]'
                     }`}
                   >
-                    <div className={`w-[32px] h-[32px] rounded-[8px] flex items-center justify-center ${
-                      isActive ? 'bg-[#E44A19]/10' : 'bg-[#F1F5F9]'
-                    }`}>
-                      <ModeIcon size={16} stroke={2} className={isActive ? 'text-[#E44A19]' : 'text-[#64748B]'} />
-                    </div>
+                    <ModeIcon size={24} stroke={1.8} className={isActive ? 'text-[#475569]' : 'text-[#64748B]'} />
                     <div className="text-center">
-                      <div className={`text-[12px] font-semibold ${isActive ? 'text-[#E44A19]' : 'text-[#334155]'}`}>
+                      <div className={`text-[13px] font-semibold leading-[18px] ${isActive ? 'text-[#E44A19]' : 'text-[#334155]'}`}>
                         {mode.label}
                       </div>
-                      <p className="text-[10px] text-[#64748B] leading-[14px] mt-[2px]">{mode.description}</p>
+                      <p className="text-[11px] text-[#64748B] leading-[15px] mt-[3px]">{mode.description}</p>
                     </div>
                   </button>
                 )
@@ -826,71 +850,76 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
             </div>
           </div>
 
-          {/* Subtotal Toggle - Only shown when collapsed */}
-          {sectionDisplay === 'collapsed' && (
-            <div className="flex items-center justify-between py-[12px] px-[14px] bg-[#F8FAFC] rounded-[8px] border border-[#E2E8F0]">
-              <div>
-                <span className="text-[13px] font-medium text-[#334155]">Show section subtotal</span>
-                <p className="text-[11px] text-[#64748B] mt-[2px]">Display subtotal in collapsed view</p>
+          {/* Hidden Mode Warning */}
+          {sectionDisplay === 'hidden' && (
+            <div className="border border-[#FECACA] bg-[#FEF2F2] rounded-[10px] p-[16px]">
+              <div className="flex items-start gap-[10px]">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-[1px]">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <div className="flex-1">
+                  <p className="text-[13px] font-semibold text-[#991B1B]">
+                    Important: Price visibility will be disabled
+                  </p>
+                  <p className="text-[12px] text-[#991B1B] mt-[4px] leading-[18px]">
+                    When a section is hidden, pricing across the proposal will be concealed. This includes the hidden section as well as all other sections and line items. Only the final total price will be visible.
+                  </p>
+                </div>
               </div>
-              <button
-                onClick={() => onUpdateSubtotal(!showSubtotal)}
-                className={`relative w-[40px] h-[22px] rounded-full transition-colors ${
-                  showSubtotal ? 'bg-[#E44A19]' : 'bg-[#CBD5E1]'
-                }`}
-              >
-                <div className={`absolute top-[2px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform ${
-                  showSubtotal ? 'left-[20px]' : 'left-[2px]'
-                }`} />
-              </button>
             </div>
           )}
 
-          {/* Roll-up Section - Only shown when collapsed */}
-          {sectionDisplay === 'collapsed' && (
-            <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-[8px] p-[12px]">
-              <div className="flex items-start gap-[10px]">
-                <div className="w-[28px] h-[28px] rounded-[6px] bg-[#DBEAFE] flex items-center justify-center flex-shrink-0 mt-[1px]">
-                  <IconStack2 size={14} stroke={2} className="text-[#1D4ED8]" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-[13px] font-semibold text-[#1E40AF]">
-                    Roll-up Prices to Parent
-                  </p>
-                  <p className="text-[11px] text-[#1E40AF] mt-[2px]">
-                    Hide this section and add its cost to the parent total
+          {/* Display Options - Only shown for expanded and collapsed */}
+          {sectionDisplay !== 'hidden' && (
+            <div className="space-y-[10px]">
+              <h4 className="text-[15px] font-semibold text-[#1E293B]">Display Options</h4>
+
+              {/* Show section total */}
+              <div className="flex items-center justify-between py-[14px] px-[16px] bg-white rounded-[10px] border border-[#E2E8F0]">
+                <div>
+                  <span className="text-[13px] font-semibold text-[#1E293B]">Show section total</span>
+                  <p className="text-[12px] text-[#64748B] mt-[2px]">
+                    {sectionDisplay === 'collapsed'
+                      ? 'Display aggregate total for collapsed section'
+                      : 'Display aggregate total for all child items'
+                    }
                   </p>
                 </div>
                 <button
-                  onClick={() => onUpdateHidden(!sectionHidden)}
-                  className={`relative w-[40px] h-[22px] rounded-full transition-colors flex-shrink-0 mt-[3px] ${
-                    sectionHidden ? 'bg-[#E44A19]' : 'bg-[#CBD5E1]'
+                  onClick={() => onUpdateSubtotal(!showSubtotal)}
+                  className={`relative w-[44px] h-[24px] rounded-full transition-colors flex-shrink-0 ${
+                    showSubtotal ? 'bg-[#E44A19]' : 'bg-[#CBD5E1]'
                   }`}
                 >
-                  <div className={`absolute top-[2px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform ${
-                    sectionHidden ? 'left-[20px]' : 'left-[2px]'
+                  <div className={`absolute top-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform ${
+                    showSubtotal ? 'left-[23px]' : 'left-[3px]'
                   }`} />
                 </button>
               </div>
+
+              {/* Show child prices - Only in expanded mode */}
+              {sectionDisplay === 'expanded' && (
+                <div className="flex items-center justify-between py-[14px] px-[16px] bg-white rounded-[10px] border border-[#E2E8F0]">
+                  <div>
+                    <span className="text-[13px] font-semibold text-[#1E293B]">Show child prices</span>
+                    <p className="text-[12px] text-[#64748B] mt-[2px]">Display individual prices for each child item</p>
+                  </div>
+                  <button
+                    onClick={handleToggleChildPrices}
+                    className={`relative w-[44px] h-[24px] rounded-full transition-colors flex-shrink-0 ${
+                      showChildPrices ? 'bg-[#E44A19]' : 'bg-[#CBD5E1]'
+                    }`}
+                  >
+                    <div className={`absolute top-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform ${
+                      showChildPrices ? 'left-[23px]' : 'left-[3px]'
+                    }`} />
+                  </button>
+                </div>
+              )}
             </div>
           )}
-
-          {/* Info Box */}
-          <div className="bg-[#EFF6FF] border border-[#BFDBFE] rounded-[8px] p-[12px]">
-            <div className="flex items-start gap-[10px]">
-              <div className="w-[28px] h-[28px] rounded-[6px] bg-[#DBEAFE] flex items-center justify-center flex-shrink-0 mt-[1px]">
-                <IconCircleCheck size={14} stroke={2} className="text-[#1D4ED8]" />
-              </div>
-              <div className="flex-1">
-                <p className="text-[13px] font-semibold text-[#1E40AF]">
-                  Applied to Quotes & Invoices
-                </p>
-                <p className="text-[11px] text-[#1E40AF] mt-[2px]">
-                  Once a proposal option is selected, the corresponding quote and invoice will reflect the same section display.
-                </p>
-              </div>
-            </div>
-          </div>
 
         </div>
 
@@ -915,6 +944,35 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
   )
 }
 
+// ─── Sortable Table Row for Drag & Drop ────────────────────────────────
+function SortableTableRow({ id, children, className = '', style: extraStyle, ...rest }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 50 : undefined,
+    ...extraStyle,
+  }
+
+  return (
+    <tr ref={setNodeRef} style={style} className={`${className} ${isDragging ? 'shadow-lg' : ''}`} {...attributes} {...rest}>
+      {typeof children === 'function'
+        ? children({ dragHandleRef: setActivatorNodeRef, dragHandleListeners: listeners, isDragging })
+        : children}
+    </tr>
+  )
+}
+
 function EditOptionDialog({ option, onClose, onUpdate }) {
   const [packageName, setPackageName] = useState(option?.title || '')
   const [packageDescription, setPackageDescription] = useState(option?.description || '')
@@ -927,7 +985,12 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
   const [headerBeingConfigured, setHeaderBeingConfigured] = useState(null)
   const [isAddingNewSection, setIsAddingNewSection] = useState(false)
   const [sectionKebabOpenId, setSectionKebabOpenId] = useState(null)
+  const [uiCollapsedSections, setUiCollapsedSections] = useState(new Set()) // UI-only: tracks which sections are visually collapsed in the builder
+  const [sectionAddMenuId, setSectionAddMenuId] = useState(null) // tracks which section's inline "+ Add" dropdown is open
+  const [sectionAddMenuPos, setSectionAddMenuPos] = useState({ top: 0, left: 0 }) // position for fixed dropdown
+  const [addToSectionId, setAddToSectionId] = useState(null) // tracks target section when opening line item picker from section
   const sectionKebabRef = useRef(null)
+  const sectionAddMenuRef = useRef(null)
   const addMenuRef = useRef(null)
 
   // Stateful line items - initialized with sample data, updated when items are added from picker
@@ -1011,14 +1074,39 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
 
   // Handle adding products from the line item picker
   const handleAddProducts = (newItems) => {
-    setLineItems(prev => [...prev, ...newItems.map(item => ({ ...item, type: 'item' }))])
+    const itemsToAdd = newItems.map(item => ({ ...item, type: 'item' }))
+    if (addToSectionId) {
+      // Insert items after the last child of the target section
+      setLineItems(prev => {
+        const result = [...prev]
+        // Find the section header index
+        const sectionIdx = result.findIndex(li => li.id === addToSectionId)
+        if (sectionIdx === -1) return [...prev, ...itemsToAdd]
+        // Find the insertion point: after the last child belonging to this section
+        let insertIdx = sectionIdx + 1
+        while (insertIdx < result.length && result[insertIdx].type !== 'header') {
+          insertIdx++
+        }
+        result.splice(insertIdx, 0, ...itemsToAdd)
+        return result
+      })
+      setAddToSectionId(null)
+    } else {
+      setLineItems(prev => [...prev, ...itemsToAdd])
+    }
   }
 
-  // Toggle section hidden via badge click
-  const handleToggleSectionHidden = (itemId) => {
-    setLineItems(prev => prev.map(item =>
-      item.id === itemId ? { ...item, sectionHidden: !item.sectionHidden } : item
-    ))
+  // Toggle section UI collapse/expand via chevron click (builder view only, does NOT change customer-facing sectionDisplay)
+  const handleToggleSectionCollapse = (itemId) => {
+    setUiCollapsedSections(prev => {
+      const next = new Set(prev)
+      if (next.has(itemId)) {
+        next.delete(itemId)
+      } else {
+        next.add(itemId)
+      }
+      return next
+    })
   }
 
   // Open section configuration sheet
@@ -1031,10 +1119,18 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
   const updateSectionDisplay = (mode) => {
     setHeaderBeingConfigured(prev => {
       const updated = { ...prev, sectionDisplay: mode }
-      if (mode === 'expanded' || mode === 'hidden') {
+      if (mode === 'hidden') {
+        // Hidden mode: no display options, reset everything
         updated.showSubtotal = false
-        if (mode === 'hidden') {
-          updated.sectionHidden = false
+        updated.showChildPrices = false
+        updated.sectionHidden = false
+      } else if (mode === 'collapsed') {
+        // Collapsed: no child prices toggle (children are hidden)
+        updated.showChildPrices = false
+      } else if (mode === 'expanded') {
+        // Expanded: default child prices to true
+        if (prev.showChildPrices === undefined || prev.showChildPrices === false) {
+          updated.showChildPrices = true
         }
       }
       return updated
@@ -1051,6 +1147,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
             sectionDisplay: headerBeingConfigured.sectionDisplay,
             sectionHidden: headerBeingConfigured.sectionHidden,
             showSubtotal: headerBeingConfigured.showSubtotal,
+            showChildPrices: headerBeingConfigured.showChildPrices,
           }
         : item
     ))
@@ -1085,6 +1182,20 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [sectionKebabOpenId])
 
+  // Close section inline add menu on click outside
+  useEffect(() => {
+    if (sectionAddMenuId === null) return
+    const handleClickOutside = (e) => {
+      // Check if click is inside the dropdown menu itself
+      if (sectionAddMenuRef.current && sectionAddMenuRef.current.contains(e.target)) return
+      // Check if click is on the section add button (data attribute)
+      if (e.target.closest('[data-section-add-btn]')) return
+      setSectionAddMenuId(null)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [sectionAddMenuId])
+
   // Clone a section
   const handleCloneSection = (item) => {
     const cloned = {
@@ -1107,6 +1218,103 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
     setSectionKebabOpenId(null)
   }
 
+  // ── Drag & Drop Setup ───────────────────────────────────────────────
+  const dndSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+  const [activeDragId, setActiveDragId] = useState(null)
+
+  // Pre-compute section membership for rendering & DnD
+  const sectionMap = useMemo(() => {
+    let currentSectionId = null
+    const map = []
+    for (let i = 0; i < lineItems.length; i++) {
+      if (lineItems[i].type === 'header') {
+        currentSectionId = lineItems[i].id
+        map.push({ item: lineItems[i], sectionId: null, isLastInSection: false })
+      } else {
+        map.push({ item: lineItems[i], sectionId: currentSectionId, isLastInSection: false })
+      }
+    }
+    // Mark last child in each section group
+    for (let i = map.length - 1; i >= 0; i--) {
+      if (map[i].sectionId && map[i].item.type !== 'header') {
+        const nextItem = map[i + 1]
+        if (!nextItem || nextItem.item.type === 'header' || nextItem.sectionId !== map[i].sectionId) {
+          map[i].isLastInSection = true
+        }
+      }
+    }
+    return map
+  }, [lineItems])
+
+  // IDs of visible items (exclude UI-collapsed children) for SortableContext
+  const visibleItemIds = useMemo(() => {
+    return sectionMap
+      .filter(({ item, sectionId }) => {
+        if (item.type !== 'header' && sectionId && uiCollapsedSections.has(sectionId)) return false
+        return true
+      })
+      .map(({ item }) => item.id)
+  }, [sectionMap, uiCollapsedSections])
+
+  // Drag start handler
+  const handleDragStart = useCallback((event) => {
+    setActiveDragId(event.active.id)
+    // Close any open menus
+    setSectionAddMenuId(null)
+    setSectionKebabOpenId(null)
+    setShowAddMenu(false)
+  }, [])
+
+  // Drag end handler — supports reordering items and moving between/into sections
+  const handleLineItemDragEnd = useCallback((event) => {
+    setActiveDragId(null)
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    setLineItems(prev => {
+      const items = [...prev]
+      const activeIdx = items.findIndex(i => i.id === active.id)
+      const overIdx = items.findIndex(i => i.id === over.id)
+      if (activeIdx === -1 || overIdx === -1) return prev
+
+      const activeItem = items[activeIdx]
+
+      if (activeItem.type === 'header') {
+        // ── Dragging a Section Header: move header + all its children as a group ──
+        let groupEnd = activeIdx + 1
+        while (groupEnd < items.length && items[groupEnd].type !== 'header') {
+          groupEnd++
+        }
+        // Extract the section group
+        const sectionGroup = items.splice(activeIdx, groupEnd - activeIdx)
+
+        // Find new position of the "over" item after splice
+        const newOverIdx = items.findIndex(i => i.id === over.id)
+        if (newOverIdx === -1) {
+          // over item was part of our group (edge case) — append
+          return [...items, ...sectionGroup]
+        }
+
+        // Determine insertion point
+        const overItem = items[newOverIdx]
+        if (overItem.type === 'header') {
+          // Insert before this header
+          items.splice(newOverIdx, 0, ...sectionGroup)
+        } else {
+          // Insert after this item
+          items.splice(newOverIdx + 1, 0, ...sectionGroup)
+        }
+        return items
+      } else {
+        // ── Dragging a Regular Item: simple reorder ──
+        return arrayMove(items, activeIdx, overIdx)
+      }
+    })
+  }, [])
+
   const taxes = [
     { name: 'RT (10%)', amount: '$135.000' },
     { name: 'CGST as (24%)', amount: '$324.000' },
@@ -1122,8 +1330,8 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.32)' }}>
-      <div className="bg-white rounded-[10px] w-full h-full max-w-[1440px] max-h-[900px] flex flex-col shadow-[0px_11px_15px_-7px_rgba(0,0,0,0.2),0px_24px_38px_3px_rgba(0,0,0,0.14),0px_9px_46px_8px_rgba(0,0,0,0.12)] overflow-hidden">
+    <div className="fixed inset-0 z-50">
+      <div className="bg-white w-full h-full flex flex-col overflow-hidden">
         {/* Header */}
         <div className="border-b border-[#CBD5E1] flex items-center justify-between px-[17.5px] py-[10.5px] flex-shrink-0">
           <span className="text-[17.5px] font-semibold text-[rgba(30,41,59,0.87)] leading-[28px]">
@@ -1207,6 +1415,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                           onClick={() => {
                             setShowAddMenu(false)
                             if (item.id === 'line-item') {
+                              setAddToSectionId(null)
                               setShowLineItemPicker(true)
                             } else if (item.id === 'section') {
                               handleStartAddSection()
@@ -1226,6 +1435,12 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
             {/* Table */}
             <div className="border-t border-[#E2E8F0] flex-shrink-0">
               <div className="overflow-x-auto">
+              <DndContext
+                sensors={dndSensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleLineItemDragEnd}
+              >
                 <table className="w-full min-w-[1080px]" style={{ borderCollapse: 'collapse' }}>
                   <thead>
                     <tr className="bg-[#F8FAFC]">
@@ -1267,44 +1482,36 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                       </th>
                     </tr>
                   </thead>
+                  <SortableContext items={visibleItemIds} strategy={verticalListSortingStrategy}>
                   <tbody>
-                    {(() => {
-                      // Pre-compute section membership: find parent section for each item
-                      let currentSectionId = null
-                      const sectionMap = [] // { item, sectionId, isLastInSection }
-                      for (let i = 0; i < lineItems.length; i++) {
-                        if (lineItems[i].type === 'header') {
-                          currentSectionId = lineItems[i].id
-                          sectionMap.push({ item: lineItems[i], sectionId: null, isLastInSection: false })
-                        } else {
-                          sectionMap.push({ item: lineItems[i], sectionId: currentSectionId, isLastInSection: false })
-                        }
-                      }
-                      // Mark last child in each section group
-                      for (let i = sectionMap.length - 1; i >= 0; i--) {
-                        if (sectionMap[i].sectionId && sectionMap[i].item.type !== 'header') {
-                          const nextItem = sectionMap[i + 1]
-                          if (!nextItem || nextItem.item.type === 'header' || nextItem.sectionId !== sectionMap[i].sectionId) {
-                            sectionMap[i].isLastInSection = true
-                          }
-                        }
+                    {sectionMap.map(({ item, sectionId, isLastInSection }, idx) => {
+                      // Skip child items of UI-collapsed sections (builder view only)
+                      if (item.type !== 'header' && sectionId && uiCollapsedSections.has(sectionId)) {
+                        return null
                       }
 
-                      return sectionMap.map(({ item, sectionId, isLastInSection }, idx) => {
                       // Section Header Row
                       if (item.type === 'header') {
-                        const isCollapsed = item.sectionDisplay === 'collapsed'
-                        const isHidden = item.sectionDisplay === 'hidden'
-                        const isRollUp = isCollapsed && item.sectionHidden
-                        // Check if this section has any children
-                        const hasChildren = sectionMap.some(s => s.sectionId === item.id && s.item.type !== 'header')
+                        const displayMode = item.sectionDisplay || 'expanded' // customer-facing config (badge)
+                        const isDisplayCollapsed = displayMode === 'collapsed'
+                        const isDisplayHidden = displayMode === 'hidden'
+                        // UI-only collapse state (builder view toggle via chevron)
+                        const isUiCollapsed = uiCollapsedSections.has(item.id)
+                        // Check if this section has visible children in the builder
+                        const hasChildren = !isUiCollapsed && sectionMap.some(s => s.sectionId === item.id && s.item.type !== 'header')
 
                         return (
-                          <tr key={item.id} className="bg-[#EFF6FF]">
+                          <SortableTableRow key={item.id} id={item.id} className="bg-[#EFF6FF]">
+                            {({ dragHandleRef, dragHandleListeners }) => (
+                            <>
                             <td className={`px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle border-l-[3px] border-l-[#3B82F6]`}>
                               <input type="checkbox" className="w-[13px] h-[13px] rounded-[2.5px] border-[#767676] cursor-pointer" />
                             </td>
-                            <td className={`px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle`}>
+                            <td
+                              ref={dragHandleRef}
+                              {...dragHandleListeners}
+                              className={`px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle cursor-grab active:cursor-grabbing`}
+                            >
                               <svg width="17.68" height="17.5" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="4" y1="6" x2="4" y2="6.01" />
                                 <line x1="12" y1="6" x2="12" y2="6.01" />
@@ -1316,16 +1523,18 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                             </td>
                             <td colSpan={9} className={`px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle`}>
                               <div className="flex items-center gap-[10px]">
-                                {/* Section Icon */}
-                                <div className="w-[28px] h-[28px] rounded-[6px] bg-white/70 flex items-center justify-center flex-shrink-0">
-                                  {isCollapsed ? (
+                                {/* Section Icon - clickable to toggle UI collapse/expand (builder view only, does NOT change customer-facing display mode) */}
+                                <button
+                                  onClick={() => handleToggleSectionCollapse(item.id)}
+                                  className="w-[28px] h-[28px] rounded-[6px] bg-white/70 flex items-center justify-center flex-shrink-0 transition-colors cursor-pointer hover:bg-white"
+                                  title={isUiCollapsed ? 'Expand section items' : 'Collapse section items'}
+                                >
+                                  {isUiCollapsed ? (
                                     <IconChevronRight size={14} stroke={2} className="text-[#3B82F6]" />
-                                  ) : isHidden ? (
-                                    <IconEyeOff size={14} stroke={2} className="text-[#64748B]" />
                                   ) : (
                                     <IconChevronDown size={14} stroke={2} className="text-[#3B82F6]" />
                                   )}
-                                </div>
+                                </button>
 
                                 {/* Section Name */}
                                 <input
@@ -1337,39 +1546,47 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                   className="text-[13px] font-semibold text-[#1E293B] leading-[20px] bg-transparent outline-none border-none min-w-[100px] flex-shrink-0"
                                 />
 
-                                {/* Badges */}
+                                {/* Display Mode Badge (customer-facing config) */}
                                 <div className="flex items-center gap-[6px]">
-                                  {/* Hidden Badge */}
-                                  {item.sectionHidden && (
-                                    <button
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        handleToggleSectionHidden(item.id)
-                                      }}
-                                      className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#FFF7ED] text-[#C2410C] border border-[#FDBA74] rounded text-[10px] font-medium cursor-pointer hover:bg-[#FFEDD5] transition-colors"
-                                    >
+                                  <span className={`inline-flex items-center gap-1 px-[8px] py-[2px] rounded text-[10px] font-medium ${
+                                    isDisplayHidden
+                                      ? 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
+                                      : isDisplayCollapsed
+                                      ? 'bg-[#FFF7ED] text-[#C2410C] border border-[#FDBA74]'
+                                      : 'bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0]'
+                                  }`}>
+                                    {isDisplayHidden ? (
                                       <IconEyeOff className="w-3 h-3" />
-                                      Hidden
-                                    </button>
-                                  )}
-
-                                  {/* Roll-up Badge */}
-                                  {isRollUp && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#FFF7ED] text-[#C2410C] border border-[#FDBA74] rounded text-[10px] font-medium">
+                                    ) : isDisplayCollapsed ? (
                                       <IconStack2 className="w-3 h-3" />
-                                      Roll-up
-                                    </span>
-                                  )}
-
-                                  {/* Display Mode Label */}
-                                  <span className="text-[10px] text-[#94A3B8] font-normal uppercase tracking-wider">
-                                    {item.sectionDisplay}
+                                    ) : (
+                                      <IconEye className="w-3 h-3" />
+                                    )}
+                                    {displayMode === 'expanded' ? 'Expanded' : displayMode === 'collapsed' ? 'Collapsed' : 'Hidden'}
                                   </span>
+                                </div>
+
+                                {/* Inline + Add button for section */}
+                                <div className="relative">
+                                  <button
+                                    data-section-add-btn="true"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      const rect = e.currentTarget.getBoundingClientRect()
+                                      setSectionAddMenuPos({ top: rect.bottom + 4, left: rect.left })
+                                      setSectionAddMenuId(prev => prev === item.id ? null : item.id)
+                                    }}
+                                    className="h-[26px] px-[10px] flex items-center gap-[5px] border border-[#CBD5E1] rounded-[5px] text-[11px] font-medium text-[#334155] bg-white hover:bg-[#F8FAFC] transition-colors"
+                                  >
+                                    <IconPlus size={11} stroke={2.5} className="text-[#334155]" />
+                                    Add
+                                  </button>
                                 </div>
                               </div>
 
-                              {/* Subtotal display when collapsed */}
-                              {isCollapsed && item.showSubtotal && (
+                              {/* Subtotal display when customer-facing mode is collapsed */}
+                              {isDisplayCollapsed && item.showSubtotal && (
                                 <div className="mt-[6px] ml-[38px] text-[12px] text-[#64748B]">
                                   Section Subtotal: <span className="font-semibold text-[#1E293B]">$0.000</span>
                                 </div>
@@ -1414,7 +1631,9 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                 )}
                               </div>
                             </td>
-                          </tr>
+                            </>
+                            )}
+                          </SortableTableRow>
                         )
                       }
 
@@ -1425,11 +1644,17 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                       const stickyBg = isGrouped ? 'bg-[#FAFBFF]' : 'bg-white'
 
                       return (
-                      <tr key={item.id} className={rowBg}>
+                      <SortableTableRow key={item.id} id={item.id} className={rowBg}>
+                        {({ dragHandleRef, dragHandleListeners }) => (
+                        <>
                         <td className={`px-[14px] py-[14px] ${borderBottom} align-middle ${isGrouped ? 'border-l-[3px] border-l-[#3B82F6]' : ''}`}>
                           <input type="checkbox" className="w-[13px] h-[13px] rounded-[2.5px] border-[#767676] cursor-pointer" />
                         </td>
-                        <td className={`px-[14px] py-[14px] ${borderBottom} align-middle`}>
+                        <td
+                          ref={dragHandleRef}
+                          {...dragHandleListeners}
+                          className={`px-[14px] py-[14px] ${borderBottom} align-middle cursor-grab active:cursor-grabbing`}
+                        >
                           {isGrouped ? (
                             <div className="flex items-center">
                               <div className="w-[2px] h-[14px] bg-[#CBD5E1] rounded-full mr-[8px]" />
@@ -1528,12 +1753,15 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                             <IconDotsVertical size={15.5} stroke={2} className="text-[rgba(30,41,59,0.87)]" />
                           </button>
                         </td>
-                      </tr>
+                        </>
+                        )}
+                      </SortableTableRow>
                       )
-                    })
-                    })()}
+                    })}
                   </tbody>
+                  </SortableContext>
                 </table>
+              </DndContext>
               </div>
             </div>
 
@@ -1771,6 +1999,38 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
         </div>
       </div>
 
+      {/* Section Inline Add Dropdown (fixed position to avoid overflow clipping) */}
+      {sectionAddMenuId && (
+        <div
+          ref={sectionAddMenuRef}
+          className="fixed w-[200px] bg-white border border-[#E2E8F0] rounded-[8px] shadow-[0px_4px_16px_rgba(0,0,0,0.12)] z-[60] py-[6px]"
+          style={{ top: sectionAddMenuPos.top, left: sectionAddMenuPos.left }}
+        >
+          {[
+            { label: 'Line Item', id: 'line-item' },
+            { label: 'Bundle', id: 'bundle' },
+            { label: 'Item Group', id: 'item-group' },
+            { label: 'Custom Line Item', id: 'custom-line-item' },
+          ].map((menuItem) => (
+            <button
+              key={menuItem.id}
+              onClick={() => {
+                const targetSectionId = sectionAddMenuId
+                setSectionAddMenuId(null)
+                if (menuItem.id === 'line-item') {
+                  setAddToSectionId(targetSectionId)
+                  setShowLineItemPicker(true)
+                }
+                // Other item types can be handled here
+              }}
+              className="w-full text-left px-[16px] py-[10px] text-[14px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors"
+            >
+              {menuItem.label}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Line Item Picker Modal */}
       <ProposalChooseLineItemModal
         isOpen={showLineItemPicker}
@@ -1786,7 +2046,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
           onUpdateDisplay={updateSectionDisplay}
           onUpdateName={(name) => setHeaderBeingConfigured(prev => ({ ...prev, name }))}
           onUpdateSubtotal={(checked) => setHeaderBeingConfigured(prev => ({ ...prev, showSubtotal: checked }))}
-          onUpdateHidden={(checked) => setHeaderBeingConfigured(prev => ({ ...prev, sectionHidden: checked }))}
+          onUpdateHidden={(updates) => setHeaderBeingConfigured(prev => ({ ...prev, ...updates }))}
           onSave={isAddingNewSection ? handleFinalizeAddSection : handleSaveSectionConfig}
           onClose={() => { setSectionConfigOpen(false); setHeaderBeingConfigured(null); setIsAddingNewSection(false) }}
         />
