@@ -685,62 +685,23 @@ function ProposalChooseLineItemModal({ isOpen, onClose, onAddProducts }) {
 }
 
 // Option selector for the EditOptionDialog table rows
-function EditOptionTableSelector({ options, selectedOption, onChange }) {
-  const [isOpen, setIsOpen] = useState(false)
-
+function EditOptionTableSelector({ options, selectedOption }) {
   if (!options || options.length === 0) {
     return <span className="text-[12.6px] text-[#94A3B8]">—</span>
   }
 
   return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="min-w-[120px] h-[32px] flex items-center gap-[6px] px-[8px] border border-[#E2E8F0] rounded-[4px] text-[12.6px] bg-white hover:bg-[#F8FAFC] transition-colors"
-      >
-        {selectedOption ? (
-          <>
-            <div
-              className="w-[14px] h-[14px] rounded-[3px] border border-[#E2E8F0] flex-shrink-0"
-              style={{ backgroundColor: selectedOption.color }}
-            />
-            <span className="text-[#334155] truncate flex-1 text-left text-[12.6px]">{selectedOption.name}</span>
-          </>
-        ) : (
-          <span className="text-[#94A3B8] text-[12.6px]">Select</span>
-        )}
-        <IconChevronDown size={12} stroke={1.5} className="text-[#94A3B8] flex-shrink-0" />
-      </button>
-
-      {isOpen && (
+    <div className="flex items-center gap-[6px]">
+      {selectedOption ? (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute top-full left-0 mt-1 w-[180px] bg-white border border-[#E2E8F0] rounded-lg shadow-lg z-50 py-1 max-h-[200px] overflow-y-auto">
-            {options.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                onClick={() => {
-                  onChange(option)
-                  setIsOpen(false)
-                }}
-                className={`w-full flex items-center gap-[8px] px-[10px] py-[7px] hover:bg-[#F8FAFC] transition-colors text-left ${
-                  selectedOption?.id === option.id ? 'bg-[#EFF6FF]' : ''
-                }`}
-              >
-                <div
-                  className="w-[16px] h-[16px] rounded-[3px] border border-[#E2E8F0] flex-shrink-0"
-                  style={{ backgroundColor: option.color }}
-                />
-                <span className="text-[12.6px] text-[#334155] flex-1">{option.name}</span>
-                {selectedOption?.id === option.id && (
-                  <IconCheck size={12} stroke={2} className="text-[#2563EB] flex-shrink-0" />
-                )}
-              </button>
-            ))}
-          </div>
+          <div
+            className="w-[14px] h-[14px] rounded-[3px] border border-[#E2E8F0] flex-shrink-0"
+            style={{ backgroundColor: selectedOption.color }}
+          />
+          <span className="text-[12.6px] text-[#334155]">{selectedOption.name}</span>
         </>
+      ) : (
+        <span className="text-[12.6px] text-[#94A3B8]">—</span>
       )}
     </div>
   )
@@ -1500,11 +1461,16 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                         // Check if this section has visible children in the builder
                         const hasChildren = !isUiCollapsed && sectionMap.some(s => s.sectionId === item.id && s.item.type !== 'header')
 
+                        const sectionBg = isDisplayHidden ? 'bg-[#FEF2F2]/40' : isDisplayCollapsed ? 'bg-[#FFF7ED]/40' : 'bg-[#EFF6FF]'
+                        const sectionBorderColor = isDisplayHidden ? 'border-l-[#FCA5A5]' : isDisplayCollapsed ? 'border-l-[#FDBA74]' : 'border-l-[#3B82F6]'
+                        const sectionDragColor = isDisplayHidden ? '#DC2626' : isDisplayCollapsed ? '#C2410C' : '#3B82F6'
+                        const sectionChevronColor = isDisplayHidden ? 'text-[#DC2626]' : isDisplayCollapsed ? 'text-[#C2410C]' : 'text-[#3B82F6]'
+
                         return (
-                          <SortableTableRow key={item.id} id={item.id} className="bg-[#EFF6FF]">
+                          <SortableTableRow key={item.id} id={item.id} className={sectionBg}>
                             {({ dragHandleRef, dragHandleListeners }) => (
                             <>
-                            <td className={`px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle border-l-[3px] border-l-[#3B82F6]`}>
+                            <td className={`px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle border-l-[3px] ${sectionBorderColor}`}>
                               <input type="checkbox" className="w-[13px] h-[13px] rounded-[2.5px] border-[#767676] cursor-pointer" />
                             </td>
                             <td
@@ -1512,7 +1478,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                               {...dragHandleListeners}
                               className={`px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle cursor-grab active:cursor-grabbing`}
                             >
-                              <svg width="17.68" height="17.5" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <svg width="17.68" height="17.5" viewBox="0 0 24 24" fill="none" stroke={sectionDragColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="4" y1="6" x2="4" y2="6.01" />
                                 <line x1="12" y1="6" x2="12" y2="6.01" />
                                 <line x1="4" y1="12" x2="4" y2="12.01" />
@@ -1526,14 +1492,14 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                 {/* Section Icon - clickable to toggle UI collapse/expand (builder view only, does NOT change customer-facing display mode) */}
                                 <button
                                   onClick={() => handleToggleSectionCollapse(item.id)}
-                                  className="w-[28px] h-[28px] rounded-[6px] bg-white/70 flex items-center justify-center flex-shrink-0 transition-colors cursor-pointer hover:bg-white"
+                                  className="w-[20px] h-[20px] flex items-center justify-center rounded hover:bg-black/5 transition-colors flex-shrink-0 cursor-pointer"
                                   title={isUiCollapsed ? 'Expand section items' : 'Collapse section items'}
                                 >
-                                  {isUiCollapsed ? (
-                                    <IconChevronRight size={14} stroke={2} className="text-[#3B82F6]" />
-                                  ) : (
-                                    <IconChevronDown size={14} stroke={2} className="text-[#3B82F6]" />
-                                  )}
+                                  <IconChevronDown
+                                    size={14}
+                                    stroke={2}
+                                    className={`${sectionChevronColor} transition-transform ${isUiCollapsed ? '-rotate-90' : ''}`}
+                                  />
                                 </button>
 
                                 {/* Section Name */}
@@ -1608,7 +1574,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                 )
                               })()}
                             </td>
-                            <td className={`w-[72px] px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle sticky right-0 bg-[#EFF6FF]`}>
+                            <td className={`w-[72px] px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle sticky right-0 ${sectionBg}`}>
                               <div className="relative" ref={sectionKebabOpenId === item.id ? sectionKebabRef : null}>
                                 <button
                                   onClick={() => setSectionKebabOpenId(sectionKebabOpenId === item.id ? null : item.id)}
@@ -1656,14 +1622,26 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                       // Regular Item Row — check if it belongs to a section
                       const isGrouped = !!sectionId
                       const borderBottom = isLastInSection ? 'border-b-[2px] border-b-[#CBD5E1]' : 'border-b border-[#E2E8F0]'
-                      const rowBg = isGrouped ? 'bg-[#FAFBFF]' : 'bg-white'
-                      const stickyBg = isGrouped ? 'bg-[#FAFBFF]' : 'bg-white'
+
+                      // Look up parent section's display mode for color coding
+                      const parentSection = isGrouped ? lineItems.find(li => li.id === sectionId) : null
+                      const parentDisplayMode = parentSection?.sectionDisplay || 'expanded'
+                      const parentIsHidden = parentDisplayMode === 'hidden'
+                      const parentIsCollapsed = parentDisplayMode === 'collapsed'
+
+                      const rowBg = isGrouped
+                        ? parentIsHidden ? 'bg-[#FEF2F2]/20' : parentIsCollapsed ? 'bg-[#FFF7ED]/20' : 'bg-[#FAFBFF]'
+                        : 'bg-white'
+                      const stickyBg = rowBg
+                      const childBorderColor = isGrouped
+                        ? parentIsHidden ? 'border-l-[#FCA5A5]' : parentIsCollapsed ? 'border-l-[#FDBA74]' : 'border-l-[#3B82F6]'
+                        : ''
 
                       return (
                       <SortableTableRow key={item.id} id={item.id} className={rowBg}>
                         {({ dragHandleRef, dragHandleListeners }) => (
                         <>
-                        <td className={`px-[14px] py-[14px] ${borderBottom} align-middle ${isGrouped ? 'border-l-[3px] border-l-[#3B82F6]' : ''}`}>
+                        <td className={`px-[14px] py-[14px] ${borderBottom} align-middle ${isGrouped ? `border-l-[3px] ${childBorderColor}` : ''}`}>
                           <input type="checkbox" className="w-[13px] h-[13px] rounded-[2.5px] border-[#767676] cursor-pointer" />
                         </td>
                         <td
@@ -1673,7 +1651,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                         >
                           {isGrouped ? (
                             <div className="flex items-center">
-                              <div className="w-[2px] h-[14px] bg-[#CBD5E1] rounded-full mr-[8px]" />
+                              <div className={`w-[2px] h-[14px] rounded-full mr-[8px] ${parentIsHidden ? 'bg-[#FCA5A5]' : parentIsCollapsed ? 'bg-[#FDBA74]' : 'bg-[#CBD5E1]'}`} />
                               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="4" y1="6" x2="4" y2="6.01" />
                                 <line x1="12" y1="6" x2="12" y2="6.01" />
@@ -1704,9 +1682,21 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                               </div>
                             )}
                             <div className="flex flex-col">
-                              <span className="text-[12.6px] font-medium text-[#1E293B] leading-[18.9px]">
-                                {item.productId}<br />- {item.name}
-                              </span>
+                              <div className="flex items-center gap-[5px]">
+                                <span className="text-[12.6px] font-medium text-[#1E293B] leading-[18.9px]">
+                                  {item.productId}<br />- {item.name}
+                                </span>
+                                {isGrouped && parentIsHidden && (
+                                  <span className="inline-flex items-center text-[#DC2626]/50" title="Hidden from customer view">
+                                    <IconEyeOff size={11} stroke={1.5} />
+                                  </span>
+                                )}
+                                {isGrouped && parentIsCollapsed && (
+                                  <span className="inline-flex items-center text-[#C2410C]/50" title="Inside collapsed section — customer sees only the header">
+                                    <IconEyeOff size={11} stroke={1.5} />
+                                  </span>
+                                )}
+                              </div>
                               <span className="text-[11.4px] text-[#64748B] leading-[17px] mt-[3.5px] line-clamp-2">{item.description}</span>
                             </div>
                           </div>
@@ -1716,11 +1706,6 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                             <EditOptionTableSelector
                               options={item.options}
                               selectedOption={item.selectedOption}
-                              onChange={(newOption) => {
-                                setLineItems(prev => prev.map(li =>
-                                  li.id === item.id ? { ...li, selectedOption: newOption } : li
-                                ))
-                              }}
                             />
                           ) : item.selectedOption ? (
                             <div className="flex items-center gap-[6px]">
