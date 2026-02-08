@@ -685,7 +685,7 @@ function ProposalChooseLineItemModal({ isOpen, onClose, onAddProducts }) {
 }
 
 // Option selector for the EditOptionDialog table rows
-function EditOptionTableSelector({ options, selectedOption }) {
+function EditOptionTableSelector({ options, selectedOption, onPreview }) {
   if (!options || options.length === 0) {
     return <span className="text-[12.6px] text-[#94A3B8]">—</span>
   }
@@ -694,15 +694,89 @@ function EditOptionTableSelector({ options, selectedOption }) {
     <div className="flex items-center gap-[6px]">
       {selectedOption ? (
         <>
-          <div
-            className="w-[14px] h-[14px] rounded-[3px] border border-[#E2E8F0] flex-shrink-0"
-            style={{ backgroundColor: selectedOption.color }}
-          />
+          <button
+            onClick={() => onPreview && onPreview(selectedOption)}
+            className="group relative"
+            title="Click to preview"
+          >
+            <div
+              className="w-[14px] h-[14px] rounded-[3px] border border-[#E2E8F0] flex-shrink-0 group-hover:ring-2 group-hover:ring-[#3B82F6] transition-all"
+              style={{ backgroundColor: selectedOption.color }}
+            />
+            {/* Expand icon on hover */}
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-[3px] opacity-0 group-hover:opacity-100 transition-opacity">
+              <svg width="8" height="8" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2.5">
+                <path d="M6 1H1v5M15 1h-5M1 10v5h5M10 15h5v-5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+          </button>
           <span className="text-[12.6px] text-[#334155]">{selectedOption.name}</span>
         </>
       ) : (
         <span className="text-[12.6px] text-[#94A3B8]">—</span>
       )}
+    </div>
+  )
+}
+
+// ─── Option Preview Modal ───────────────────────────────────────────
+function OptionPreviewModal({ isOpen, onClose, option }) {
+  if (!isOpen || !option) return null
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[60]">
+      <div className="bg-white rounded-[12px] w-[360px] shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="h-[48px] px-[16px] flex items-center justify-between border-b border-[#E2E8F0]">
+          <span className="text-[14px] font-medium text-[#334155]">{option.name}</span>
+          <button
+            onClick={onClose}
+            className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors"
+          >
+            <IconX size={18} stroke={1.5} className="text-[#64748B]" />
+          </button>
+        </div>
+
+        {/* Preview Content */}
+        <div className="p-[20px]">
+          <div className="flex justify-center">
+            {option.image ? (
+              <img
+                src={option.image}
+                alt={option.name}
+                className="w-[280px] h-[280px] object-cover rounded-[8px] border border-[#E2E8F0]"
+              />
+            ) : option.color ? (
+              <div
+                className="w-[280px] h-[280px] rounded-[8px] border-2 border-[#E2E8F0]"
+                style={{ backgroundColor: option.color }}
+              />
+            ) : (
+              <div className="w-[280px] h-[280px] rounded-[8px] border-2 border-dashed border-[#CBD5E1] bg-[#F8FAFC] flex flex-col items-center justify-center gap-[12px]">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <div className="text-center">
+                  <p className="text-[14px] font-medium text-[#64748B]">No Image</p>
+                  <p className="text-[12px] text-[#94A3B8] mt-1">Image not uploaded for this option</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-[20px] pb-[20px]">
+          <button
+            onClick={onClose}
+            className="w-full h-[40px] border border-[#E2E8F0] rounded-[6px] text-[14px] font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
@@ -950,6 +1024,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
   const [sectionAddMenuId, setSectionAddMenuId] = useState(null) // tracks which section's inline "+ Add" dropdown is open
   const [sectionAddMenuPos, setSectionAddMenuPos] = useState({ top: 0, left: 0 }) // position for fixed dropdown
   const [addToSectionId, setAddToSectionId] = useState(null) // tracks target section when opening line item picker from section
+  const [previewOption, setPreviewOption] = useState(null) // option being previewed in modal
   const sectionKebabRef = useRef(null)
   const sectionAddMenuRef = useRef(null)
   const addMenuRef = useRef(null)
@@ -1706,13 +1781,25 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                             <EditOptionTableSelector
                               options={item.options}
                               selectedOption={item.selectedOption}
+                              onPreview={(opt) => setPreviewOption(opt)}
                             />
                           ) : item.selectedOption ? (
                             <div className="flex items-center gap-[6px]">
-                              <div
-                                className="w-[14px] h-[14px] rounded-[3px] border border-[#E2E8F0] flex-shrink-0"
-                                style={{ backgroundColor: item.selectedOption.color }}
-                              />
+                              <button
+                                onClick={() => setPreviewOption(item.selectedOption)}
+                                className="group relative"
+                                title="Click to preview"
+                              >
+                                <div
+                                  className="w-[14px] h-[14px] rounded-[3px] border border-[#E2E8F0] flex-shrink-0 group-hover:ring-2 group-hover:ring-[#3B82F6] transition-all"
+                                  style={{ backgroundColor: item.selectedOption.color }}
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-[3px] opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <svg width="8" height="8" viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2.5">
+                                    <path d="M6 1H1v5M15 1h-5M1 10v5h5M10 15h5v-5" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                </div>
+                              </button>
                               <span className="text-[12.6px] text-[#334155]">{item.selectedOption.name}</span>
                             </div>
                           ) : (
@@ -2040,6 +2127,13 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
       />
 
       {/* Section Configuration Sheet (also used for adding new sections) */}
+      {/* Option Preview Modal */}
+      <OptionPreviewModal
+        isOpen={!!previewOption}
+        onClose={() => setPreviewOption(null)}
+        option={previewOption}
+      />
+
       {sectionConfigOpen && headerBeingConfigured && (
         <SectionConfigSheet
           header={headerBeingConfigured}
