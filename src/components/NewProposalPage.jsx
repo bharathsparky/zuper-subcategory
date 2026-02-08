@@ -2180,13 +2180,6 @@ function ProposalOptionCard({ option, index, onUpdate, onDelete, onDuplicate, on
     }
   }
 
-  // Page header colors
-  const pageColors = {
-    'Roof Estimate A': '#E8F4FD',
-    'Roof Estimate B': '#E8F8E8',
-    'Repair Estimate': '#FFF3E0'
-  }
-  const pageBgColor = pageColors[option.lineItemsPage] || '#F8FAFC'
 
   return (
     <div className="min-w-[420px] w-[420px] bg-white border border-[#E2E8F0] rounded-[4px] flex flex-col">
@@ -2263,8 +2256,7 @@ function ProposalOptionCard({ option, index, onUpdate, onDelete, onDuplicate, on
         <div className="border border-[#E2E8F0] rounded-[4px] overflow-hidden">
           {/* Page Header */}
           <div
-            className="h-[35px] px-[7px] flex items-center justify-between"
-            style={{ backgroundColor: pageBgColor }}
+            className="h-[35px] px-[7px] flex items-center justify-between bg-[#F8FAFC] border-b border-dashed border-[#CBD5E1]"
           >
             <span className="text-[13px] font-medium text-[#334155] leading-[21px]">{option.lineItemsPage}</span>
             <div className="flex items-center gap-[7px]">
