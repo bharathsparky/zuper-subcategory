@@ -1548,7 +1548,15 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
 
                                 {/* Display Mode Badge (customer-facing config) */}
                                 <div className="flex items-center gap-[6px]">
-                                  <span className={`inline-flex items-center gap-1 px-[8px] py-[2px] rounded text-[10px] font-medium ${
+                                  <span
+                                    title={
+                                      isDisplayHidden
+                                        ? 'Hidden: Section header is hidden from customer view. Items remain editable here.'
+                                        : isDisplayCollapsed
+                                        ? 'Collapsed: Only the section header is shown to customers. Child items are hidden.'
+                                        : 'Expanded: Section header and all child items are visible to customers.'
+                                    }
+                                    className={`inline-flex items-center gap-1 px-[8px] py-[2px] rounded text-[10px] font-medium cursor-default ${
                                     isDisplayHidden
                                       ? 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
                                       : isDisplayCollapsed
@@ -1585,12 +1593,20 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                 </div>
                               </div>
 
-                              {/* Subtotal display when customer-facing mode is collapsed */}
-                              {isDisplayCollapsed && item.showSubtotal && (
-                                <div className="mt-[6px] ml-[38px] text-[12px] text-[#64748B]">
-                                  Section Subtotal: <span className="font-semibold text-[#1E293B]">$0.000</span>
-                                </div>
-                              )}
+                              {/* Subtotal display when showSubtotal is enabled (expanded or collapsed) */}
+                              {item.showSubtotal && !isDisplayHidden && (() => {
+                                // Compute section subtotal from child items
+                                const childItems = sectionMap.filter(s => s.sectionId === item.id && s.item.type !== 'header')
+                                const subtotal = childItems.reduce((sum, { item: child }) => {
+                                  const val = parseFloat((child.total || '').replace(/[^0-9.-]/g, ''))
+                                  return sum + (isNaN(val) ? 0 : val)
+                                }, 0)
+                                return (
+                                  <div className="mt-[6px] ml-[38px] text-[12px] text-[#64748B]">
+                                    Section Total: <span className="font-semibold text-[#1E293B]">${subtotal.toLocaleString('en-US', { minimumFractionDigits: 3 })}</span>
+                                  </div>
+                                )
+                              })()}
                             </td>
                             <td className={`w-[72px] px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle sticky right-0 bg-[#EFF6FF]`}>
                               <div className="relative" ref={sectionKebabOpenId === item.id ? sectionKebabRef : null}>

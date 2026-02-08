@@ -2,251 +2,238 @@ import React, { useState } from 'react';
 import { 
   IconChevronDown, 
   IconChevronRight,
+  IconChevronUp,
   IconPrinter,
   IconFileText,
   IconSend,
   IconPlus,
   IconX,
+  IconEye,
+  IconEyeOff,
+  IconStack2,
+  IconCheck,
+  IconMail,
+  IconPhone,
+  IconCopy,
+  IconPencil,
+  IconAlertTriangle,
+  IconTrendingUp,
+  IconTrendingDown,
+  IconDotsVertical,
+  IconClock,
+  IconBuilding,
+  IconUser,
+  IconHome,
+  IconFolder,
+  IconBriefcase,
+  IconPackage,
+  IconShoppingCart,
+  IconPaperclip,
+  IconNotes,
+  IconActivity,
+  IconSettings,
+  IconLayoutColumns,
 } from '@tabler/icons-react';
 
-// Mock data for the quote
+// ─── Mock Data ──────────────────────────────────────────────────
 const QUOTE_DATA = {
-  quoteNo: '#2024-3',
-  quoteTitle: 'Proposal for Albus Sverus',
+  quoteNo: '13341',
+  quoteTitle: 'Residential Roof Replacement - 42 Oak Street',
   status: 'Accepted',
-  job: {
-    id: '#202545',
-    title: 'Installation job for Albus',
-  },
-  quoteDate: '09/15/2025',
-  expiryDate: '10/15/2025',
-  createdBy: 'Eric Taylor',
-  quoteSoldBy: 'Marcus Chen',
+  job: { id: 'JOB-4521', title: 'Roof Replacement' },
+  quoteDate: '02/07/2026',
+  expiryDate: '02/08/2026',
+  createdBy: 'Mike Johnson',
+  quoteSoldBy: 'Mike Johnson',
+
   billingAddress: {
-    name: 'Albus Sverus',
-    street: '520 East Denny Way',
-    city: 'Seattle',
-    state: 'Washington',
-    zip: '98122',
-    email: 'dilith@zuper.co',
+    name: 'David & Sarah Thompson',
+    lines: ['42 Oak Street', 'Apt 2B', 'Austin', 'Texas - 78701'],
+    phone: '+15129876543',
+    email: 'thompson.roofing@email.com',
   },
   customerAddress: {
-    name: 'Albus Sverus',
-    street: '520 East Denny Way',
-    city: 'Seattle',
-    state: 'Washington',
-    zip: '98122',
-    email: 'dilith@zuper.co',
+    name: 'David Thompson',
+    lines: ['42 Oak Street', 'Residential Property', 'Austin', 'Texas - 78701'],
+    phone: '+15129876543',
+    email: 'thompson.roofing@email.com',
   },
-  proposalTemplate: 'Roof Replacement',
-  quoteTemplate: 'Proposal Template',
+
+  totalAmount: '$14,847.00',
+
   lineItems: [
-    { id: 1, category: 'Roofing Foundations', items: [
-      { id: 101, name: 'RSS103 - OCF Starter Strip Plus', unitCost: '$92.00', markup: '-', taxPreference: 'Taxable', location: 'Warehouse', quantity: '1 Bundle(s)', price: '$115.00', total: '$115.00', image: true },
-      { id: 102, name: 'Install -1 - Double Underlayment - Install - SQ', unitCost: '$50.00', markup: '-', taxPreference: 'Taxable', location: '---', quantity: '1', price: '$50.00', total: '$50.00', image: true },
-      { id: 103, name: 'Pipie Boot-1 - Pipe Boot - Master Flow Pivot Boot - Black - 2.0" - EA', unitCost: '$120.00', markup: '-', taxPreference: 'Taxable', location: 'Warehouse', quantity: '1', price: '$120.00', total: '$120.00', image: true },
-      { id: 104, name: 'Storm Guard -1 - IWS - Storm Guard - Blue - 2 SQ - SQ', unitCost: '$350.00', markup: '-', taxPreference: 'Taxable', location: 'Warehouse', quantity: '1', price: '$350.00', total: '$350.00', image: true },
-      { id: 105, name: 'Sealant -1 - Sealant - All - Black - EA', unitCost: '$24.99', markup: '-', taxPreference: 'Taxable', location: 'Warehouse', quantity: '1', price: '$24.99', total: '$24.99', image: true },
-      { id: 106, name: 'Vent-1 - Dryer/Bath/Exhaust - Masterflow Goose Neck - Black - 4" - EA', unitCost: '$34.99', markup: '-', taxPreference: 'Taxable', location: 'Warehouse', quantity: '1', price: '$34.99', total: '$34.99', image: true },
-      { id: 107, name: 'Labour -1 - Install - Architectural - Install - SQ', unitCost: '$100.00', markup: '-', taxPreference: 'Taxable', location: '---', quantity: '1', price: '$100.00', total: '$100.00', image: true },
-      { id: 108, name: 'Install LF - Starter Strip - Install - LF', unitCost: '$92.00', markup: '-', taxPreference: 'Taxable', location: '---', quantity: '1 Bundle(s)', price: '$115.00', total: '$115.00', image: true },
-      { id: 109, name: 'Drip edge - Drip Edge - Aluminum F5 Drip Edge - White - F5 - EA', unitCost: '$8.81', markup: '-', taxPreference: 'Taxable', location: 'Warehouse', quantity: '1 Stick(s)', price: '$22.50', total: '$22.50', image: true },
-      { id: 110, name: 'Perimeter - Drip Edge - Aluminum F5 Drip Edge - White - F5 - EA', unitCost: '$92.00', markup: '-', taxPreference: 'Taxable', location: '---', quantity: '1 Bundle(s)', price: '$30.00', total: '$30.00', image: true },
-      { id: 111, name: 'Perimeter -1 - Starter Strip - GAF ProStart - Black - 120 LF - BD', unitCost: '$92.00', markup: '-', taxPreference: 'Taxable', location: '---', quantity: '1 Bundle(s)', price: '$48.00', total: '$48.00', image: true },
-      { id: 112, name: 'Perimeter -2 - Transition Flashing - Install Repair - LF', unitCost: '$92.00', markup: '-', taxPreference: 'Taxable', location: '---', quantity: '1 Bundle(s)', price: '$12.00', total: '$12.00', image: true },
-      { id: 113, name: 'Labour - - Drip Edge - Install - LF', unitCost: '$8.81', markup: '-', taxPreference: 'Taxable', location: 'Warehouse', quantity: '1 Stick(s)', price: '$36.00', total: '$36.00', image: true },
-    ]}
+    { id: 1, category: 'Roofing Materials', sectionDisplay: 'expanded', showSubtotal: true, items: [
+      { id: 101, name: '#RF-2041 - GAF Timberline HDZ Shingles', desc: 'Lifetime architectural shingles with\nLayerLock™ technology.\nColor: Weathered Wood', unitCost: '$98.00', markup: '48%', taxPreference: 'Taxable', location: 'Main\nWarehouse\nA-12', brand: 'GAF', spec: 'Weathered Wood', quantity: '24 SQ', price: '$145.00', total: '$3,480.00', taxNote: 'Taxable', image: '/assets/shingles.jpg', hasTaxDetails: true, hasReadMore: true, readMoreText: 'Actual shingle color may vary from\ndigital representation.\nRead More' },
+      { id: 102, name: '#RF-3082 - Synthetic Roof Underlayment', desc: 'High-performance synthetic underlayment\nfor superior moisture protection.', unitCost: '$85.00', markup: '53%', taxPreference: 'Taxable', location: 'Main\nWarehouse\nB-04', brand: 'CertainTeed', spec: '4ft × 250ft Roll', quantity: '6 Roll', price: '$130.00', total: '$780.00', taxNote: 'Taxable', image: '/assets/underlayment.jpg', hasReadMore: false },
+      { id: 103, name: '#RF-4420 - Drip Edge Flashing - 10ft', desc: 'Aluminum drip edge flashing\nColor: Brown', unitCost: '$8.50', markup: '41%', taxPreference: 'Taxable', location: 'Main\nWarehouse\nC-07', brand: 'Amerimax', spec: '2×2 Profile', quantity: '26 PC', price: '$12.00', total: '$312.00', taxNote: 'Taxable', image: '/assets/drip-edge.jpg', isBundle: false },
+    ]},
+    { id: 2, category: 'Ventilation & Accessories', sectionDisplay: 'collapsed', showSubtotal: true, items: [
+      { id: 201, name: '#RF-1157 - GAF Cobra Snow Country Ridge Vent - 4ft', unitCost: '$18.50', markup: '35%', taxPreference: 'Taxable', location: 'Warehouse', brand: 'GAF', spec: '4ft Section', quantity: '8 PC', price: '$25.00', total: '$200.00', image: null },
+      { id: 202, name: '#RF-6610 - Starter Strip Shingles - Pro-Start', unitCost: '$32.00', markup: '41%', taxPreference: 'Taxable', location: 'Warehouse', brand: 'GAF', spec: '120 LF Bundle', quantity: '4 Bundle', price: '$45.00', total: '$180.00', image: null },
+      { id: 203, name: '#RF-7715 - Hip & Ridge Cap Shingles - Seal-A-Ridge', unitCost: '$42.00', markup: '43%', taxPreference: 'Taxable', location: 'Warehouse', brand: 'GAF', spec: '25 LF Bundle', quantity: '3 Bundle', price: '$60.00', total: '$180.00', image: null },
+    ]},
+    { id: 3, category: 'Labor & Installation', sectionDisplay: 'expanded', showSubtotal: true, items: [
+      { id: 301, name: '#SVC-8001 - Roof Tear-Off & Disposal', unitCost: '$65.00', markup: '38%', taxPreference: 'Tax Exempt', location: '---', brand: '', spec: 'Per Square', quantity: '24 SQ', price: '$90.00', total: '$2,160.00', taxNote: 'Non-Taxable', image: null },
+      { id: 302, name: '#SVC-8002 - Shingle Installation - Architectural', unitCost: '$85.00', markup: '47%', taxPreference: 'Tax Exempt', location: '---', brand: '', spec: 'Per Square', quantity: '24 SQ', price: '$125.00', total: '$3,000.00', taxNote: 'Non-Taxable', image: null },
+      { id: 303, name: '#SVC-8010 - Ridge Vent Installation', unitCost: '$4.00', markup: '50%', taxPreference: 'Tax Exempt', location: '---', brand: '', spec: 'Per LF', quantity: '32 LF', price: '$6.00', total: '$192.00', taxNote: 'Non-Taxable', image: null },
+    ]},
+    { id: 4, category: 'Cleanup & Disposal', sectionDisplay: 'hidden', showSubtotal: false, items: [
+      { id: 401, name: '#SVC-9001 - Dumpster Rental - 20 Yard Roll-off', unitCost: '$350.00', markup: '29%', taxPreference: 'Taxable', location: '---', brand: '', spec: '', quantity: '1 EA', price: '$450.00', total: '$450.00', taxNote: 'Taxable', image: null },
+      { id: 402, name: '#SVC-9002 - Magnetic Nail Sweep & Final Cleanup', unitCost: '$150.00', markup: '53%', taxPreference: 'Tax Exempt', location: '---', brand: '', spec: '', quantity: '1 EA', price: '$230.00', total: '$230.00', taxNote: 'Non-Taxable', image: null },
+    ]},
   ],
+
   summary: {
-    subTotal: '$1,058.48',
+    subTotal: '$11,164.00',
     taxes: [
-      { name: 'King County Tax (5%)', amount: '$52.92' },
-      { name: 'Purchase Tax (5.5%)', amount: '$58.22' },
+      { name: 'Sales Tax (8.25%)', amount: '$920.53' },
+      { name: 'Material Surcharge (2%)', amount: '$223.28' },
     ],
-    total: '$1,169.62',
-    deposit: {
-      type: 'Collect Deposit',
-      amount: '$211.70',
-    },
+    total: '$14,847.00',
   },
-  financingOptions: [
-    { label: 'Option 1: 120mo.', value: '---' },
-    { label: 'Option 1: 180mo.', value: '---' },
-    { label: 'Option 2: 120mo.', value: '---' },
-    { label: 'Option 2: 180mo.', value: '---' },
-    { label: 'Option 3: 120mo.', value: '---' },
-    { label: 'Option 3: 180mo.', value: '---' },
-    { label: 'Option 4: 120mo.', value: '---' },
-    { label: 'Option 4: 180mo.', value: '---' },
+
+  costBreakdown: {
+    profitMargin: '38.2%',
+    profitMarginNegative: false,
+    cogs: '$6,898.00',
+    quoteTotal: '$11,164.00',
+    profit: '$4,266.00',
+    profitNegative: false,
+  },
+
+  templates: {
+    proposalTemplate: 'Residential Roofing Proposal',
+    proposalLayout: 'Template of CertainTeed Residential Roofing',
+    quoteTemplate: 'Roof Estimate - Standard',
+    tradeType: 'Roofing',
+    pricelist: 'GAF Certified 2026',
+  },
+
+  quoteStatusTimeline: [
+    { label: 'Draft', date: '02/07/2026 09:45 AM', sub: 'Created by Mike Johnson', done: true },
+    { label: 'Sent', date: '02/07/2026 10:12 AM', sub: 'Sent to David Thompson', done: true },
+    { label: 'Viewed', date: '02/07/2026 11:30 AM', sub: 'Viewed by David Thompson', done: true },
+    { label: 'Accepted', date: '02/07/2026 02:19 PM', sub: 'Accepted by David Thompson', done: true, isAccepted: true },
+  ],
+
+  organization: {
+    letter: 'S',
+    name: 'Summit Roofing & Exteriors',
+    status: 'Active',
+    customerCount: 142,
+    address: '8500 Shoal Creek Blvd, Suite 200, Austin, Texas, 78757',
+  },
+
+  customer: {
+    name: 'David Thompson',
+    company: 'Summit Roofing & Exteriors',
+    type: 'Residential',
+    address: '42 Oak Street, Apt 2B, Austin, Texas, 78701',
+  },
+
+  otherDetails: [
+    { label: 'Roof Type', value: 'Gable' },
+    { label: 'Roof Pitch', value: '6/12' },
+    { label: 'Total Squares', value: '24 SQ' },
+    { label: 'Stories', value: '2' },
+    { label: 'Existing Material', value: 'Asphalt Shingles (3-tab)' },
+    { label: 'Layers to Remove', value: '1' },
+    { label: 'Decking Condition', value: 'Good - Minor repairs needed' },
+    { label: 'Permit Required', value: 'Yes' },
+    { label: 'HOA Approval', value: 'Approved - Color: Weathered Wood' },
+  ],
+
+  testSection: [
+    { label: 'Inspection Date', value: '01/28/2026' },
+    { label: 'Inspector', value: 'Mike Johnson' },
+    { label: 'Storm Damage', value: 'Hail - 1.5" diameter' },
+    { label: 'Insurance Claim #', value: 'CLM-2026-087432' },
+    { label: 'Adjuster Name', value: 'Robert Davis' },
+    { label: 'Adjuster Phone', value: '+1 (512) 555-0198' },
+    { label: 'Satellite Measurements', value: 'EagleView Report #EV-44521' },
+    { label: 'Warranty Type', value: 'GAF Golden Pledge - 50 Year' },
+    { label: 'Estimated Start Date', value: '02/15/2026' },
   ],
 };
 
-// Sidebar items
+// ─── Sidebar items for icon strip ─────────────────────────────
 const SIDEBAR_ITEMS = [
-  { id: 'quote-status', label: 'Quote Status', icon: 'status', hasChevron: true },
-  { id: 'customer', label: 'Customer', icon: 'customer', hasChevron: true },
-  { id: 'proposal-options', label: 'Proposal Options', icon: 'options', hasChevron: true },
-  { id: 'property', label: 'Property', icon: 'property', hasChevron: true },
-  { id: 'project', label: 'Project', icon: 'project', hasPlus: true, hasChevron: true },
-  { id: 'job', label: 'Job', icon: 'job', hasChevron: true },
-  { id: 'material-requests', label: 'Material Requests', icon: 'material', count: 0, hasPlus: true, hasChevron: true },
-  { id: 'purchase-orders', label: 'Purchase Orders', icon: 'purchase', count: 0, hasPlus: true, hasChevron: true },
-  { id: 'attachments', label: 'Attachments', icon: 'attachment', count: 0, hasPlus: true, hasChevron: true },
-  { id: 'notes', label: 'Notes', icon: 'notes', count: 0, hasPlus: true, hasChevron: true },
-  { id: 'quote-activity', label: 'Quote Activity', icon: 'activity', hasChevron: true },
-  { id: 'workflow-activity', label: 'Workflow Activity', icon: 'workflow', count: 1, hasChevron: true },
+  { id: 'quote-status', label: 'Quote Status', icon: IconClock },
+  { id: 'organization', label: 'Organization', icon: IconBuilding },
+  { id: 'customer', label: 'Customer', icon: IconUser },
+  { id: 'property', label: 'Property', icon: IconHome },
+  { id: 'project', label: 'Project', icon: IconFolder },
+  { id: 'job', label: 'Job', icon: IconBriefcase },
+  { id: 'material-requests', label: 'Material Requests', icon: IconPackage },
+  { id: 'purchase-orders', label: 'Purchase Orders', icon: IconShoppingCart },
+  { id: 'attachments', label: 'Attachments', icon: IconPaperclip },
+  { id: 'notes', label: 'Notes', icon: IconNotes },
+  { id: 'quote-activity', label: 'Quote Activity', icon: IconActivity },
+  { id: 'workflow-activity', label: 'Workflow Activity', icon: IconSettings },
 ];
 
-// Sidebar Icons
-const SidebarIcon = ({ type }) => {
-  const icons = {
-    status: (
-      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 3H21V17H7L3 21V3Z" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-    customer: (
-      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="7" r="4" stroke="#64748B" strokeWidth="1.5"/>
-        <path d="M4 19C4 15.134 7.582 12 12 12C16.418 12 20 15.134 20 19" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-    ),
-    options: (
-      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="3" width="18" height="15" rx="2" stroke="#64748B" strokeWidth="1.5"/>
-        <path d="M7 8H17M7 12H13" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-    ),
-    property: (
-      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 10L12 3L21 10V19H3V10Z" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <rect x="9" y="13" width="6" height="6" stroke="#64748B" strokeWidth="1.5"/>
-      </svg>
-    ),
-    project: (
-      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="3" width="18" height="15" rx="2" stroke="#64748B" strokeWidth="1.5"/>
-        <path d="M3 8H21" stroke="#64748B" strokeWidth="1.5"/>
-        <path d="M9 3V8" stroke="#64748B" strokeWidth="1.5"/>
-      </svg>
-    ),
-    job: (
-      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="6" width="18" height="12" rx="2" stroke="#64748B" strokeWidth="1.5"/>
-        <path d="M8 6V4C8 2.895 8.895 2 10 2H14C15.105 2 16 2.895 16 4V6" stroke="#64748B" strokeWidth="1.5"/>
-      </svg>
-    ),
-    material: (
-      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="3" width="18" height="15" rx="2" stroke="#64748B" strokeWidth="1.5"/>
-        <path d="M3 9H21" stroke="#64748B" strokeWidth="1.5"/>
-        <path d="M9 9V18" stroke="#64748B" strokeWidth="1.5"/>
-      </svg>
-    ),
-    purchase: (
-      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4 4H6L8 16H18L20 6H7" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <circle cx="9" cy="19" r="1" stroke="#64748B" strokeWidth="1.5"/>
-        <circle cx="17" cy="19" r="1" stroke="#64748B" strokeWidth="1.5"/>
-      </svg>
-    ),
-    attachment: (
-      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M21.44 11.05L12.25 20.24C10.72 21.77 8.18 21.77 6.65 20.24C5.12 18.71 5.12 16.17 6.65 14.64L15.84 5.45C16.87 4.42 18.48 4.42 19.51 5.45C20.54 6.48 20.54 8.09 19.51 9.12L10.32 18.31C9.8 18.83 9 18.83 8.48 18.31C7.96 17.79 7.96 16.99 8.48 16.47L17.67 7.28" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-    notes: (
-      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M14 3V7H18M14 3H6C4.895 3 4 3.895 4 5V17C4 18.105 4.895 19 6 19H18C19.105 19 20 18.105 20 17V9L14 3Z" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M8 13H16M8 16H12" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-    ),
-    activity: (
-      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="11" r="8" stroke="#64748B" strokeWidth="1.5"/>
-        <path d="M12 7V11L15 13" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-    ),
-    workflow: (
-      <svg width="24" height="21" viewBox="0 0 24 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="11" r="8" stroke="#64748B" strokeWidth="1.5"/>
-        <path d="M12 7V11L15 13" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round"/>
-      </svg>
-    ),
-  };
-  return icons[type] || null;
-};
-
-// Email icon for addresses
-const EmailIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M1.625 3.25L6.5 7.3125L11.375 3.25" stroke="#64748B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <rect x="1.625" y="2.4375" width="9.75" height="8.125" rx="1" stroke="#64748B" strokeWidth="1.5"/>
-  </svg>
-);
-
-function QuoteDetailsPage({ onBack, quoteData }) {
+// ─── Component ──────────────────────────────────────────────────
+function QuoteDetailsPage({ onBack }) {
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(QUOTE_DATA.status);
-  const [expandedSidebar, setExpandedSidebar] = useState({});
+  const [expandedSidebar, setExpandedSidebar] = useState({
+    'quote-status': true,
+    'organization': true,
+    'customer': true,
+  });
+  const [costBreakdownOpen, setCostBreakdownOpen] = useState(true);
+  const [collapsedSections, setCollapsedSections] = useState({});
 
-  const toggleSidebarItem = (id) => {
-    setExpandedSidebar(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
+  const toggleSidebarSection = (id) => {
+    setExpandedSidebar(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const toggleSectionCollapse = (sectionId) => {
+    setCollapsedSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
   };
 
   const statusOptions = ['Draft', 'Sent', 'Viewed', 'Accepted', 'Declined', 'Expired'];
 
   return (
     <div className="flex flex-col h-full bg-[#F8FAFC]">
-      {/* Header */}
+      {/* ─── Top Bar ─── */}
       <div className="bg-white border-b border-[#E2E8F0]">
-        {/* Breadcrumb and Actions */}
         <div className="h-[49px] flex items-center justify-between px-[21px]">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-[14px]">
-            <button 
-              onClick={onBack}
-              className="text-[14px] text-[#3B82F6] hover:underline"
-            >
-              Quotes
-            </button>
-            <IconChevronRight size={21} stroke={1.5} className="text-[#94A3B8]" />
+          <div className="flex items-center gap-[8px]">
+            <button onClick={onBack} className="text-[14px] text-[#3B82F6] hover:underline">Quotes</button>
+            <IconChevronRight size={14} stroke={2} className="text-[#94A3B8]" />
             <span className="text-[14px] text-[#1E293B]">
-              Quote {QUOTE_DATA.quoteNo} - {QUOTE_DATA.quoteTitle}
+              Quote # {QUOTE_DATA.quoteNo} - {QUOTE_DATA.quoteTitle}
             </span>
           </div>
 
-          {/* Action Buttons */}
+          {/* Actions */}
           <div className="flex items-center gap-[7px]">
-            {/* New Button */}
-            <button className="h-[31.5px] px-[15px] flex items-center gap-[7px] border border-[#E2E8F0] rounded-[4px] text-[14px] text-[#334155] hover:bg-[#F8FAFC] transition-colors">
+            {/* New button */}
+            <button className="h-[32px] px-[12px] flex items-center gap-[6px] border border-[#E2E8F0] rounded-[4px] text-[13px] font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors">
               <span>New</span>
               <IconChevronDown size={13} stroke={2} />
             </button>
-
-            {/* Print, PDF, Send Group */}
+            {/* Print / PDF / Send group */}
             <div className="flex items-center border border-[#E2E8F0] rounded-[4px] overflow-hidden">
-              <button className="h-[31.5px] px-[14px] flex items-center gap-[7px] text-[14px] text-[#334155] hover:bg-[#F8FAFC] transition-colors border-r border-[#E2E8F0]">
-                <IconPrinter size={16} stroke={1.5} />
+              <button className="h-[32px] px-[12px] flex items-center gap-[6px] text-[13px] text-[#334155] hover:bg-[#F8FAFC] transition-colors border-r border-[#E2E8F0]">
+                <IconPrinter size={15} stroke={1.5} />
                 <span>Print</span>
-                <IconChevronDown size={13} stroke={2} />
+                <IconChevronDown size={12} stroke={2} className="text-[#94A3B8]" />
               </button>
-              <button className="h-[31.5px] px-[14px] flex items-center gap-[7px] text-[14px] text-[#334155] hover:bg-[#F8FAFC] transition-colors border-r border-[#E2E8F0]">
-                <IconFileText size={16} stroke={1.5} />
+              <button className="h-[32px] px-[12px] flex items-center gap-[6px] text-[13px] text-[#334155] hover:bg-[#F8FAFC] transition-colors border-r border-[#E2E8F0]">
+                <IconFileText size={15} stroke={1.5} />
                 <span>PDF</span>
-                <IconChevronDown size={13} stroke={2} />
+                <IconChevronDown size={12} stroke={2} className="text-[#94A3B8]" />
               </button>
-              <button className="h-[31.5px] px-[14px] flex items-center gap-[7px] text-[14px] text-[#334155] hover:bg-[#F8FAFC] transition-colors">
-                <IconSend size={16} stroke={1.5} />
+              <button className="h-[32px] px-[12px] flex items-center gap-[6px] text-[13px] text-[#334155] hover:bg-[#F8FAFC] transition-colors">
+                <IconSend size={15} stroke={1.5} />
                 <span>Send</span>
               </button>
             </div>
-
             {/* More Actions */}
-            <button className="h-[31.5px] px-[15px] flex items-center gap-[7px] border border-[#E2E8F0] rounded-[4px] text-[14px] text-[#334155] hover:bg-[#F8FAFC] transition-colors">
+            <button className="h-[32px] px-[12px] flex items-center gap-[6px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] hover:bg-[#F8FAFC] transition-colors">
               <span>More Actions</span>
               <IconChevronDown size={13} stroke={2} />
             </button>
@@ -254,47 +241,34 @@ function QuoteDetailsPage({ onBack, quoteData }) {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* ─── Body ─── */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Content Area */}
+        {/* ─── Left Content ─── */}
         <div className="flex-1 overflow-y-auto p-[21px]">
-          {/* Job & Status Card */}
-          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[17.5px]">
-            <div className="flex">
-              {/* Job Info */}
-              <div className="flex-1 p-[21px] border-r border-[#E2E8F0]">
-                <div className="text-[14px] text-[#64748B] mb-[8px]">Job</div>
-                <a href="#" className="text-[14px] text-[#3B82F6] hover:underline leading-relaxed">
-                  {QUOTE_DATA.job.id} - {QUOTE_DATA.job.title}
-                </a>
-              </div>
 
-              {/* Status */}
-              <div className="flex-1 p-[21px]">
-                <div className="text-[14px] text-[#64748B] mb-[8px]">Status</div>
+          {/* ─── Job & Status Row ─── */}
+          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px]">
+            <div className="flex">
+              <div className="flex-1 p-[14px] border-r border-[#E2E8F0]">
+                <div className="text-[13px] text-[#64748B] mb-[4px]">Job</div>
+                <div className="text-[13px] text-[#334155]">{QUOTE_DATA.job.id || '---'}</div>
+              </div>
+              <div className="flex-1 p-[14px]">
+                <div className="text-[13px] text-[#64748B] mb-[4px]">Status</div>
                 <div className="relative">
                   <button
                     onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
-                    className="w-full h-[39px] px-[10px] flex items-center justify-between border border-[#E2E8F0] rounded-[4px] text-[14px] text-[#334155] hover:border-[#CBD5E1] transition-colors"
+                    className="w-full h-[36px] px-[10px] flex items-center justify-between border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] hover:border-[#CBD5E1] transition-colors"
                   >
                     <span>{currentStatus}</span>
-                    <IconChevronDown size={18} stroke={1.5} className="text-[#64748B]" />
+                    <IconChevronDown size={16} stroke={1.5} className="text-[#64748B]" />
                   </button>
                   {statusDropdownOpen && (
-                    <div className="absolute top-[43px] left-0 right-0 bg-white border border-[#E2E8F0] rounded-[4px] shadow-lg z-10">
-                      {statusOptions.map((status) => (
-                        <button
-                          key={status}
-                          onClick={() => {
-                            setCurrentStatus(status);
-                            setStatusDropdownOpen(false);
-                          }}
-                          className={`w-full px-[14px] py-[10px] text-left text-[14px] hover:bg-[#F8FAFC] transition-colors ${
-                            currentStatus === status ? 'bg-[#F1F5F9] text-[#3B82F6]' : 'text-[#334155]'
-                          }`}
-                        >
-                          {status}
-                        </button>
+                    <div className="absolute top-[40px] left-0 right-0 bg-white border border-[#E2E8F0] rounded-[4px] shadow-lg z-10">
+                      {statusOptions.map(s => (
+                        <button key={s} onClick={() => { setCurrentStatus(s); setStatusDropdownOpen(false); }}
+                          className={`w-full px-[12px] py-[8px] text-left text-[13px] hover:bg-[#F8FAFC] ${currentStatus === s ? 'bg-[#F1F5F9] text-[#3B82F6]' : 'text-[#334155]'}`}
+                        >{s}</button>
                       ))}
                     </div>
                   )}
@@ -303,321 +277,564 @@ function QuoteDetailsPage({ onBack, quoteData }) {
             </div>
           </div>
 
-          {/* Quote Details Card */}
-          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[17.5px]">
-            {/* Preview Image with Ribbon Badge */}
+          {/* ─── Main Info Card ─── */}
+          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px]">
+            {/* Logo row + ACCEPTED ribbon */}
             <div className="relative p-[21px] border-b border-[#E2E8F0] overflow-hidden">
-              <div className="flex">
-                {/* Image */}
-                <div className="w-[105px] h-[70px] rounded-[4px] overflow-hidden bg-[#E2E8F0]">
-                  <img 
-                    src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&h=140&fit=crop" 
-                    alt="Property" 
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Accepted Ribbon Badge */}
-                <div className="absolute -top-[2px] -right-[2px] w-[120px] h-[120px] overflow-hidden">
-                  <div 
-                    className="absolute bg-[#22C55E] text-white text-[11px] font-semibold tracking-wide text-center py-[6px] w-[170px]"
-                    style={{
-                      top: '26px',
-                      right: '-40px',
-                      transform: 'rotate(45deg)',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-                    }}
-                  >
-                    ACCEPTED
+              <div className="flex items-start">
+                {/* Company logo */}
+                <div>
+                  <div className="flex items-center gap-[4px]">
+                    <span className="text-[22px] font-extrabold text-[#1E293B] tracking-tight italic">SUMMIT</span>
                   </div>
+                  <div className="text-[7px] font-medium text-[#64748B] tracking-[0.15em] uppercase -mt-[2px]">Roofing & Exteriors</div>
                 </div>
+              </div>
+              {/* ACCEPTED diagonal ribbon */}
+              <div className="absolute -top-[2px] -right-[2px] w-[120px] h-[120px] overflow-hidden">
+                <div
+                  className="absolute bg-[#22C55E] text-white text-[11px] font-semibold tracking-wide text-center py-[6px] w-[170px]"
+                  style={{ top: '26px', right: '-40px', transform: 'rotate(45deg)', boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}
+                >ACCEPTED</div>
               </div>
             </div>
 
-            {/* Addresses and Summary */}
-            <div className="flex p-[21px]">
-              {/* Left - Addresses */}
-              <div className="flex gap-[17.5px]">
-                {/* Billing Address */}
-                <div className="w-[252px] border border-[#E2E8F0] rounded-[4px] p-[15px]">
-                  <div className="text-[14px] font-medium text-[#334155] mb-[10.5px]">Billing Address</div>
-                  <div className="space-y-[0px] text-[13px] text-[#64748B]">
-                    <div>{QUOTE_DATA.billingAddress.name}</div>
-                    <div>{QUOTE_DATA.billingAddress.street}</div>
-                    <div>{QUOTE_DATA.billingAddress.city}</div>
-                    <div>{QUOTE_DATA.billingAddress.state} - {QUOTE_DATA.billingAddress.zip}</div>
-                    <div className="flex items-center gap-[7px] pt-[3.5px]">
-                      <EmailIcon />
-                      <a href={`mailto:${QUOTE_DATA.billingAddress.email}`} className="text-[#3B82F6] hover:underline">
-                        {QUOTE_DATA.billingAddress.email}
-                      </a>
-                    </div>
+            {/* Addresses + Quote Details */}
+            <div className="flex p-[14px] gap-[14px]">
+              {/* Billing Address */}
+              <div className="flex-1 border border-[#E2E8F0] rounded-[4px] p-[12px]">
+                <div className="text-[12px] font-semibold text-[#334155] mb-[6px]">Billing Address</div>
+                <div className="space-y-[1px] text-[12px] text-[#64748B] leading-[18px]">
+                  <div className="font-medium text-[#334155]">{QUOTE_DATA.billingAddress.name}</div>
+                  {QUOTE_DATA.billingAddress.lines.map((l, i) => <div key={i}>{l}</div>)}
+                  <div className="flex items-center gap-[6px] pt-[4px]">
+                    <IconPhone size={13} stroke={1.5} className="text-[#64748B] flex-shrink-0" />
+                    <span>{QUOTE_DATA.billingAddress.phone}</span>
+                  </div>
+                  <div className="flex items-center gap-[6px]">
+                    <IconMail size={13} stroke={1.5} className="text-[#64748B] flex-shrink-0" />
+                    <a href={`mailto:${QUOTE_DATA.billingAddress.email}`} className="text-[#3B82F6] hover:underline">{QUOTE_DATA.billingAddress.email}</a>
                   </div>
                 </div>
+              </div>
 
-                {/* Customer Address */}
-                <div className="w-[252px] border border-[#E2E8F0] rounded-[4px] p-[15px]">
-                  <div className="text-[14px] font-medium text-[#334155] mb-[10.5px]">Customer Address</div>
-                  <div className="space-y-[0px] text-[13px] text-[#64748B]">
-                    <div>{QUOTE_DATA.customerAddress.name}</div>
-                    <div>{QUOTE_DATA.customerAddress.street}</div>
-                    <div>{QUOTE_DATA.customerAddress.city}</div>
-                    <div>{QUOTE_DATA.customerAddress.state} - {QUOTE_DATA.customerAddress.zip}</div>
-                    <div className="flex items-center gap-[7px] pt-[3.5px]">
-                      <EmailIcon />
-                      <a href={`mailto:${QUOTE_DATA.customerAddress.email}`} className="text-[#3B82F6] hover:underline">
-                        {QUOTE_DATA.customerAddress.email}
-                      </a>
-                    </div>
+              {/* Customer Address */}
+              <div className="flex-1 border border-[#E2E8F0] rounded-[4px] p-[12px]">
+                <div className="text-[12px] font-semibold text-[#334155] mb-[6px]">Customer Address</div>
+                <div className="space-y-[1px] text-[12px] text-[#64748B] leading-[18px]">
+                  <div className="font-medium text-[#334155]">{QUOTE_DATA.customerAddress.name}</div>
+                  {QUOTE_DATA.customerAddress.lines.map((l, i) => <div key={i}>{l}</div>)}
+                  <div className="flex items-center gap-[6px] pt-[4px]">
+                    <IconPhone size={13} stroke={1.5} className="text-[#64748B] flex-shrink-0" />
+                    <span>{QUOTE_DATA.customerAddress.phone}</span>
+                  </div>
+                  <div className="flex items-center gap-[6px]">
+                    <IconMail size={13} stroke={1.5} className="text-[#64748B] flex-shrink-0" />
+                    <a href={`mailto:${QUOTE_DATA.customerAddress.email}`} className="text-[#3B82F6] hover:underline">{QUOTE_DATA.customerAddress.email}</a>
                   </div>
                 </div>
               </div>
 
               {/* Right - Total Amount & Details */}
-              <div className="flex-1 ml-[21px] border border-[#E2E8F0] rounded-[4px]">
+              <div className="w-[240px] flex-shrink-0 border border-[#E2E8F0] rounded-[4px] overflow-hidden">
                 {/* Total Amount Header */}
-                <div className="bg-[#F1F5F9] p-[14px] text-center border-b border-[#E2E8F0]">
-                  <div className="text-[12px] text-[#3B82F6] font-medium uppercase tracking-wide">Total Amount</div>
-                  <div className="text-[20px] font-semibold text-[#1E293B]">{QUOTE_DATA.summary.total}</div>
+                <div className="bg-[#F1F5F9] p-[12px] text-center border-b border-[#E2E8F0]">
+                  <div className="text-[11px] text-[#3B82F6] font-semibold uppercase tracking-wide">Total Amount</div>
+                  <div className="text-[20px] font-bold text-[#1E293B]">{QUOTE_DATA.totalAmount}</div>
                 </div>
-
-                {/* Quote Details */}
-                <div className="p-[14px]">
-                  <div className="flex justify-between py-[7px]">
-                    <span className="text-[13px] text-[#64748B]">Quote No</span>
-                    <span className="text-[13px] text-[#334155] text-right">{QUOTE_DATA.quoteNo}</span>
-                  </div>
-                  <div className="flex justify-between py-[7px]">
-                    <span className="text-[13px] text-[#64748B]">Quote Date</span>
-                    <span className="text-[13px] text-[#334155] text-right">{QUOTE_DATA.quoteDate}</span>
-                  </div>
-                  <div className="flex justify-between py-[7px]">
-                    <span className="text-[13px] text-[#64748B]">Expiry Date</span>
-                    <span className="text-[13px] text-[#334155] text-right">{QUOTE_DATA.expiryDate}</span>
-                  </div>
-                  <div className="flex justify-between py-[7px]">
-                    <span className="text-[13px] text-[#64748B]">Created By</span>
-                    <span className="text-[13px] text-[#334155] text-right">{QUOTE_DATA.createdBy}</span>
-                  </div>
-                  <div className="flex justify-between py-[7px]">
-                    <span className="text-[13px] text-[#64748B]">Quote Sold By</span>
-                    <span className="text-[13px] text-[#334155] text-right">{QUOTE_DATA.quoteSoldBy}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Line Items Table */}
-            <div className="border-t border-[#E2E8F0]">
-              {/* Table Header */}
-              <div className="grid grid-cols-[48px_1fr_96px_96px_144px_96px_192px] bg-[#F8FAFC] border-b border-[#E2E8F0]">
-                <div className="px-[15px] py-[18.5px] text-[13px] text-[#64748B]">#</div>
-                <div className="px-[14px] py-[18.5px] text-[13px] text-[#64748B]">Product / Service</div>
-                <div className="px-[14px] py-[18.5px] text-[13px] text-[#64748B]">Unit Cost</div>
-                <div className="px-[14px] py-[18.5px] text-[13px] text-[#64748B]">Markup</div>
-                <div className="px-[14px] py-[18.5px] text-[13px] text-[#64748B]">Tax Preference</div>
-                <div className="px-[14px] py-[18.5px] text-[13px] text-[#64748B]">Location</div>
-                <div className="px-[14px] py-[18.5px] text-[13px] text-[#64748B]">Price</div>
-              </div>
-
-              {/* Table Body */}
-              {QUOTE_DATA.lineItems.map((category) => (
-                <div key={category.id}>
-                  {/* Category Header */}
-                  <div className="grid grid-cols-[48px_1fr_96px_96px_144px_96px_192px] border-b border-[#E2E8F0] bg-[#FAFAFA]">
-                    <div className="px-[15px] py-[5.3px]"></div>
-                    <div className="px-[14px] py-[5.3px] text-[13px] font-medium text-[#334155]">{category.category}</div>
-                    <div className="px-[14px] py-[5.3px]"></div>
-                    <div className="px-[14px] py-[5.3px] text-[13px] text-[#64748B]">-</div>
-                    <div className="px-[14px] py-[5.3px]"></div>
-                    <div className="px-[14px] py-[5.3px]"></div>
-                    <div className="px-[14px] py-[5.3px]"></div>
-                  </div>
-
-                  {/* Line Items */}
-                  {category.items.map((item, index) => (
-                    <div key={item.id} className="grid grid-cols-[48px_1fr_96px_96px_144px_96px_192px] border-b border-[#E2E8F0] hover:bg-[#F8FAFC]">
-                      <div className="px-[15px] py-[28.5px] text-[13px] text-[#64748B]">{index + 1}</div>
-                      <div className="px-[14px] py-[14px] flex items-center gap-[10.5px]">
-                        <div className="w-[49px] h-[49px] bg-[#E2E8F0] rounded-[4px] overflow-hidden flex-shrink-0">
-                          {item.image && (
-                            <img 
-                              src={`https://placehold.co/49x49/E2E8F0/64748B?text=${index + 1}`} 
-                              alt="" 
-                              className="w-full h-full object-cover"
-                            />
-                          )}
-                        </div>
-                        <span className="text-[13px] text-[#3B82F6]">{item.name}</span>
-                      </div>
-                      <div className="px-[14px] py-[28.5px] text-[13px] text-[#334155]">{item.unitCost}</div>
-                      <div className="px-[14px] py-[28.5px] text-[13px] text-[#64748B]">{item.markup}</div>
-                      <div className="px-[14px] py-[28.5px] text-[13px] text-[#334155]">{item.taxPreference}</div>
-                      <div className="px-[14px] py-[28.5px] text-[13px] text-[#334155]">{item.location}</div>
-                      <div className="px-[14px] py-[28.5px] text-[13px] text-[#334155]">
-                        <span>{item.quantity}</span>
-                        <span className="mx-[7px] text-[#94A3B8]">×</span>
-                        <span>{item.price}</span>
-                      </div>
+                {/* Quote Detail Rows */}
+                <div className="p-[12px] space-y-[6px]">
+                  {[
+                    ['Quote No', QUOTE_DATA.quoteNo],
+                    ['Quote Date', QUOTE_DATA.quoteDate],
+                    ['Expiry Date', QUOTE_DATA.expiryDate],
+                    ['Created By', QUOTE_DATA.createdBy],
+                    ['Quote Sold By', QUOTE_DATA.quoteSoldBy],
+                  ].map(([label, val]) => (
+                    <div key={label} className="flex justify-between">
+                      <span className="text-[12px] text-[#64748B]">{label}</span>
+                      <span className="text-[12px] text-[#334155] font-medium">{val}</span>
                     </div>
                   ))}
                 </div>
-              ))}
+              </div>
+            </div>
 
-              {/* Summary Section */}
+            {/* ─── Line Items Table ─── */}
+            <div className="border-t border-[#E2E8F0]">
+              {/* Toolbar row */}
+              <div className="flex justify-end px-[14px] py-[6px]">
+                <button className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors" title="Table layout">
+                  <IconLayoutColumns size={15} stroke={1.5} className="text-[#94A3B8]" />
+                </button>
+              </div>
+
+              {/* Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[960px]">
+                  <thead>
+                    <tr className="bg-[#F8FAFC] border-b border-t border-[#E2E8F0]">
+                      <th className="w-[44px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">#</th>
+                      <th className="px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Product / Service</th>
+                      <th className="w-[100px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Unit Cost</th>
+                      <th className="w-[70px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Markup</th>
+                      <th className="w-[110px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Tax Preference</th>
+                      <th className="w-[100px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Location</th>
+                      <th className="w-[60px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Brand</th>
+                      <th className="w-[90px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Specification</th>
+                      <th className="w-[130px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {QUOTE_DATA.lineItems.map((category) => {
+                      const displayMode = category.sectionDisplay || 'expanded';
+                      const isExpanded = displayMode === 'expanded';
+                      const isCollapsed = displayMode === 'collapsed';
+                      const isHidden = displayMode === 'hidden';
+
+                      const sectionTotal = category.items.reduce((sum, item) => {
+                        const val = parseFloat((item.total || '').replace(/[^0-9.-]/g, ''));
+                        return sum + (isNaN(val) ? 0 : val);
+                      }, 0);
+
+                      const isSectionCollapsedInUI = collapsedSections[category.id] ?? false;
+
+                      return (
+                        <React.Fragment key={category.id}>
+                          {/* Section Header Row */}
+                          <tr className={`border-b border-[#E2E8F0] border-l-[3px] ${
+                            isHidden ? 'border-l-[#FCA5A5] bg-[#FEF2F2]/30' :
+                            isCollapsed ? 'border-l-[#FDBA74] bg-[#FFF7ED]/30' :
+                            'border-l-[#3B82F6] bg-[#F8FAFC]'
+                          }`}>
+                            <td colSpan={9} className="px-[12px] py-[10px]">
+                              <div className="flex items-center gap-[10px]">
+                                {/* Accordion chevron */}
+                                <button
+                                  onClick={() => toggleSectionCollapse(category.id)}
+                                  className="w-[20px] h-[20px] flex items-center justify-center rounded hover:bg-black/5 transition-colors flex-shrink-0"
+                                >
+                                  <IconChevronDown
+                                    size={14}
+                                    stroke={2}
+                                    className={`text-[#64748B] transition-transform ${isSectionCollapsedInUI ? '-rotate-90' : ''}`}
+                                  />
+                                </button>
+                                <span className="text-[13px] font-semibold text-[#1E293B]">{category.category}</span>
+                                {/* Item count when collapsed */}
+                                {isSectionCollapsedInUI && (
+                                  <span className="text-[11px] text-[#94A3B8]">({category.items.length} items)</span>
+                                )}
+                                {/* Display Mode Badge with tooltip */}
+                                <span
+                                  title={
+                                    isExpanded
+                                      ? 'Expanded: Section header and all items visible to customer.'
+                                      : isCollapsed
+                                      ? 'Collapsed: Customer sees only the section header with total. Items are hidden from customer.'
+                                      : 'Hidden: Entire section is hidden from customer view.'
+                                  }
+                                  className={`inline-flex items-center gap-1 px-[6px] py-[1px] rounded text-[10px] font-medium cursor-default ${
+                                    isHidden
+                                      ? 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
+                                      : isCollapsed
+                                      ? 'bg-[#FFF7ED] text-[#C2410C] border border-[#FDBA74]'
+                                      : 'bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0]'
+                                  }`}
+                                >
+                                  {isHidden ? <IconEyeOff className="w-3 h-3" /> : isCollapsed ? <IconStack2 className="w-3 h-3" /> : <IconEye className="w-3 h-3" />}
+                                  {isExpanded ? 'Expanded' : isCollapsed ? 'Collapsed' : 'Hidden'}
+                                </span>
+                                {/* Section total */}
+                                {category.showSubtotal && (
+                                  <span className="ml-auto text-[11px] text-[#64748B]">
+                                    Section Total: <span className="font-semibold text-[#1E293B]">${sectionTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+
+                          {/* Items — always present, accordion controls UI collapse */}
+                          {!isSectionCollapsedInUI && category.items.map((item, idx) => (
+                            <React.Fragment key={item.id}>
+                              <tr className={`border-b border-[#E2E8F0] hover:bg-[#FAFAFA] border-l-[3px] ${
+                                isHidden ? 'border-l-[#FCA5A5]' :
+                                isCollapsed ? 'border-l-[#FDBA74]' :
+                                'border-l-[#3B82F6]'
+                              }`}>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#64748B] align-top">{idx + 1}</td>
+                                <td className="px-[12px] py-[12px] align-top">
+                                  <div className="flex items-start gap-[10px]">
+                                    <div className="w-[40px] h-[40px] bg-[#F1F5F9] rounded-[4px] overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke="#94A3B8" strokeWidth="1.5"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" stroke="#94A3B8" strokeWidth="1.5"/></svg>
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="flex items-center gap-[6px]">
+                                        <span className="text-[12px] text-[#3B82F6] leading-[16px]">{item.name}</span>
+                                        {isHidden && (
+                                          <span className="inline-flex items-center gap-[3px] text-[9px] text-[#DC2626]/60" title="This item is hidden from customer view">
+                                            <IconEyeOff size={10} stroke={1.5} />
+                                          </span>
+                                        )}
+                                        {isCollapsed && (
+                                          <span className="inline-flex items-center gap-[3px] text-[9px] text-[#C2410C]/60" title="This item is inside a collapsed section — customer sees only the section header">
+                                            <IconEyeOff size={10} stroke={1.5} />
+                                          </span>
+                                        )}
+                                      </div>
+                                      {item.desc && (
+                                        <div className="text-[10px] text-[#94A3B8] mt-[2px] leading-[14px] whitespace-pre-line">{item.desc}</div>
+                                      )}
+                                      {item.hasReadMore && (
+                                        <button className="text-[10px] text-[#E44A19] hover:underline mt-[1px]">Read More</button>
+                                      )}
+                                      {item.isBundle && (
+                                        <div className="flex items-center gap-[4px] mt-[2px]">
+                                          <IconChevronDown size={12} stroke={2} className="text-[#64748B]" />
+                                          <button className="text-[10px] text-[#3B82F6] hover:underline">{item.bundleCount} item(s)</button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#334155] align-top">{item.unitCost}</td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#64748B] align-top">{item.markup}</td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#334155] align-top">{item.taxPreference}</td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#334155] align-top whitespace-pre-line">{item.location}</td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#334155] align-top">{item.brand || ''}</td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#334155] align-top">{item.spec || ''}</td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#334155] align-top whitespace-nowrap">
+                                  <div>{item.quantity} <span className="text-[#94A3B8]">×</span> {item.price}</div>
+                                  <div className="text-[10px] text-[#94A3B8] mt-[1px]">{item.taxNote}</div>
+                                </td>
+                              </tr>
+                            </React.Fragment>
+                          ))}
+                        </React.Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ─── Summary ─── */}
               <div className="border-t border-[#E2E8F0]">
-                {/* Sub-Total */}
-                <div className="grid grid-cols-[1fr_157px_157px] border-b border-[#E2E8F0]">
-                  <div></div>
-                  <div className="px-[7px] py-[10.5px] text-[13px] text-[#64748B]">Sub-Total</div>
-                  <div className="px-[7px] py-[10.5px] text-[13px] text-[#334155]">{QUOTE_DATA.summary.subTotal}</div>
-                </div>
-
-                {/* Taxes */}
-                {QUOTE_DATA.summary.taxes.map((tax, index) => (
-                  <div key={index} className="grid grid-cols-[1fr_157px_157px] border-b border-[#E2E8F0]">
-                    <div></div>
-                    <div className="px-[7px] py-[10.5px] text-[13px] text-[#64748B]">{tax.name}</div>
-                    <div className="px-[7px] py-[10.5px] text-[13px] text-[#334155]">{tax.amount}</div>
+                {[
+                  ['Sub-Total', QUOTE_DATA.summary.subTotal, false],
+                  ...QUOTE_DATA.summary.taxes.map(t => [t.name, t.amount, false]),
+                  ['Total', QUOTE_DATA.summary.total, true],
+                ].map(([label, val, isBold], i) => (
+                  <div key={i} className="flex justify-end border-b border-[#E2E8F0] last:border-b-0">
+                    <div className={`w-[160px] px-[12px] py-[8px] text-[12px] ${isBold ? 'font-bold text-[#1E293B] text-[14px]' : 'text-[#64748B]'}`}>{label}</div>
+                    <div className={`w-[120px] px-[12px] py-[8px] text-[12px] ${isBold ? 'font-bold text-[#1E293B] text-[14px]' : 'text-[#334155]'}`}>{val}</div>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
 
-                {/* Total */}
-                <div className="grid grid-cols-[1fr_157px_157px] border-b border-[#E2E8F0]">
-                  <div></div>
-                  <div className="px-[7px] py-[10.5px] text-[16px] font-semibold text-[#1E293B]">Total</div>
-                  <div className="px-[7px] py-[10.5px] text-[16px] font-semibold text-[#1E293B]">{QUOTE_DATA.summary.total}</div>
-                </div>
-
-                {/* Deposit */}
-                <div className="grid grid-cols-[1fr_157px_157px]">
-                  <div></div>
-                  <div className="px-[7px] py-[14px]">
-                    <div className="flex items-center gap-[7px] text-[13px] text-[#64748B]">
-                      <span>Deposit</span>
-                      <svg width="24" height="16" viewBox="0 0 24 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 1L4 8L12 15" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
+          {/* ─── Cost & Profit Breakdown ─── */}
+          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px]">
+            <button
+              onClick={() => setCostBreakdownOpen(!costBreakdownOpen)}
+              className="w-full h-[44px] px-[14px] flex items-center justify-between hover:bg-[#F8FAFC] transition-colors"
+            >
+              <span className="text-[14px] font-semibold text-[#1E293B]">Cost & Profit Breakdown</span>
+              <IconChevronUp size={16} stroke={2} className={`text-[#64748B] transition-transform ${costBreakdownOpen ? '' : 'rotate-180'}`} />
+            </button>
+            {costBreakdownOpen && (
+              <div className="px-[14px] pb-[14px] border-t border-[#E2E8F0] pt-[14px]">
+                <div className="grid grid-cols-4 gap-[14px]">
+                  {/* Profit Margin */}
+                  <div className="flex items-center gap-[10px]">
+                    <div className={`w-[36px] h-[36px] rounded-full flex items-center justify-center ${QUOTE_DATA.costBreakdown.profitMarginNegative ? 'bg-[#FEF2F2]' : 'bg-[#F0FDF4]'}`}>
+                      <IconTrendingDown size={18} stroke={1.5} className={QUOTE_DATA.costBreakdown.profitMarginNegative ? 'text-[#EF4444]' : 'text-[#22C55E]'} />
                     </div>
-                    <div className="text-[13px] text-[#64748B]">{QUOTE_DATA.summary.deposit.type}</div>
+                    <div>
+                      <div className="text-[11px] text-[#64748B]">Profit Margin</div>
+                      <div className={`text-[14px] font-bold ${QUOTE_DATA.costBreakdown.profitMarginNegative ? 'text-[#EF4444]' : 'text-[#1E293B]'}`}>{QUOTE_DATA.costBreakdown.profitMargin}</div>
+                    </div>
                   </div>
-                  <div className="px-[7px] py-[14px] flex items-center gap-[14px]">
-                    <span className="text-[13px] text-[#334155]">{QUOTE_DATA.summary.deposit.amount}</span>
-                    <button className="text-[#3B82F6] hover:text-[#2563EB]">
-                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11 4H4C3.447 4 3 4.447 3 5V20C3 20.553 3.447 21 4 21H19C19.553 21 20 20.553 20 20V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M18.5 2.5L21.5 5.5L12 15H9V12L18.5 2.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </button>
+                  {/* COGS */}
+                  <div className="flex items-center gap-[10px]">
+                    <div className="w-[36px] h-[36px] rounded-full bg-[#FEF2F2] flex items-center justify-center">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#EF4444" strokeWidth="1.5"/><path d="M12 8V12M12 16H12.01" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                    </div>
+                    <div>
+                      <div className="text-[11px] text-[#64748B] flex items-center gap-[3px]">COGS <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#94A3B8" strokeWidth="1.5"/><path d="M8 5.5V8.5M8 10.5H8.005" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round"/></svg></div>
+                      <div className="text-[14px] font-bold text-[#1E293B]">{QUOTE_DATA.costBreakdown.cogs}</div>
+                    </div>
+                  </div>
+                  {/* Quote Total */}
+                  <div className="flex items-center gap-[10px]">
+                    <div className="w-[36px] h-[36px] rounded-full bg-[#EFF6FF] flex items-center justify-center">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="#3B82F6" strokeWidth="1.5"/><path d="M8 10H16M8 14H12" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                    </div>
+                    <div>
+                      <div className="text-[11px] text-[#64748B]">Quote Total</div>
+                      <div className="text-[14px] font-bold text-[#1E293B]">{QUOTE_DATA.costBreakdown.quoteTotal}</div>
+                    </div>
+                  </div>
+                  {/* Profit */}
+                  <div className="flex items-center gap-[10px]">
+                    <div className={`w-[36px] h-[36px] rounded-full flex items-center justify-center ${QUOTE_DATA.costBreakdown.profitNegative ? 'bg-[#FEF2F2]' : 'bg-[#F0FDF4]'}`}>
+                      {QUOTE_DATA.costBreakdown.profitNegative
+                        ? <IconTrendingDown size={18} stroke={1.5} className="text-[#EF4444]" />
+                        : <IconTrendingUp size={18} stroke={1.5} className="text-[#22C55E]" />
+                      }
+                    </div>
+                    <div>
+                      <div className="text-[11px] text-[#64748B]">Profit</div>
+                      <div className={`text-[14px] font-bold ${QUOTE_DATA.costBreakdown.profitNegative ? 'text-[#EF4444]' : 'text-[#22C55E]'}`}>{QUOTE_DATA.costBreakdown.profit}</div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+          </div>
 
-            {/* Templates Section */}
-            <div className="border-t border-[#E2E8F0] p-[21px]">
-              <div className="grid grid-cols-2 gap-[14px]">
-                <div>
-                  <div className="text-[14px] text-[#64748B] mb-[7px]">Proposal Template</div>
-                  <div className="text-[13px] text-[#334155]">{QUOTE_DATA.proposalTemplate}</div>
-                </div>
-                <div>
-                  <div className="text-[14px] text-[#64748B] mb-[7px]">Quote Template</div>
-                  <div className="text-[13px] text-[#334155]">{QUOTE_DATA.quoteTemplate}</div>
-                </div>
+          {/* ─── Templates & Trade ─── */}
+          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px] p-[14px]">
+            <div className="grid grid-cols-3 gap-[14px] mb-[14px]">
+              <div>
+                <div className="text-[12px] text-[#64748B] mb-[2px]">Proposal Template</div>
+                <div className="text-[12px] text-[#334155]">{QUOTE_DATA.templates.proposalTemplate}</div>
+              </div>
+              <div>
+                <div className="text-[12px] text-[#64748B] mb-[2px]">Proposal Layout</div>
+                <div className="text-[12px] text-[#334155]">{QUOTE_DATA.templates.proposalLayout}</div>
+              </div>
+              <div>
+                <div className="text-[12px] text-[#64748B] mb-[2px]">Quote Template</div>
+                <div className="text-[12px] text-[#334155]">{QUOTE_DATA.templates.quoteTemplate}</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-[14px]">
+              <div>
+                <div className="text-[12px] text-[#64748B] mb-[2px]">Trade Type</div>
+                <div className="text-[12px] text-[#334155]">{QUOTE_DATA.templates.tradeType}</div>
+              </div>
+              <div>
+                <div className="text-[12px] text-[#64748B] mb-[2px]">Pricelist</div>
+                <div className="text-[12px] text-[#334155]">{QUOTE_DATA.templates.pricelist}</div>
               </div>
             </div>
           </div>
 
-          {/* Description Section */}
-          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[17.5px]">
-            <div className="px-[22px] py-[8px] border-b border-[#E2E8F0]">
-              <h3 className="text-[17px] font-semibold text-[#1E293B]">Description</h3>
+          {/* ─── Description ─── */}
+          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px]">
+            <div className="px-[14px] py-[10px] border-b border-[#E2E8F0]">
+              <h3 className="text-[14px] font-semibold text-[#1E293B]">Scope of Work</h3>
             </div>
-            <div className="p-[21px]">
-              <p className="text-[14px] text-[#64748B]">---</p>
+            <div className="p-[14px]">
+              <p className="text-[12px] text-[#64748B] leading-[18px]">
+                Complete tear-off and replacement of existing 3-tab asphalt shingle roof system. Work includes removal and disposal of existing roofing materials (1 layer), inspection and repair of roof decking as needed, installation of synthetic underlayment, GAF Timberline HDZ architectural shingles (Weathered Wood), new drip edge flashing, starter strips, hip & ridge caps, and ridge vent system. All work performed per local building codes with required permits. Includes magnetic nail sweep and final site cleanup. Covered by GAF Golden Pledge 50-Year warranty.
+              </p>
             </div>
           </div>
 
-          {/* Financing Options Section */}
-          <div className="bg-white rounded-[4px] border border-[#E2E8F0]">
-            <div className="flex items-center justify-between px-[21px] py-[12px] border-b border-[#E2E8F0]">
-              <h3 className="text-[17px] font-semibold text-[#1E293B]">Financing Options</h3>
-              <button className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors">
-                <IconPlus size={16} stroke={2} className="text-[#64748B]" />
+          {/* ─── Other Details ─── */}
+          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px]">
+            <div className="flex items-center justify-between px-[14px] py-[10px] border-b border-[#E2E8F0]">
+              <h3 className="text-[14px] font-semibold text-[#1E293B]">Roof Details</h3>
+              <button className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9]">
+                <IconPencil size={14} stroke={1.5} className="text-[#3B82F6]" />
               </button>
             </div>
-            <div className="p-[21px]">
-              <div className="grid grid-cols-3 gap-x-[14px] gap-y-[14px]">
-                {QUOTE_DATA.financingOptions.map((option, index) => (
-                  <div key={index}>
-                    <div className="text-[14px] text-[#64748B] mb-[7px]">{option.label}</div>
-                    <div className="text-[14px] text-[#334155]">{option.value}</div>
+            <div className="p-[14px]">
+              <div className="grid grid-cols-3 gap-x-[14px] gap-y-[12px]">
+                {QUOTE_DATA.otherDetails.map((f, i) => (
+                  <div key={i}>
+                    <div className="text-[11px] font-medium text-[#334155] mb-[2px]">{f.label}</div>
+                    <div className="text-[12px] text-[#64748B]">{f.value}</div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Right Sidebar */}
-        <div className="w-[343px] bg-white border-l border-[#E2E8F0] flex">
-          {/* Main Sidebar Content */}
-          <div className="flex-1 overflow-y-auto">
-            {SIDEBAR_ITEMS.map((item) => (
-              <div key={item.id} className="border-b border-[#F1F5F9]">
-                <button
-                  onClick={() => toggleSidebarItem(item.id)}
-                  className="w-full h-[45.5px] flex items-center justify-between px-[14px] hover:bg-[#F8FAFC] transition-colors"
-                >
-                  <div className="flex items-center gap-[7px]">
-                    <SidebarIcon type={item.icon} />
-                    <span className="text-[14px] text-[#334155]">{item.label}</span>
-                    {item.count !== undefined && (
-                      <span className="text-[14px] text-[#64748B]">({item.count})</span>
-                    )}
+          {/* ─── Test Section ─── */}
+          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px]">
+            <div className="flex items-center justify-between px-[14px] py-[10px] border-b border-[#E2E8F0]">
+              <h3 className="text-[14px] font-semibold text-[#1E293B]">Roof Inspection & Insurance</h3>
+              <button className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9]">
+                <IconPencil size={14} stroke={1.5} className="text-[#3B82F6]" />
+              </button>
+            </div>
+            <div className="p-[14px]">
+              <div className="grid grid-cols-3 gap-x-[14px] gap-y-[12px]">
+                {QUOTE_DATA.testSection.map((f, i) => (
+                  <div key={i}>
+                    <div className="text-[11px] font-medium text-[#334155] mb-[2px]">{f.label}</div>
+                    <div className="text-[12px] text-[#64748B]">{f.value}</div>
                   </div>
-                  <div className="flex items-center gap-[7px]">
-                    {item.hasPlus && (
-                      <IconPlus size={18} stroke={2} className="text-[#64748B]" />
-                    )}
-                    {item.hasChevron && (
-                      <IconChevronDown 
-                        size={12} 
-                        stroke={2} 
-                        className={`text-[#64748B] transition-transform ${expandedSidebar[item.id] ? 'rotate-180' : ''}`} 
-                      />
-                    )}
-                  </div>
-                </button>
-                {expandedSidebar[item.id] && (
-                  <div className="px-[14px] py-[14px] bg-[#F8FAFC]">
-                    <p className="text-[13px] text-[#64748B]">No data available</p>
-                  </div>
-                )}
+                ))}
               </div>
-            ))}
+            </div>
           </div>
 
-          {/* Right Icon Strip */}
+        </div>
+
+        {/* ─── Right Sidebar ─── */}
+        <div className="w-[300px] bg-white border-l border-[#E2E8F0] flex flex-shrink-0">
+          {/* Main sidebar content */}
+          <div className="flex-1 overflow-y-auto">
+
+            {/* ── Quote Status ── */}
+            <div className="border-b border-[#E2E8F0]">
+              <button
+                onClick={() => toggleSidebarSection('quote-status')}
+                className="w-full h-[42px] px-[14px] flex items-center justify-between hover:bg-[#F8FAFC] transition-colors"
+              >
+                <div className="flex items-center gap-[8px]">
+                  <IconClock size={18} stroke={1.5} className="text-[#64748B]" />
+                  <span className="text-[13px] font-medium text-[#334155]">Quote Status</span>
+                </div>
+                <IconChevronDown size={14} stroke={2} className={`text-[#94A3B8] transition-transform ${expandedSidebar['quote-status'] ? 'rotate-180' : ''}`} />
+              </button>
+              {expandedSidebar['quote-status'] && (
+                <div className="px-[14px] pb-[14px]">
+                  <div className="relative pl-[20px]">
+                    {/* Timeline line */}
+                    <div className="absolute left-[7px] top-[10px] bottom-[10px] w-[2px] bg-[#E2E8F0]"></div>
+                    {QUOTE_DATA.quoteStatusTimeline.map((ev, i) => (
+                      <div key={i} className="relative flex items-start gap-[10px] mb-[12px] last:mb-0">
+                        <div className="absolute left-[-20px] top-[2px] w-[16px] h-[16px] rounded-full bg-[#22C55E] flex items-center justify-center z-10">
+                          <IconCheck size={10} stroke={3} className="text-white" />
+                        </div>
+                        <div>
+                          {ev.label && (
+                            <div className={`text-[12px] font-semibold ${ev.isAccepted ? 'text-[#22C55E]' : 'text-[#1E293B]'}`}>
+                              {ev.label}
+                            </div>
+                          )}
+                          <div className="text-[11px] text-[#64748B]">{ev.date}</div>
+                          <div className="text-[11px] text-[#64748B]">{ev.sub}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Gray placeholder image */}
+                  <div className="mt-[12px] w-full h-[80px] bg-[#F1F5F9] rounded-[4px] flex items-center justify-center">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#CBD5E1" strokeWidth="1.5"/><circle cx="8.5" cy="8.5" r="1.5" stroke="#CBD5E1" strokeWidth="1.5"/><path d="M21 15L16 10L5 21" stroke="#CBD5E1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ── Organization ── */}
+            <div className="border-b border-[#E2E8F0]">
+              <button
+                onClick={() => toggleSidebarSection('organization')}
+                className="w-full h-[42px] px-[14px] flex items-center justify-between hover:bg-[#F8FAFC] transition-colors"
+              >
+                <div className="flex items-center gap-[8px]">
+                  <IconBuilding size={18} stroke={1.5} className="text-[#64748B]" />
+                  <span className="text-[13px] font-medium text-[#334155]">Organization</span>
+                </div>
+                <IconChevronDown size={14} stroke={2} className={`text-[#94A3B8] transition-transform ${expandedSidebar['organization'] ? 'rotate-180' : ''}`} />
+              </button>
+              {expandedSidebar['organization'] && (
+                <div className="px-[14px] pb-[14px] space-y-[8px]">
+                  <div className="flex items-center gap-[8px]">
+                    <div className="w-[28px] h-[28px] rounded-full bg-[#FFC107] flex items-center justify-center text-white text-[13px] font-bold">{QUOTE_DATA.organization.letter}</div>
+                    <span className="text-[12px] font-medium text-[#334155]">{QUOTE_DATA.organization.name}</span>
+                    <span className="ml-auto px-[8px] py-[1px] text-[10px] font-medium text-[#DC2626] bg-white border border-[#DC2626] rounded">{QUOTE_DATA.organization.status}</span>
+                  </div>
+                  <div className="flex items-center gap-[6px] text-[11px] text-[#64748B]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" stroke="#94A3B8" strokeWidth="1.5"/><path d="M4 20C4 16.134 7.582 13 12 13C16.418 13 20 16.134 20 20" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                    <span>{QUOTE_DATA.organization.customerCount} Customers</span>
+                  </div>
+                  <div className="flex items-start gap-[6px] text-[11px] text-[#64748B]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="mt-[1px] flex-shrink-0"><circle cx="12" cy="10" r="3" stroke="#94A3B8" strokeWidth="1.5"/><path d="M12 21C12 21 4 15 4 10C4 5.582 7.582 2 12 2C16.418 2 20 5.582 20 10C20 15 12 21 12 21Z" stroke="#94A3B8" strokeWidth="1.5"/></svg>
+                    <span>{QUOTE_DATA.organization.address}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ── Customer ── */}
+            <div className="border-b border-[#E2E8F0]">
+              <button
+                onClick={() => toggleSidebarSection('customer')}
+                className="w-full h-[42px] px-[14px] flex items-center justify-between hover:bg-[#F8FAFC] transition-colors"
+              >
+                <div className="flex items-center gap-[8px]">
+                  <IconUser size={18} stroke={1.5} className="text-[#64748B]" />
+                  <span className="text-[13px] font-medium text-[#334155]">Customer</span>
+                </div>
+                <IconChevronDown size={14} stroke={2} className={`text-[#94A3B8] transition-transform ${expandedSidebar['customer'] ? 'rotate-180' : ''}`} />
+              </button>
+              {expandedSidebar['customer'] && (
+                <div className="px-[14px] pb-[14px] space-y-[8px]">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-[6px]">
+                      <span className="text-[12px] font-bold text-[#1E293B] bg-[#F1F5F9] w-[20px] h-[20px] rounded flex items-center justify-center text-[10px]">#</span>
+                      <span className="text-[12px] font-semibold text-[#1E293B]">{QUOTE_DATA.customer.name}</span>
+                    </div>
+                    <div className="flex items-center gap-[4px]">
+                      <button className="w-[26px] h-[26px] flex items-center justify-center rounded hover:bg-[#F1F5F9]"><IconMail size={14} stroke={1.5} className="text-[#64748B]" /></button>
+                      <button className="w-[26px] h-[26px] flex items-center justify-center rounded hover:bg-[#F1F5F9]"><IconPhone size={14} stroke={1.5} className="text-[#64748B]" /></button>
+                      <button className="w-[26px] h-[26px] flex items-center justify-center rounded hover:bg-[#F1F5F9]"><IconCopy size={14} stroke={1.5} className="text-[#64748B]" /></button>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-[6px] text-[11px] text-[#64748B]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="14" rx="2" stroke="#94A3B8" strokeWidth="1.5"/><path d="M8 6V4C8 2.895 8.895 2 10 2H14C15.105 2 16 2.895 16 4V6" stroke="#94A3B8" strokeWidth="1.5"/></svg>
+                    <span>{QUOTE_DATA.customer.company}</span>
+                  </div>
+                  <div className="flex items-center gap-[6px] text-[11px] text-[#64748B]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 10L12 3L21 10V19H3V10Z" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><rect x="9" y="13" width="6" height="6" stroke="#94A3B8" strokeWidth="1.5"/></svg>
+                    <span>{QUOTE_DATA.customer.type}</span>
+                  </div>
+                  <div className="flex items-start gap-[6px] text-[11px] text-[#64748B]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="mt-[1px] flex-shrink-0"><circle cx="12" cy="10" r="3" stroke="#94A3B8" strokeWidth="1.5"/><path d="M12 21C12 21 4 15 4 10C4 5.582 7.582 2 12 2C16.418 2 20 5.582 20 10C20 15 12 21 12 21Z" stroke="#94A3B8" strokeWidth="1.5"/></svg>
+                    <span>{QUOTE_DATA.customer.address}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ── Property ── */}
+            <div className="border-b border-[#E2E8F0]">
+              <button
+                onClick={() => toggleSidebarSection('property')}
+                className="w-full h-[42px] px-[14px] flex items-center justify-between hover:bg-[#F8FAFC] transition-colors"
+              >
+                <div className="flex items-center gap-[8px]">
+                  <IconHome size={18} stroke={1.5} className="text-[#64748B]" />
+                  <span className="text-[13px] font-medium text-[#334155]">Property</span>
+                </div>
+                <div className="flex items-center gap-[4px]">
+                  <IconPlus size={14} stroke={2} className="text-[#64748B]" />
+                  <IconChevronDown size={14} stroke={2} className={`text-[#94A3B8] transition-transform ${expandedSidebar['property'] ? 'rotate-180' : ''}`} />
+                </div>
+              </button>
+            </div>
+
+          </div>
+
+          {/* ── Right Icon Strip ── */}
           <div className="w-[48px] min-w-[48px] bg-white border-l border-[#E2E8F0] flex flex-col py-[3.5px]">
-            {SIDEBAR_ITEMS.map((item) => (
-              <div key={item.id} className="px-[7px] py-[7px]">
-                <button
-                  onClick={() => toggleSidebarItem(item.id)}
-                  className={`w-[31.5px] h-[31.5px] flex items-center justify-center transition-colors rounded-[7px] ${
-                    expandedSidebar[item.id] ? 'bg-[#FBE9E7]' : 'hover:bg-[#F1F5F9]'
-                  }`}
-                  title={item.label}
-                >
-                  <SidebarIcon type={item.icon} />
-                </button>
-              </div>
-            ))}
+            {SIDEBAR_ITEMS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.id} className="px-[7px] py-[7px]">
+                  <button
+                    onClick={() => toggleSidebarSection(item.id)}
+                    className={`w-[31.5px] h-[31.5px] flex items-center justify-center transition-colors rounded-[7px] ${
+                      expandedSidebar[item.id] ? 'bg-[#FBE9E7]' : 'hover:bg-[#F1F5F9]'
+                    }`}
+                    title={item.label}
+                  >
+                    <Icon size={21} stroke={1.5} className="text-[#64748B]" />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
-
     </div>
   );
 }
