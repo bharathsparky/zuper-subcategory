@@ -12,6 +12,7 @@ import ReportsPage from './components/ReportsPage'
 import MobileCategoryPage from './components/MobileCategoryPage'
 import MobileQuoteDetailsPage from './components/MobileQuoteDetailsPage'
 import MobileProposalPage from './components/MobileProposalPage'
+import MobileProposalDetailsPage from './components/MobileProposalDetailsPage'
 import JobsListingPage from './components/JobsListingPage'
 import NewQuotePage from './components/NewQuotePage'
 import NewProposalPage from './components/NewProposalPage'
@@ -38,6 +39,11 @@ function App() {
     return path === '/mobile/proposal' || path === '/mobile/proposal/'
   })
   
+  const [isMobileProposalDetailsRoute, setIsMobileProposalDetailsRoute] = useState(() => {
+    const path = window.location.pathname
+    return path === '/mobile/proposal/details' || path === '/mobile/proposal/details/'
+  })
+  
   const [isListingRoute, setIsListingRoute] = useState(() => {
     const path = window.location.pathname
     return path === '/listing' || path === '/listing/'
@@ -53,6 +59,7 @@ function App() {
       setIsMobileRoute(path === '/mobile' || path === '/mobile/')
       setIsMobileQuoteRoute(path === '/mobile/quote' || path === '/mobile/quote/')
       setIsMobileProposalRoute(path === '/mobile/proposal' || path === '/mobile/proposal/')
+      setIsMobileProposalDetailsRoute(path === '/mobile/proposal/details' || path === '/mobile/proposal/details/')
       setIsListingRoute(path === '/listing' || path === '/listing/')
     }
     window.addEventListener('popstate', checkRoute)
@@ -125,6 +132,11 @@ function App() {
     setIsListingRoute(false)
     window.history.pushState({}, '', '/')
     setCurrentView('new-proposal')
+  }
+
+  // If on mobile proposal details route, render the details page
+  if (isMobileProposalDetailsRoute) {
+    return <MobileProposalDetailsPage />
   }
 
   // If on mobile proposal route, render the mobile proposal page

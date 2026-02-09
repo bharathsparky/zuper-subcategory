@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 // ─── Asset paths ───────────────────────────────────────────────────
 const ASSETS = '/assets/mobile-proposal'
@@ -309,28 +310,38 @@ function LineItemCard({ item, onQtyChange, sectionDisplay }) {
 }
 
 // ─── Section Header (interactive with display badges) ───────────────
-function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onConfigure, onClone, onRemove, onAddItem }) {
-  const [showKebab, setShowKebab] = useState(false)
-  const kebabRef = useRef(null)
+function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onAddItem, isKebabOpen, onToggleKebab, onConfigure, onClone, onRemove }) {
   const display = section.sectionDisplay || 'expanded'
   const colors = SECTION_COLORS[display]
-
-  useEffect(() => {
-    if (!showKebab) return
-    const handleClickOutside = (e) => {
-      if (kebabRef.current && !kebabRef.current.contains(e.target)) {
-        setShowKebab(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [showKebab])
-
   const badgeLabels = { expanded: 'Expanded', collapsed: 'Collapsed', hidden: 'Hidden' }
+  const kebabRef = useRef(null)
+  const [menuPos, setMenuPos] = useState({ top: 0, right: 0 })
+
+  // Calculate position and open
+  const handleKebabClick = () => {
+    if (isKebabOpen) {
+      onToggleKebab(null)
+      return
+    }
+    if (kebabRef.current) {
+      const rect = kebabRef.current.getBoundingClientRect()
+      const menuHeight = 160 // approximate dropdown height
+      const spaceBelow = window.innerHeight - rect.bottom
+      // Flip above if not enough space below
+      const top = spaceBelow < menuHeight
+        ? rect.top - menuHeight - 4
+        : rect.bottom + 4
+      setMenuPos({
+        top: Math.max(8, top),
+        right: window.innerWidth - rect.right
+      })
+    }
+    onToggleKebab(section.id)
+  }
 
   return (
     <div
-      className="w-full overflow-hidden"
+      className="w-full"
       style={{ borderLeft: `3px solid ${colors.border}`, backgroundColor: colors.bg }}
     >
       <div className="flex items-center px-[12px] py-[10px] gap-[8px]">
@@ -366,42 +377,54 @@ function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onConfigu
           <img alt="Add" className="block w-[16px] h-[16px]" src={ICO_PLUS} />
         </button>
 
-        {/* Kebab menu */}
-        <div className="relative" ref={kebabRef}>
-          <button
-            onClick={() => setShowKebab(!showKebab)}
-            className="w-[24px] h-[24px] flex items-center justify-center shrink-0"
-          >
-            <MoreVertIcon size={18} className="text-[#64748B]" />
-          </button>
+        {/* Kebab menu trigger */}
+        <button
+          ref={kebabRef}
+          onClick={handleKebabClick}
+          className="w-[24px] h-[24px] flex items-center justify-center shrink-0"
+        >
+          <MoreVertIcon size={18} className="text-[#64748B]" />
+        </button>
 
-          {showKebab && (
-            <div className="absolute right-0 top-[28px] bg-white border border-[#E8EDF1] rounded-[8px] shadow-lg z-50 w-[160px] py-[4px] overflow-hidden">
+        {/* Kebab dropdown - rendered via portal to avoid overflow clipping */}
+        {isKebabOpen && createPortal(
+          <>
+            {/* Transparent backdrop to catch outside clicks */}
+            <div
+              style={{ position: 'fixed', inset: 0, zIndex: 9998 }}
+              onClick={() => onToggleKebab(null)}
+            />
+            {/* Dropdown menu */}
+            <div
+              className="bg-white border border-[#E8EDF1] rounded-[12px] shadow-xl w-[180px] py-[6px] overflow-hidden"
+              style={{ position: 'fixed', top: menuPos.top, right: menuPos.right, zIndex: 9999 }}
+            >
               <button
-                onClick={() => { setShowKebab(false); onConfigure() }}
-                className="w-full flex items-center gap-[10px] px-[12px] py-[10px] text-left hover:bg-[#F8FAFC] transition-colors"
+                onClick={() => { onToggleKebab(null); onConfigure() }}
+                className="w-full flex items-center gap-[10px] px-[14px] py-[12px] text-left active:bg-[#F1F5F9] transition-colors"
               >
                 <SettingsIcon size={16} className="text-[#64748B]" />
-                <span className="text-[13px] text-[#334155]">Configure</span>
+                <span className="text-[14px] text-[#334155]">Configure</span>
               </button>
               <button
-                onClick={() => { setShowKebab(false); onClone() }}
-                className="w-full flex items-center gap-[10px] px-[12px] py-[10px] text-left hover:bg-[#F8FAFC] transition-colors"
+                onClick={() => { onToggleKebab(null); onClone() }}
+                className="w-full flex items-center gap-[10px] px-[14px] py-[12px] text-left active:bg-[#F1F5F9] transition-colors"
               >
                 <CopyIcon size={16} className="text-[#64748B]" />
-                <span className="text-[13px] text-[#334155]">Clone</span>
+                <span className="text-[14px] text-[#334155]">Clone</span>
               </button>
-              <div className="h-px bg-[#E8EDF1] mx-[8px]" />
+              <div className="h-px bg-[#E8EDF1] mx-[10px]" />
               <button
-                onClick={() => { setShowKebab(false); onRemove() }}
-                className="w-full flex items-center gap-[10px] px-[12px] py-[10px] text-left hover:bg-[#FEF2F2] transition-colors"
+                onClick={() => { onToggleKebab(null); onRemove() }}
+                className="w-full flex items-center gap-[10px] px-[14px] py-[12px] text-left active:bg-[#FEF2F2] transition-colors"
               >
                 <TrashIcon size={16} className="text-[#EF4444]" />
-                <span className="text-[13px] text-[#EF4444]">Remove</span>
+                <span className="text-[14px] text-[#EF4444]">Remove</span>
               </button>
             </div>
-          )}
-        </div>
+          </>,
+          document.body
+        )}
       </div>
 
       {/* Section subtotal (shown when toggled on) */}
@@ -661,6 +684,9 @@ export default function MobileProposalPage() {
   // Add dropdown state
   const [showAddDropdown, setShowAddDropdown] = useState(false)
   const addBtnRef = useRef(null)
+
+  // Kebab menu state
+  const [kebabSectionId, setKebabSectionId] = useState(null)
 
   // Section config sheet state
   const [sectionConfigOpen, setSectionConfigOpen] = useState(false)
@@ -957,7 +983,7 @@ export default function MobileProposalPage() {
         </div>
 
         {/* ── Line Items Card ── */}
-        <div className="bg-white flex flex-col items-start rounded-[6px] overflow-hidden w-full shrink-0">
+        <div className="bg-white flex flex-col items-start rounded-[6px] w-full shrink-0">
           {/* Package header */}
           <div className="flex flex-col items-start px-[12px] py-[10px] border-b border-[#E8EDF1] w-full">
             <div className="flex items-center gap-[16px] w-full">
@@ -1001,6 +1027,8 @@ export default function MobileProposalPage() {
                     section={section}
                     isCollapsed={isCollapsed}
                     onToggleCollapse={() => handleToggleSectionCollapse(section.id)}
+                    isKebabOpen={kebabSectionId === section.id}
+                    onToggleKebab={setKebabSectionId}
                     onConfigure={() => handleConfigureSection(section)}
                     onClone={() => handleCloneSection(section)}
                     onRemove={() => handleRemoveSection(section.id)}
@@ -1095,7 +1123,13 @@ export default function MobileProposalPage() {
                 <p className="text-[12px] text-[#0172CB] tracking-[0.36px] leading-[22px]">VIEW DETAILS</p>
               </div>
             </div>
-            <button className="bg-[#E44A19] flex items-center justify-center h-[44px] px-[12px] py-[4px] rounded-[6px] shrink-0">
+            <button
+              onClick={() => {
+                window.history.pushState({}, '', '/mobile/proposal/details')
+                window.dispatchEvent(new PopStateEvent('popstate'))
+              }}
+              className="bg-[#E44A19] flex items-center justify-center h-[44px] px-[12px] py-[4px] rounded-[6px] shrink-0"
+            >
               <span className="font-bold text-[12px] text-white tracking-[0.46px] leading-[22px] text-center w-[98px]">Save</span>
             </button>
           </div>
@@ -1105,6 +1139,7 @@ export default function MobileProposalPage() {
 
       {/* ── Home Indicator ── */}
       <HomeIndicator />
+
 
       {/* ── Section Config Sheet ── */}
       {sectionConfigOpen && configSection && (
