@@ -11,6 +11,7 @@ import JobChecklistPage from './components/JobChecklistPage'
 import ReportsPage from './components/ReportsPage'
 import MobileCategoryPage from './components/MobileCategoryPage'
 import MobileQuoteDetailsPage from './components/MobileQuoteDetailsPage'
+import MobileProposalPage from './components/MobileProposalPage'
 import JobsListingPage from './components/JobsListingPage'
 import NewQuotePage from './components/NewQuotePage'
 import NewProposalPage from './components/NewProposalPage'
@@ -32,6 +33,11 @@ function App() {
     return path === '/mobile/quote' || path === '/mobile/quote/'
   })
   
+  const [isMobileProposalRoute, setIsMobileProposalRoute] = useState(() => {
+    const path = window.location.pathname
+    return path === '/mobile/proposal' || path === '/mobile/proposal/'
+  })
+  
   const [isListingRoute, setIsListingRoute] = useState(() => {
     const path = window.location.pathname
     return path === '/listing' || path === '/listing/'
@@ -46,6 +52,7 @@ function App() {
       const path = window.location.pathname
       setIsMobileRoute(path === '/mobile' || path === '/mobile/')
       setIsMobileQuoteRoute(path === '/mobile/quote' || path === '/mobile/quote/')
+      setIsMobileProposalRoute(path === '/mobile/proposal' || path === '/mobile/proposal/')
       setIsListingRoute(path === '/listing' || path === '/listing/')
     }
     window.addEventListener('popstate', checkRoute)
@@ -118,6 +125,11 @@ function App() {
     setIsListingRoute(false)
     window.history.pushState({}, '', '/')
     setCurrentView('new-proposal')
+  }
+
+  // If on mobile proposal route, render the mobile proposal page
+  if (isMobileProposalRoute) {
+    return <MobileProposalPage />
   }
 
   // If on mobile quote route, render the mobile quote details page
