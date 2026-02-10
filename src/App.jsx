@@ -44,6 +44,11 @@ function App() {
     return path === '/mobile/proposal/details' || path === '/mobile/proposal/details/'
   })
   
+  const [isProposalRoute, setIsProposalRoute] = useState(() => {
+    const path = window.location.pathname
+    return path === '/proposal' || path === '/proposal/'
+  })
+
   const [isListingRoute, setIsListingRoute] = useState(() => {
     const path = window.location.pathname
     return path === '/listing' || path === '/listing/'
@@ -60,6 +65,7 @@ function App() {
       setIsMobileQuoteRoute(path === '/mobile/quote' || path === '/mobile/quote/')
       setIsMobileProposalRoute(path === '/mobile/proposal' || path === '/mobile/proposal/')
       setIsMobileProposalDetailsRoute(path === '/mobile/proposal/details' || path === '/mobile/proposal/details/')
+      setIsProposalRoute(path === '/proposal' || path === '/proposal/')
       setIsListingRoute(path === '/listing' || path === '/listing/')
     }
     window.addEventListener('popstate', checkRoute)
@@ -132,6 +138,11 @@ function App() {
     setIsListingRoute(false)
     window.history.pushState({}, '', '/')
     setCurrentView('new-proposal')
+  }
+
+  // If on /proposal route, render the desktop proposal page standalone
+  if (isProposalRoute) {
+    return <NewProposalPage onBack={() => { window.history.pushState({}, '', '/'); window.location.reload() }} />
   }
 
   // If on mobile proposal details route, render the details page

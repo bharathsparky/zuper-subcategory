@@ -9929,7 +9929,239 @@ Now I have both components. Let me replace them with centered dialog versions:
 
 <details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
 
-Status: **loading**
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -867,5 +867,5 @@
+  
+  // ─── Section Configuration Sheet (simplified) ───────────────────────
+- function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onSave, onClose }) {
++ function SectionConfigDialog({ header, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onSave, onClose }) {
+    const sectionDisplay = header.sectionDisplay || 'expanded'
+    const showSubtotal = header.showSubtotal || false
+```
+
+**Chunk 2**
+Lines added: 90, lines removed: 104
+
+```diff
+@@ -877,124 +877,110 @@
+  
+    return (
+-     &lt;div className="fixed inset-0 z-[70]" onClick={onClose}&gt;
+-       {/* Backdrop */}
++     &lt;div className="fixed inset-0 z-[70] flex items-center justify-center" onClick={onClose}&gt;
+        &lt;div className="absolute inset-0 bg-black/30" /&gt;
+- 
+-       {/* Sheet Panel - slides from right */}
+        &lt;div
+-         className="absolute right-0 top-0 bottom-0 w-[400px] bg-white shadow-[0px_8px_32px_rgba(0,0,0,0.18)] flex flex-col"
++         className="relative bg-white rounded-[12px] shadow-[0px_8px_32px_rgba(0,0,0,0.16)] w-[420px] overflow-hidden"
+          onClick={(e) =&gt; e.stopPropagation()}
+        &gt;
+-         {/* Sheet Header */}
+-         &lt;div className="h-[56px] px-[21px] flex items-center justify-between border-b border-[#E2E8F0] flex-shrink-0"&gt;
+-           &lt;h3 className="text-[16px] font-semibold text-[#1E293B]"&gt;Section Settings&lt;/h3&gt;
++         {/* Header */}
++         &lt;div className="px-[20px] pt-[20px] pb-[4px] flex items-center justify-between"&gt;
++           &lt;h3 className="text-[15px] font-semibold text-[#1E293B]"&gt;Section Settings&lt;/h3&gt;
+            &lt;button
+              onClick={onClose}
+-             className="w-[32px] h-[32px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors"
++             className="w-[28px] h-[28px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors"
+            &gt;
+-             &lt;IconX size={18} stroke={2} className="text-[#64748B]" /&gt;
++             &lt;IconX size={16} stroke={2} className="text-[#64748B]" /&gt;
+            &lt;/button&gt;
+          &lt;/div&gt;
+  
+-         {/* Sheet Content */}
+-         &lt;div className="flex-1 overflow-y-auto p-[21px] space-y-[16px]"&gt;
+-           {/* Simple Toggles */}
+-           &lt;div className="space-y-[4px]"&gt;
+-             &lt;h4 className="text-[14px] font-semibold text-[#1E293B] mb-[12px]"&gt;Display Settings&lt;/h4&gt;
+- 
+-             {/* Show child items (expanded vs collapsed) */}
+-             &lt;div className={&#96;flex items-center justify-between py-[12px] px-[14px] rounded-[8px] transition-colors ${isHidden ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}&#96;}&gt;
+-               &lt;div className="flex items-center gap-[10px]"&gt;
+-                 &lt;IconEye size={18} stroke={1.8} className="text-[#64748B]" /&gt;
+-                 &lt;div&gt;
+-                   &lt;span className="text-[13px] font-medium text-[#1E293B]"&gt;Show Line-Items&lt;/span&gt;
+-                       &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;Expand items under this section for customers&lt;/p&gt;
+-                 &lt;/div&gt;
+-               &lt;/div&gt;
+-               &lt;ToggleSwitch
+-                 checked={isExpanded}
+-                 onChange={(val) =&gt; onUpdateDisplay(val ? 'expanded' : 'collapsed')}
+-                 disabled={isHidden}
+-               /&gt;
+-             &lt;/div&gt;
++         {/* Toggles */}
++         &lt;div className="px-[20px] py-[12px] space-y-[2px]"&gt;
++           {/* Show Line-Items */}
++           &lt;div className={&#96;flex items-center justify-between py-[10px] px-[12px] rounded-[8px] transition-colors ${isHidden ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}&#96;}&gt;
++             &lt;div className="flex items-center gap-[10px]"&gt;
++               &lt;IconEye size={18} stroke={1.8} className="text-[#64748B]" /&gt;
++               &lt;div&gt;
++                 &lt;span className="text-[13px] font-medium text-[#1E293B]"&gt;Show Line-Items&lt;/span&gt;
++                 &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;Expand items under this section for customers&lt;/p&gt;
++               &lt;/div&gt;
++             &lt;/div&gt;
++             &lt;ToggleSwitch
++               checked={isExpanded}
++               onChange={(val) =&gt; onUpdateDisplay(val ? 'expanded' : 'collapsed')}
++               disabled={isHidden}
++             /&gt;
++           &lt;/div&gt;
+  
+-             {/* Show section total */}
+-             &lt;div className={&#96;flex items-center justify-between py-[12px] px-[14px] rounded-[8px] transition-colors ${isHidden ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}&#96;}&gt;
+-               &lt;div className="flex items-center gap-[10px]"&gt;
+-                 &lt;svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;line x1="12" y1="1" x2="12" y2="23"/&gt;&lt;path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/&gt;&lt;/svg&gt;
+-                 &lt;div&gt;
+-                   &lt;span className="text-[13px] font-medium text-[#1E293B]"&gt;Show section total&lt;/span&gt;
+-                   &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;Display aggregate subtotal for this section&lt;/p&gt;
+-                 &lt;/div&gt;
+-               &lt;/div&gt;
+-               &lt;ToggleSwitch
+-                 checked={showSubtotal}
+-                 onChange={(val) =&gt; onUpdateSubtotal(val)}
+-                 disabled={isHidden}
+-               /&gt;
+-             &lt;/div&gt;
++           {/* Show section total */}
++           &lt;div className={&#96;flex items-center justify-between py-[10px] px-[12px] rounded-[8px] transition-colors ${isHidden ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}&#96;}&gt;
++             &lt;div className="flex items-center gap-[10px]"&gt;
++               &lt;svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;line x1="12" y1="1" x2="12" y2="23"/&gt;&lt;path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/&gt;&lt;/svg&gt;
++               &lt;div&gt;
++                 &lt;span className="text-[13px] font-medium text-[#1E293B]"&gt;Show section total&lt;/span&gt;
++                 &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;Display aggregate subtotal for this section&lt;/p&gt;
++               &lt;/div&gt;
++             &lt;/div&gt;
++             &lt;ToggleSwitch
++               checked={showSubtotal}
++               onChange={(val) =&gt; onUpdateSubtotal(val)}
++               disabled={isHidden}
++             /&gt;
++           &lt;/div&gt;
+  
+-             {/* Show child prices — always visible, disabled when collapsed or hidden */}
+-             &lt;div className={&#96;flex items-center justify-between py-[12px] px-[14px] rounded-[8px] transition-colors ${(isCollapsed || isHidden) ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}&#96;}&gt;
+-               &lt;div className="flex items-center gap-[10px]"&gt;
+-                 &lt;svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;rect x="1" y="4" width="22" height="16" rx="2" ry="2"/&gt;&lt;line x1="1" y1="10" x2="23" y2="10"/&gt;&lt;/svg&gt;
+-                 &lt;div&gt;
+-                   &lt;span className="text-[13px] font-medium text-[#1E293B]"&gt;Show Line-Item Prices&lt;/span&gt;
+-                       &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;
+-                         {isCollapsed ? 'Enable "Show Line-Items" first' : 'Display individual price for each line item'}
+-                   &lt;/p&gt;
+-                 &lt;/div&gt;
+-               &lt;/div&gt;
+-               &lt;ToggleSwitch
+-                 checked={showChildPrices}
+-                 onChange={(val) =&gt; onUpdateChildPrices(val)}
+-                 disabled={isCollapsed || isHidden}
+-               /&gt;
+-             &lt;/div&gt;
++           {/* Show Line-Item Prices */}
++           &lt;div className={&#96;flex items-center justify-between py-[10px] px-[12px] rounded-[8px] transition-colors ${(isCollapsed || isHidden) ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}&#96;}&gt;
++             &lt;div className="flex items-center gap-[10px]"&gt;
++               &lt;svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;rect x="1" y="4" width="22" height="16" rx="2" ry="2"/&gt;&lt;line x1="1" y1="10" x2="23" y2="10"/&gt;&lt;/svg&gt;
++               &lt;div&gt;
++                 &lt;span className="text-[13px] font-medium text-[#1E293B]"&gt;Show Line-Item Prices&lt;/span&gt;
++                 &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;
++                   {isCollapsed ? 'Enable "Show Line-Items" first' : 'Display individual price for each line item'}
++                 &lt;/p&gt;
++               &lt;/div&gt;
++             &lt;/div&gt;
++             &lt;ToggleSwitch
++               checked={showChildPrices}
++               onChange={(val) =&gt; onUpdateChildPrices(val)}
++               disabled={isCollapsed || isHidden}
++             /&gt;
++           &lt;/div&gt;
+  
+-             {/* Divider */}
+-             &lt;div className="border-t border-[#E2E8F0] my-[4px]" /&gt;
++           {/* Divider */}
++           &lt;div className="border-t border-[#E2E8F0] my-[4px]" /&gt;
+  
+-             {/* Hide from proposal */}
+-             &lt;div className="flex items-center justify-between py-[12px] px-[14px] rounded-[8px] hover:bg-[#FEF2F2]/60 transition-colors"&gt;
+-               &lt;div className="flex items-center gap-[10px]"&gt;
+-                 &lt;IconEyeOff size={18} stroke={1.8} className={isHidden ? 'text-[#DC2626]' : 'text-[#64748B]'} /&gt;
+-                 &lt;div&gt;
+-                   &lt;span className={&#96;text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#1E293B]'}&#96;}&gt;Hide Section&lt;/span&gt;
+-                       &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;Completely hide this section from customer view&lt;/p&gt;
+-                 &lt;/div&gt;
+-               &lt;/div&gt;
+-               &lt;ToggleSwitch
+-                 checked={isHidden}
+-                 onChange={(val) =&gt; {
+-                   if (val) {
+-                     onUpdateDisplay('hidden')
+-                   } else {
+-                     onUpdateDisplay('expanded')
+-                   }
+-                 }}
+-               /&gt;
+-             &lt;/div&gt;
++           {/* Hide Section */}
++           &lt;div className="flex items-center justify-between py-[10px] px-[12px] rounded-[8px] hover:bg-[#FEF2F2]/60 transition-colors"&gt;
++             &lt;div className="flex items-center gap-[10px]"&gt;
++               &lt;IconEyeOff size={18} stroke={1.8} className={isHidden ? 'text-[#DC2626]' : 'text-[#64748B]'} /&gt;
++               &lt;div&gt;
++                 &lt;span className={&#96;text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#1E293B]'}&#96;}&gt;Hide Section&lt;/span&gt;
++                 &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;Completely hide this section from customer view&lt;/p&gt;
++               &lt;/div&gt;
++             &lt;/div&gt;
++             &lt;ToggleSwitch
++               checked={isHidden}
++               onChange={(val) =&gt; onUpdateDisplay(val ? 'hidden' : 'expanded')}
++             /&gt;
++           &lt;/div&gt;
+  
+-             {/* Hidden Mode Warning */}
+-             {isHidden &amp;&amp; (
+-               &lt;div className="mx-[4px] border border-[#FECACA] bg-[#FEF2F2] rounded-[8px] p-[12px]"&gt;
+-                 &lt;div className="flex items-start gap-[8px]"&gt;
+-                   &lt;svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-[1px]"&gt;
+-                     &lt;path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/&gt;
+-                     &lt;line x1="12" y1="9" x2="12" y2="13"/&gt;
+-                     &lt;line x1="12" y1="17" x2="12.01" y2="17"/&gt;
+-                   &lt;/svg&gt;
+-                   &lt;p className="text-[11px] text-[#991B1B] leading-[16px]"&gt;
+-                     Section &amp;amp; Line-Item level prices will be hidden for the customer. Only final total will be visible.
+-                   &lt;/p&gt;
+-                 &lt;/div&gt;
+-               &lt;/div&gt;
+-             )}
+-           &lt;/div&gt;
+-         &lt;/div&gt;
++           {/* Hidden Mode Warning */}
++           {isHidden &amp;&amp; (
++             &lt;div className="border border-[#FECACA] bg-[#FEF2F2] rounded-[8px] p-[12px] mt-[4px]"&gt;
++               &lt;div className="flex items-start gap-[8px]"&gt;
++                 &lt;svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-[1px]"&gt;
++                   &lt;path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/&gt;
++                   &lt;line x1="12" y1="9" x2="12" y2="13"/&gt;
++                   &lt;line x1="12" y1="17" x2="12.01" y2="17"/&gt;
++                 &lt;/svg&gt;
++                 &lt;p className="text-[11px] text-[#991B1B] leading-[16px]"&gt;
++                   Section &amp;amp; Line-Item level prices will be hidden for the customer. Only final total will be visible.
++                 &lt;/p&gt;
++               &lt;/div&gt;
++             &lt;/div&gt;
++           )}
++         &lt;/div&gt;
+  
+-         {/* Sheet Footer */}
+-         &lt;div className="border-t border-[#E2E8F0] px-[21px] py-[14px] flex items-center justify-end gap-[10px] flex-shrink-0"&gt;
++         {/* Footer */}
++         &lt;div className="px-[20px] pb-[16px] pt-[4px] flex items-center justify-end gap-[8px]"&gt;
+            &lt;button
+              onClick={onClose}
+```
 
 </details>
 
@@ -9937,7 +10169,369 @@ Status: **loading**
 
 ---
 
+Now update the reference from `SectionConfigSheet` to `SectionConfigDialog`:
 
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "SectionConfigSheet" in "/Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx" • 1 match</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/NewProposalPage.jsx` | `<SectionConfigSheet` | L2170 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -2168,5 +2168,5 @@
+        {/* Section Config Sheet (for existing sections) */}
+        {sectionConfigOpen &amp;&amp; headerBeingConfigured &amp;&amp; (
+-         &lt;SectionConfigSheet
++         &lt;SectionConfigDialog
+            header={headerBeingConfigured}
+            onUpdateDisplay={updateSectionDisplay}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now do the same for mobile — convert bottom sheet to centered dialog:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 2
+
+```diff
+@@ -569,6 +569,6 @@
+  }
+  
+- // ─── Section Config Sheet (simplified - bottom sheet) ────────────────
+- function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onSave, onClose }) {
++ // ─── Section Config Dialog (centered modal) ────────────────
++ function MobileSectionConfigDialog({ section, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onSave, onClose }) {
+    const sectionDisplay = section?.sectionDisplay || 'expanded'
+    const showSubtotal = section?.showSubtotal || false
+```
+
+**Chunk 2**
+Lines added: 11, lines removed: 15
+
+```diff
+@@ -579,31 +579,27 @@
+  
+    return (
+-     &lt;div className="absolute inset-0 z-50" onClick={onClose}&gt;
++     &lt;div className="absolute inset-0 z-50 flex items-center justify-center" onClick={onClose}&gt;
+        &lt;div className="absolute inset-0 bg-black/40" /&gt;
+        &lt;div
+-         className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[16px] flex flex-col max-h-[85%] overflow-hidden"
++         className="relative bg-white rounded-[16px] shadow-xl w-[340px] overflow-hidden mx-[20px]"
+          onClick={(e) =&gt; e.stopPropagation()}
+        &gt;
+-         &lt;div className="flex justify-center pt-[8px] pb-[4px] shrink-0"&gt;
+-           &lt;div className="w-[36px] h-[4px] bg-[#CBD5E1] rounded-full" /&gt;
+-         &lt;/div&gt;
+-         &lt;div className="flex items-center justify-between px-[16px] pb-[12px] pt-[4px] border-b border-[#E8EDF1] shrink-0"&gt;
++         {/* Header */}
++         &lt;div className="px-[20px] pt-[20px] pb-[4px] flex items-center justify-between"&gt;
+            &lt;p className="font-semibold text-[16px] text-[#252A31]"&gt;Section Settings&lt;/p&gt;
+-           &lt;button onClick={onClose} className="w-[32px] h-[32px] flex items-center justify-center"&gt;
+-             &lt;CloseIcon size={20} className="text-[#64748B]" /&gt;
++           &lt;button onClick={onClose} className="w-[28px] h-[28px] flex items-center justify-center rounded-full active:bg-[#F1F5F9]"&gt;
++             &lt;CloseIcon size={18} className="text-[#64748B]" /&gt;
+            &lt;/button&gt;
+          &lt;/div&gt;
+  
+-         &lt;div className="flex-1 overflow-y-auto px-[16px] py-[16px] min-h-0"&gt;
+-           {/* Display Settings */}
+-           &lt;h4 className="font-semibold text-[14px] text-[#252A31] mb-[10px]"&gt;Display Settings&lt;/h4&gt;
+- 
+-           {/* Show child items */}
+-           &lt;div className={&#96;flex items-center justify-between py-[12px] px-[14px] rounded-[10px] mb-[6px] ${isHidden ? 'opacity-50' : 'active:bg-[#F8FAFC]'}&#96;}&gt;
++         {/* Toggles */}
++         &lt;div className="px-[16px] py-[10px] space-y-[2px]"&gt;
++           {/* Show Line-Items */}
++           &lt;div className={&#96;flex items-center justify-between py-[10px] px-[12px] rounded-[10px] ${isHidden ? 'opacity-50' : 'active:bg-[#F8FAFC]'}&#96;}&gt;
+              &lt;div className="flex items-center gap-[10px] flex-1 min-w-0 pr-[12px]"&gt;
+                &lt;EyeIcon size={18} className="text-[#94A3B8] shrink-0" /&gt;
+                &lt;div&gt;
+                  &lt;span className="text-[13px] font-medium text-[#252A31]"&gt;Show Line-Items&lt;/span&gt;
+-                     &lt;p className="text-[10px] text-[#94A3B8] mt-[1px]"&gt;Expand items for customers&lt;/p&gt;
++                 &lt;p className="text-[10px] text-[#94A3B8] mt-[1px]"&gt;Expand items for customers&lt;/p&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+```
+
+**Chunk 3**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -612,5 +608,5 @@
+  
+            {/* Show section total */}
+-           &lt;div className={&#96;flex items-center justify-between py-[12px] px-[14px] rounded-[10px] mb-[6px] ${isHidden ? 'opacity-50' : 'active:bg-[#F8FAFC]'}&#96;}&gt;
++           &lt;div className={&#96;flex items-center justify-between py-[10px] px-[12px] rounded-[10px] ${isHidden ? 'opacity-50' : 'active:bg-[#F8FAFC]'}&#96;}&gt;
+              &lt;div className="flex items-center gap-[10px] flex-1 min-w-0 pr-[12px]"&gt;
+                &lt;svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"&gt;&lt;line x1="12" y1="1" x2="12" y2="23"/&gt;&lt;path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/&gt;&lt;/svg&gt;
+```
+
+**Chunk 4**
+Lines added: 4, lines removed: 4
+
+```diff
+@@ -623,12 +619,12 @@
+            &lt;/div&gt;
+  
+-           {/* Show child prices — always visible, disabled when collapsed or hidden */}
+-           &lt;div className={&#96;flex items-center justify-between py-[12px] px-[14px] rounded-[10px] mb-[6px] ${(isCollapsed || isHidden) ? 'opacity-50' : 'active:bg-[#F8FAFC]'}&#96;}&gt;
++           {/* Show Line-Item Prices */}
++           &lt;div className={&#96;flex items-center justify-between py-[10px] px-[12px] rounded-[10px] ${(isCollapsed || isHidden) ? 'opacity-50' : 'active:bg-[#F8FAFC]'}&#96;}&gt;
+              &lt;div className="flex items-center gap-[10px] flex-1 min-w-0 pr-[12px]"&gt;
+                &lt;svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"&gt;&lt;rect x="1" y="4" width="22" height="16" rx="2" ry="2"/&gt;&lt;line x1="1" y1="10" x2="23" y2="10"/&gt;&lt;/svg&gt;
+                &lt;div&gt;
+                  &lt;span className="text-[13px] font-medium text-[#252A31]"&gt;Show Line-Item Prices&lt;/span&gt;
+-                     &lt;p className="text-[10px] text-[#94A3B8] mt-[1px]"&gt;
+-                       {isCollapsed ? 'Enable "Show Line-Items" first' : 'Individual price per line item'}
++                 &lt;p className="text-[10px] text-[#94A3B8] mt-[1px]"&gt;
++                   {isCollapsed ? 'Enable "Show Line-Items" first' : 'Individual price per line item'}
+                  &lt;/p&gt;
+                &lt;/div&gt;
+```
+
+**Chunk 5**
+Lines added: 4, lines removed: 4
+
+```diff
+@@ -638,13 +634,13 @@
+  
+            {/* Divider */}
+-           &lt;div className="border-t border-[#E8EDF1] my-[8px]" /&gt;
++           &lt;div className="border-t border-[#E8EDF1] my-[4px]" /&gt;
+  
+-           {/* Hide from proposal */}
+-           &lt;div className="flex items-center justify-between py-[12px] px-[14px] rounded-[10px] active:bg-[#FEF2F2]/60"&gt;
++           {/* Hide Section */}
++           &lt;div className="flex items-center justify-between py-[10px] px-[12px] rounded-[10px] active:bg-[#FEF2F2]/60"&gt;
+              &lt;div className="flex items-center gap-[10px] flex-1 min-w-0 pr-[12px]"&gt;
+                &lt;EyeOffIcon size={18} className={isHidden ? 'text-[#DC2626] shrink-0' : 'text-[#94A3B8] shrink-0'} /&gt;
+                &lt;div&gt;
+                  &lt;span className={&#96;text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#252A31]'}&#96;}&gt;Hide Section&lt;/span&gt;
+-                     &lt;p className="text-[10px] text-[#94A3B8] mt-[1px]"&gt;Completely hide from customer view&lt;/p&gt;
++                 &lt;p className="text-[10px] text-[#94A3B8] mt-[1px]"&gt;Completely hide from customer view&lt;/p&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+```
+
+**Chunk 6**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -653,5 +649,5 @@
+  
+            {isHidden &amp;&amp; (
+-             &lt;div className="border border-[#FECACA] bg-[#FEF2F2] rounded-[10px] p-[12px] mt-[8px]"&gt;
++             &lt;div className="border border-[#FECACA] bg-[#FEF2F2] rounded-[10px] p-[12px] mt-[4px]"&gt;
+                &lt;div className="flex items-start gap-[10px]"&gt;
+                  &lt;WarningIcon size={16} className="text-[#DC2626] shrink-0 mt-[1px]" /&gt;
+```
+
+**Chunk 7**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -665,5 +661,5 @@
+  
+          {/* Footer */}
+-         &lt;div className="border-t border-[#E8EDF1] px-[16px] py-[12px] flex items-center gap-[10px] shrink-0"&gt;
++         &lt;div className="px-[16px] pb-[16px] pt-[4px] flex items-center gap-[10px]"&gt;
+            &lt;button onClick={onClose} className="flex-1 h-[44px] border border-[#E8EDF1] rounded-[8px] text-[14px] font-medium text-[#475569] bg-white active:bg-[#F8FAFC] transition-colors"&gt;Cancel&lt;/button&gt;
+            &lt;button
+```
+
+**Chunk 8**
+Lines added: undefined, lines removed: 1
+
+```diff
+@@ -674,5 +670,4 @@
+            &lt;/button&gt;
+          &lt;/div&gt;
+-         &lt;div className="h-[20px] shrink-0" /&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now update the reference from `MobileSectionConfigSheet` to `MobileSectionConfigDialog`:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "MobileSectionConfigSheet" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 1 match</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/MobileProposalPage.jsx` | `<MobileSectionConfigSheet` | L1189 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -1187,5 +1187,5 @@
+        {/* ── Section Config Sheet ── */}
+        {sectionConfigOpen &amp;&amp; configSection &amp;&amp; (
+-         &lt;MobileSectionConfigSheet
++         &lt;MobileSectionConfigDialog
+            section={configSection}
+            onUpdateDisplay={handleUpdateDisplay}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now let me verify the build:
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /Users/bharath.s/zuper-subcategory && npx vite build 2>&1 | tail -10</summary>
+
+```bash
+cd /Users/bharath.s/zuper-subcategory && npx vite build 2>&1 | tail -10
+```
+
+```
+dist/index.html                                                        0.73 kB │ gzip:   0.42 kB
+dist/assets/6718db1f1d1ce90fa5eb49c325d04010b62ca586-DAF2paW0.png      7.20 kB
+dist/assets/index-C8lOCYmS.css                                        79.29 kB │ gzip:  13.94 kB
+dist/assets/index-B_KzM1f7.js                                      1,066.65 kB │ gzip: 239.68 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.46s
+
+```
+</details>
+</tool-use>
+
+---
+
+Build passes. Let me push:
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /Users/bharath.s/zuper-subcategory && git add -A && git commit -m "Convert section config from side/bottom sheet to centered dialog
+
+- Desktop: replace right-side sliding sheet with compact centered modal dialog
+- Mobile: replace bottom sheet with centered modal dialog
+- Both: same toggle content, just presented in a cleaner centered dialog
+- Renamed SectionConfigSheet → SectionConfigDialog
+- Renamed MobileSectionConfigSheet → MobileSectionConfigDialog"</summary>
+
+```bash
+cd /Users/bharath.s/zuper-subcategory && git add -A && git commit -m "Convert section config from side/bottom sheet to centered dialog
+
+- Desktop: replace right-side sliding sheet with compact centered modal dialog
+- Mobile: replace bottom sheet with centered modal dialog
+- Both: same toggle content, just presented in a cleaner centered dialog
+- Renamed SectionConfigSheet → SectionConfigDialog
+- Renamed MobileSectionConfigSheet → MobileSectionConfigDialog"
+```
+
+```
+[main 0d828cea] Convert section config from side/bottom sheet to centered dialog
+ 7 files changed, 1322 insertions(+), 130 deletions(-)
+ rename dist/assets/{index-KUicA6J8.js =&gt; index-B_KzM1f7.js} (82%)
+ delete mode 100644 dist/assets/index-C0qlNr_v.css
+ create mode 100644 dist/assets/index-C8lOCYmS.css
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /Users/bharath.s/zuper-subcategory && git push</summary>
+
+```bash
+cd /Users/bharath.s/zuper-subcategory && git push
+```
+
+```
+To github.com:bharathsparky/zuper-subcategory.git
+   fe81dc15..0d828cea  main -&gt; main
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="task" data-tool-name="todo_write">
+<details><summary>Tool use: **todo_write** • Todo List</summary>
+
+- [x] Convert desktop SectionConfigSheet from side sheet to center dialog
+- [x] Convert mobile MobileSectionConfigSheet from bottom sheet to center dialog
+
+</details>
+</tool-use>
+
+---
+
+Pushed (`fe81dc15..0d828cea`). Both desktop and mobile section config are now compact centered dialogs instead of side/bottom sheets:
+
+- **Desktop:** Was a 400px right-sliding panel → now a 420px centered modal
+- **Mobile:** Was a bottom sheet sliding up → now a 340px centered modal
+
+Same 3 toggles + hide section toggle, just in a cleaner, lighter-weight dialog that matches the rename dialog style.
 
 ---
 
