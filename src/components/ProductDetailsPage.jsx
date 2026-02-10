@@ -132,6 +132,7 @@ function ProductDetailsPage({ product, onBack }) {
     taxPreference: 'Taxable',
     description: getProductDescription(),
     // Options (Color/Variant Picker) - always show for demo
+    optionTitle: 'Colors', // Customer-facing label shown in public proposals
     options: [
       { id: 1, name: 'Charcoal', imageUrl: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"%3E%3Crect width="40" height="40" rx="4" fill="%2336454F"/%3E%3C/svg%3E', available: true },
       { id: 2, name: 'Weathered Wood', imageUrl: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"%3E%3Crect width="40" height="40" rx="4" fill="%238B7355"/%3E%3Crect x="5" y="8" width="30" height="3" rx="1" fill="%23A08060" opacity="0.6"/%3E%3Crect x="5" y="16" width="30" height="3" rx="1" fill="%23A08060" opacity="0.4"/%3E%3Crect x="5" y="24" width="30" height="3" rx="1" fill="%23A08060" opacity="0.6"/%3E%3Crect x="5" y="32" width="30" height="3" rx="1" fill="%23A08060" opacity="0.4"/%3E%3C/svg%3E', available: true },
@@ -375,11 +376,17 @@ function ProductDetailsPage({ product, onBack }) {
             {productDetails.options && productDetails.options.length > 0 && (
               <div className="bg-white rounded-[7px] shadow-sm overflow-hidden">
                 <div className="px-[21px] pt-[14px] flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <IconPalette size={18} className="text-[#64748B]" stroke={1.5} />
+                  <div className="flex items-center gap-2.5">
                     <h3 className="text-[15.8px] font-semibold text-[#475569] leading-[24.5px]">
                       Options ({productDetails.options.length})
                     </h3>
+                    {/* Customer Facing Label - compact inline chip */}
+                    {productDetails.optionTitle && (
+                      <span className="inline-flex items-center gap-[5px] text-[12px] text-[#64748B] bg-[#F1F5F9] border border-[#E2E8F0] rounded-full px-[10px] py-[3px]">
+                        <span className="text-[#94A3B8]">Label:</span>
+                        <span className="font-medium text-[#334155]">{productDetails.optionTitle}</span>
+                      </span>
+                    )}
                   </div>
                   {productDetails.customerSelectionEnabled && (
                     <span className="text-[12px] text-[#2563EB] bg-[#EFF6FF] px-2 py-1 rounded">
