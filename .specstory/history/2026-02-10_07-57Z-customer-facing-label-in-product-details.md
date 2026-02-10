@@ -8726,6 +8726,1217 @@ Output mode: content
 
 ---
 
+Now I have the full picture. Let me also check what icons are available for a "rename" icon:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "IconPencil|IconEdit|PencilIcon|EditIcon" in "/Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx" • 2 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/NewProposalPage.jsx` | `IconPencil,` | L32 |
+| `src/components/NewProposalPage.jsx` | `<IconPencil size=\{14\} stroke=\{1.5\} className="text-[#64748B]" />` | L2303 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "PencilIcon|EditIcon|IconPencil" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 0 matches</summary>
+
+Output mode: content
+
+
+_No matches found_
+
+</details>
+</tool-use>
+
+---
+
+Good, `IconPencil` is already imported in desktop. Now let me check what's available in mobile for icons:
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+Good, there's an `ICO_EDIT` icon. Now let me also check if there's an inline SVG I can use for the mobile pencil icon. Let me look for how other icons are defined:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "function.*Icon.*size.*className" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 0 matches</summary>
+
+Output mode: content
+
+
+_No matches found_
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "^function.*Icon|^const.*Icon"" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 0 matches</summary>
+
+Output mode: content
+
+
+_No matches found_
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "CopyIcon|TrashIcon|SettingsIcon|EyeOffIcon|EyeIcon" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 9 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/MobileProposalPage.jsx` | `const EyeIcon = (\{ size = 18, className = '' \}) => (` | L113 |
+| `src/components/MobileProposalPage.jsx` | `const EyeOffIcon = (\{ size = 18, className = '' \}) => (` | L120 |
+| `src/components/MobileProposalPage.jsx` | `const CopyIcon = (\{ size = 18, className = '' \}) => (` | L185 |
+| `src/components/MobileProposalPage.jsx` | `const TrashIcon = (\{ size = 18, className = '' \}) => (` | L192 |
+| `src/components/MobileProposalPage.jsx` | `const SettingsIcon = (\{ size = 18, className = '' \}) => (` | L199 |
+| `src/components/MobileProposalPage.jsx` | `<EyeOffIcon size=\{14\} className="text-[#94A3B8] shrink-0" />` | L290 |
+| `src/components/MobileProposalPage.jsx` | `<EyeOffIcon size=\{15\} className="text-[#DC2626]" />` | L368 |
+| `src/components/MobileProposalPage.jsx` | `<SettingsIcon size=\{16\} className="text-[#64748B]" />` | L385 |
+| `src/components/MobileProposalPage.jsx` | `<CopyIcon size=\{16\} className="text-[#64748B]" />` | L414 |
+
+
+</details>
+</tool-use>
+
+---
+
+Let me see how those inline icon components are defined so I can add a PencilIcon:
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+Now let me also read the mobile section header function signature to understand what props it takes so I can add `onRename`:
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "MobileSectionHeader"" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 0 matches</summary>
+
+Output mode: content
+
+
+_No matches found_
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "<MobileSectionHeader" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 1 match</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/MobileProposalPage.jsx` | `<MobileSectionHeader` | L1042 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+Now I have everything. Let me implement all the changes. Here's the plan:
+
+1. **Desktop:** Remove section name from `SectionConfigSheet`, add rename dialog state, add "Rename" to kebab menu, create rename dialog
+2. **Mobile:** Remove section name from `MobileSectionConfigSheet`, add `onRename` to `MobileSectionHeader`, add "Rename" to kebab menu, create rename dialog
+
+Let me start with desktop:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -867,5 +867,5 @@
+  
+  // ─── Section Configuration Sheet (simplified) ───────────────────────
+- function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onUpdateName, onSave, onClose }) {
++ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onSave, onClose }) {
+    const sectionDisplay = header.sectionDisplay || 'expanded'
+    const showSubtotal = header.showSubtotal || false
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: undefined, lines removed: 15
+
+```diff
+@@ -899,19 +899,4 @@
+          {/* Sheet Content */}
+          &lt;div className="flex-1 overflow-y-auto p-[21px] space-y-[16px]"&gt;
+-           {/* Section Name */}
+-           &lt;div className="space-y-[6px]"&gt;
+-             &lt;label className="text-[13px] font-medium text-[#334155]"&gt;Section Name&lt;/label&gt;
+-             &lt;input
+-               type="text"
+-               value={header.name}
+-               onChange={(e) =&gt; onUpdateName?.(e.target.value)}
+-               placeholder="Enter section name"
+-               className="w-full h-[38px] px-[11px] border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors bg-white"
+-             /&gt;
+-           &lt;/div&gt;
+- 
+-           {/* Divider */}
+-           &lt;div className="border-t border-[#E2E8F0]" /&gt;
+- 
+            {/* Simple Toggles */}
+            &lt;div className="space-y-[4px]"&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now remove the disabled condition on Save that checked for name (since name is no longer in the config sheet):
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 2
+
+```diff
+@@ -1005,6 +1005,5 @@
+            &lt;button
+              onClick={onSave}
+-             disabled={!header.name?.trim()}
+-             className="h-[36px] px-[20px] bg-[#E44A19] border border-[#E44A19] rounded-[6px] text-[13px] font-medium text-white hover:bg-[#D03F14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
++             className="h-[36px] px-[20px] bg-[#E44A19] border border-[#E44A19] rounded-[6px] text-[13px] font-medium text-white hover:bg-[#D03F14] transition-colors"
+            &gt;
+              Save
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now remove `onUpdateName` from where `SectionConfigSheet` is rendered:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: undefined, lines removed: 1
+
+```diff
+@@ -2159,5 +2159,4 @@
+            header={headerBeingConfigured}
+            onUpdateDisplay={updateSectionDisplay}
+-           onUpdateName={(name) =&gt; setHeaderBeingConfigured(prev =&gt; ({ ...prev, name }))}
+            onUpdateSubtotal={(checked) =&gt; setHeaderBeingConfigured(prev =&gt; ({ ...prev, showSubtotal: checked }))}
+            onUpdateChildPrices={(checked) =&gt; setHeaderBeingConfigured(prev =&gt; ({ ...prev, showChildPrices: checked }))}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now I need to add the rename dialog state and the "Rename" option to the kebab menu. Let me find where the desktop state is declared:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "sectionKebabOpenId|sectionConfigOpen|headerBeingConfigured" in "/Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx" • 9 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/NewProposalPage.jsx` | `const [sectionConfigOpen, setSectionConfigOpen] = useState(false)` | L1054 |
+| `src/components/NewProposalPage.jsx` | `const [headerBeingConfigured, setHeaderBeingConfigured] = useState(null)` | L1055 |
+| `src/components/NewProposalPage.jsx` | `const [sectionKebabOpenId, setSectionKebabOpenId] = useState(null)` | L1057 |
+| `src/components/NewProposalPage.jsx` | `item.id === headerBeingConfigured.id` | L1210 |
+| `src/components/NewProposalPage.jsx` | `name: headerBeingConfigured.name,` | L1213 |
+| `src/components/NewProposalPage.jsx` | `sectionDisplay: headerBeingConfigured.sectionDisplay,` | L1214 |
+| `src/components/NewProposalPage.jsx` | `sectionHidden: headerBeingConfigured.sectionHidden,` | L1215 |
+| `src/components/NewProposalPage.jsx` | `showSubtotal: headerBeingConfigured.showSubtotal,` | L1216 |
+| `src/components/NewProposalPage.jsx` | `showChildPrices: headerBeingConfigured.showChildPrices,` | L1217 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+Now add the rename dialog state:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: undefined
+
+```diff
+@@ -1056,4 +1056,6 @@
+    const [isAddingNewSection, setIsAddingNewSection] = useState(false)
+    const [sectionKebabOpenId, setSectionKebabOpenId] = useState(null)
++   const [renamingSectionId, setRenamingSectionId] = useState(null) // section id being renamed
++   const [renameSectionValue, setRenameSectionValue] = useState('') // current value in rename dialog
+    const [uiCollapsedSections, setUiCollapsedSections] = useState(new Set()) // UI-only: tracks which sections are visually collapsed in the builder
+    const [sectionAddMenuId, setSectionAddMenuId] = useState(null) // tracks which section's inline "+ Add" dropdown is open
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now add the rename handlers. Let me find a good place for them — near the other section handlers:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "handleCloneSection|handleRemoveSection" in "/Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx" • 4 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/NewProposalPage.jsx` | `const handleCloneSection = (item) => \{` | L1269 |
+| `src/components/NewProposalPage.jsx` | `const handleRemoveSection = (itemId) => \{` | L1285 |
+| `src/components/NewProposalPage.jsx` | `onClick=\{() => handleCloneSection(item)\}` | L1685 |
+| `src/components/NewProposalPage.jsx` | `onClick=\{() => handleRemoveSection(item.id)\}` | L1693 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 16, lines removed: undefined
+
+```diff
+@@ -1287,4 +1287,20 @@
+      setSectionKebabOpenId(null)
+    }
++ 
++   const handleStartRenameSection = (item) =&gt; {
++     setRenamingSectionId(item.id)
++     setRenameSectionValue(item.name)
++     setSectionKebabOpenId(null)
++   }
++ 
++   const handleConfirmRenameSection = () =&gt; {
++     if (renameSectionValue.trim()) {
++       setLineItems(prev =&gt; prev.map(li =&gt;
++         li.id === renamingSectionId ? { ...li, name: renameSectionValue.trim() } : li
++       ))
++     }
++     setRenamingSectionId(null)
++     setRenameSectionValue('')
++   }
+  
+    // ── Drag &amp; Drop Setup ───────────────────────────────────────────────
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now add "Rename" to the kebab menu and render the rename dialog. Let me update the kebab menu first:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 8, lines removed: undefined
+
+```diff
+@@ -1698,4 +1698,12 @@
+                                    {sectionKebabOpenId === item.id &amp;&amp; (
+                                      &lt;div className="absolute right-0 top-full mt-[4px] w-[160px] bg-white border border-[#E2E8F0] rounded-[8px] shadow-lg z-50 py-[4px] overflow-hidden"&gt;
++                                       &lt;button
++                                         onClick={() =&gt; handleStartRenameSection(item)}
++                                         className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[8px]"
++                                       &gt;
++                                         &lt;IconPencil size={14} stroke={2} className="text-[#64748B]" /&gt;
++                                         Rename
++                                       &lt;/button&gt;
++                                       &lt;div className="my-[2px] mx-[10px] border-t border-[#E2E8F0]" /&gt;
+                                        &lt;button
+                                          onClick={() =&gt; handleCloneSection(item)}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now add the rename dialog. Let me find where the config sheet is rendered at the end:
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 41, lines removed: undefined
+
+```diff
+@@ -2191,4 +2191,45 @@
+          /&gt;
+        )}
++ 
++       {/* Rename Section Dialog */}
++       {renamingSectionId &amp;&amp; (
++         &lt;div className="fixed inset-0 z-[80] flex items-center justify-center" onClick={() =&gt; { setRenamingSectionId(null); setRenameSectionValue('') }}&gt;
++           &lt;div className="absolute inset-0 bg-black/30" /&gt;
++           &lt;div
++             className="relative bg-white rounded-[12px] shadow-[0px_8px_32px_rgba(0,0,0,0.16)] w-[380px] overflow-hidden"
++             onClick={(e) =&gt; e.stopPropagation()}
++           &gt;
++             &lt;div className="px-[20px] pt-[20px] pb-[4px]"&gt;
++               &lt;h3 className="text-[15px] font-semibold text-[#1E293B]"&gt;Rename Section&lt;/h3&gt;
++             &lt;/div&gt;
++             &lt;div className="px-[20px] py-[12px]"&gt;
++               &lt;input
++                 type="text"
++                 autoFocus
++                 value={renameSectionValue}
++                 onChange={(e) =&gt; setRenameSectionValue(e.target.value)}
++                 onKeyDown={(e) =&gt; { if (e.key === 'Enter' &amp;&amp; renameSectionValue.trim()) handleConfirmRenameSection() }}
++                 placeholder="Enter section name"
++                 className="w-full h-[40px] px-[12px] border border-[#E2E8F0] rounded-[8px] text-[14px] text-[#1E293B] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors bg-white"
++               /&gt;
++             &lt;/div&gt;
++             &lt;div className="px-[20px] pb-[16px] flex items-center justify-end gap-[8px]"&gt;
++               &lt;button
++                 onClick={() =&gt; { setRenamingSectionId(null); setRenameSectionValue('') }}
++                 className="h-[36px] px-[16px] border border-[#E2E8F0] rounded-[6px] text-[13px] font-medium text-[#334155] bg-white hover:bg-[#F8FAFC] transition-colors"
++               &gt;
++                 Cancel
++               &lt;/button&gt;
++               &lt;button
++                 onClick={handleConfirmRenameSection}
++                 disabled={!renameSectionValue.trim()}
++                 className="h-[36px] px-[20px] bg-[#E44A19] border border-[#E44A19] rounded-[6px] text-[13px] font-medium text-white hover:bg-[#D03F14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
++               &gt;
++                 Save
++               &lt;/button&gt;
++             &lt;/div&gt;
++           &lt;/div&gt;
++         &lt;/div&gt;
++       )}
+      &lt;/div&gt;
+    )
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="task" data-tool-name="todo_write">
+<details><summary>Tool use: **todo_write** • Todo List</summary>
+
+- [x] Remove section name input from desktop config sheet
+- [x] Add Rename option to desktop kebab menu + dialog
+- [-] Remove section name input from mobile config sheet
+- [ ] Add Rename option to mobile kebab menu + dialog
+
+</details>
+</tool-use>
+
+---
+
+Now let's do the same for mobile. First, remove section name from `MobileSectionConfigSheet`:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -556,5 +556,5 @@
+  
+  // ─── Section Config Sheet (simplified - bottom sheet) ────────────────
+- function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, onUpdateName, onUpdateChildPrices, onSave, onClose }) {
++ function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onSave, onClose }) {
+    const sectionDisplay = section?.sectionDisplay || 'expanded'
+    const showSubtotal = section?.showSubtotal || false
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: undefined, lines removed: 14
+
+```diff
+@@ -582,18 +582,4 @@
+  
+          &lt;div className="flex-1 overflow-y-auto px-[16px] py-[16px] min-h-0"&gt;
+-           {/* Section Name */}
+-           &lt;div className="mb-[20px]"&gt;
+-             &lt;label className="font-medium text-[13px] text-[#334155] mb-[6px] block"&gt;Section Name&lt;/label&gt;
+-             &lt;div className="bg-[#EFF2F5] rounded-[8px] overflow-hidden"&gt;
+-               &lt;input
+-                 type="text"
+-                 value={section?.title || ''}
+-                 onChange={(e) =&gt; onUpdateName(e.target.value)}
+-                 placeholder="Enter section name"
+-                 className="w-full h-[44px] px-[14px] bg-transparent text-[14px] text-[#252A31] placeholder-[#94A3B8] outline-none"
+-               /&gt;
+-             &lt;/div&gt;
+-           &lt;/div&gt;
+- 
+            {/* Display Settings */}
+            &lt;h4 className="font-semibold text-[14px] text-[#252A31] mb-[10px]"&gt;Display Settings&lt;/h4&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now remove the `disabled` check based on title in mobile config Save button:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "disabled=.*section.*title.*trim" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 1 match</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/MobileProposalPage.jsx` | `disabled=\{!(section?.title?.trim())\}` | L657 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 2
+
+```diff
+@@ -655,6 +655,5 @@
+            &lt;button
+              onClick={onSave}
+-             disabled={!(section?.title?.trim())}
+-             className="flex-1 h-[44px] bg-[#E44A19] rounded-[8px] text-[14px] font-medium text-white active:bg-[#D03F14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
++             className="flex-1 h-[44px] bg-[#E44A19] rounded-[8px] text-[14px] font-medium text-white active:bg-[#D03F14] transition-colors"
+            &gt;
+              Save
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now remove `onUpdateName` from where `MobileSectionConfigSheet` is rendered:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: undefined, lines removed: 1
+
+```diff
+@@ -1156,5 +1156,4 @@
+            section={configSection}
+            onUpdateDisplay={handleUpdateDisplay}
+-           onUpdateName={(name) =&gt; setConfigSection(prev =&gt; ({ ...prev, title: name }))}
+            onUpdateSubtotal={(checked) =&gt; setConfigSection(prev =&gt; ({ ...prev, showSubtotal: checked }))}
+            onUpdateChildPrices={(checked) =&gt; setConfigSection(prev =&gt; ({ ...prev, showChildPrices: checked }))}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now add a PencilIcon component, rename state, rename handlers, "Rename" in kebab menu, and a rename dialog for mobile. First, add the PencilIcon:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 6, lines removed: undefined
+
+```diff
+@@ -196,4 +196,10 @@
+    &lt;/svg&gt;
+  )
++ 
++ const PencilIcon = ({ size = 18, className = '' }) =&gt; (
++   &lt;svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}&gt;
++     &lt;path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" /&gt;
++   &lt;/svg&gt;
++ )
+  
+  const SettingsIcon = ({ size = 18, className = '' }) =&gt; (
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now add `onRename` to `MobileSectionHeader` and add "Rename" to the kebab menu:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -319,5 +319,5 @@
+  
+  // ─── Section Header (interactive with display badges) ───────────────
+- function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onAddItem, isKebabOpen, onToggleKebab, onConfigure, onClone, onRemove }) {
++ function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onAddItem, isKebabOpen, onToggleKebab, onConfigure, onRename, onClone, onRemove }) {
+    const display = section.sectionDisplay || 'expanded'
+    const colors = SECTION_COLORS[display]
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now add the "Rename" option to the mobile kebab dropdown:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 8, lines removed: undefined
+
+```diff
+@@ -414,4 +414,12 @@
+                style={{ position: 'fixed', top: menuPos.top, right: menuPos.right, zIndex: 9999 }}
+              &gt;
++               &lt;button
++                 onClick={() =&gt; { onToggleKebab(null); onRename() }}
++                 className="w-full flex items-center gap-[10px] px-[14px] py-[12px] text-left active:bg-[#F1F5F9] transition-colors"
++               &gt;
++                 &lt;PencilIcon size={16} className="text-[#64748B]" /&gt;
++                 &lt;span className="text-[14px] text-[#334155]"&gt;Rename&lt;/span&gt;
++               &lt;/button&gt;
++               &lt;div className="h-px bg-[#E8EDF1] mx-[10px]" /&gt;
+                &lt;button
+                  onClick={() =&gt; { onToggleKebab(null); onClone() }}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now add rename state and handlers to the mobile main component. Let me find the state declarations:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "kebabSectionId|sectionConfigOpen|configSection" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 6 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/MobileProposalPage.jsx` | `const [kebabSectionId, setKebabSectionId] = useState(null)` | L704 |
+| `src/components/MobileProposalPage.jsx` | `const [sectionConfigOpen, setSectionConfigOpen] = useState(false)` | L707 |
+| `src/components/MobileProposalPage.jsx` | `const [configSection, setConfigSection] = useState(null)` | L708 |
+| `src/components/MobileProposalPage.jsx` | `s.id === configSection.id` | L864 |
+| `src/components/MobileProposalPage.jsx` | `title: configSection.title,` | L867 |
+| `src/components/MobileProposalPage.jsx` | `sectionDisplay: configSection.sectionDisplay,` | L868 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: undefined
+
+```diff
+@@ -708,4 +708,6 @@
+    const [configSection, setConfigSection] = useState(null)
+    const [isAddingNewSection, setIsAddingNewSection] = useState(false)
++   const [renamingSectionId, setRenamingSectionId] = useState(null)
++   const [renameSectionValue, setRenameSectionValue] = useState('')
+  
+    // UI-only: tracks which sections are visually collapsed in the builder
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now add the rename handlers. Let me find where the clone/remove handlers are:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "handleCloneSection|handleRemoveSection" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 4 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/MobileProposalPage.jsx` | `const handleCloneSection = (section) => \{` | L812 |
+| `src/components/MobileProposalPage.jsx` | `const handleRemoveSection = (sectionId) => \{` | L829 |
+| `src/components/MobileProposalPage.jsx` | `onClone=\{() => handleCloneSection(section)\}` | L1050 |
+| `src/components/MobileProposalPage.jsx` | `onRemove=\{() => handleRemoveSection(section.id)\}` | L1051 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 22, lines removed: undefined
+
+```diff
+@@ -836,4 +836,26 @@
+      }))
+    }
++ 
++   const handleStartRenameSection = (section) =&gt; {
++     setRenamingSectionId(section.id)
++     setRenameSectionValue(section.title)
++     setKebabSectionId(null)
++   }
++ 
++   const handleConfirmRenameSection = () =&gt; {
++     if (renameSectionValue.trim()) {
++       setOptions(prev =&gt; prev.map((opt, oi) =&gt; {
++         if (oi !== currentOptionIdx) return opt
++         return {
++           ...opt,
++           sections: opt.sections.map(s =&gt;
++             s.id === renamingSectionId ? { ...s, title: renameSectionValue.trim() } : s
++           ),
++         }
++       }))
++     }
++     setRenamingSectionId(null)
++     setRenameSectionValue('')
++   }
+  
+    // Update section display mode in config
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now pass `onRename` to `MobileSectionHeader`:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -1070,4 +1070,5 @@
+                      onToggleKebab={setKebabSectionId}
+                      onConfigure={() =&gt; handleConfigureSection(section)}
++                     onRename={() =&gt; handleStartRenameSection(section)}
+                      onClone={() =&gt; handleCloneSection(section)}
+                      onRemove={() =&gt; handleRemoveSection(section.id)}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now add the rename dialog at the bottom of the mobile component, before the closing `</div>`:
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 43, lines removed: undefined
+
+```diff
+@@ -1201,4 +1201,47 @@
+          /&gt;
+        )}
++ 
++       {/* ── Rename Section Dialog ── */}
++       {renamingSectionId &amp;&amp; (
++         &lt;div className="absolute inset-0 z-50 flex items-center justify-center" onClick={() =&gt; { setRenamingSectionId(null); setRenameSectionValue('') }}&gt;
++           &lt;div className="absolute inset-0 bg-black/40" /&gt;
++           &lt;div
++             className="relative bg-white rounded-[16px] shadow-xl w-[320px] overflow-hidden mx-[20px]"
++             onClick={(e) =&gt; e.stopPropagation()}
++           &gt;
++             &lt;div className="px-[20px] pt-[20px] pb-[4px]"&gt;
++               &lt;p className="font-semibold text-[16px] text-[#252A31]"&gt;Rename Section&lt;/p&gt;
++             &lt;/div&gt;
++             &lt;div className="px-[20px] py-[12px]"&gt;
++               &lt;div className="bg-[#EFF2F5] rounded-[8px] overflow-hidden"&gt;
++                 &lt;input
++                   type="text"
++                   autoFocus
++                   value={renameSectionValue}
++                   onChange={(e) =&gt; setRenameSectionValue(e.target.value)}
++                   onKeyDown={(e) =&gt; { if (e.key === 'Enter' &amp;&amp; renameSectionValue.trim()) handleConfirmRenameSection() }}
++                   placeholder="Enter section name"
++                   className="w-full h-[44px] px-[14px] bg-transparent text-[14px] text-[#252A31] placeholder-[#94A3B8] outline-none"
++                 /&gt;
++               &lt;/div&gt;
++             &lt;/div&gt;
++             &lt;div className="px-[20px] pb-[16px] flex items-center gap-[10px]"&gt;
++               &lt;button
++                 onClick={() =&gt; { setRenamingSectionId(null); setRenameSectionValue('') }}
++                 className="flex-1 h-[44px] border border-[#E8EDF1] rounded-[8px] text-[14px] font-medium text-[#475569] bg-white active:bg-[#F8FAFC] transition-colors"
++               &gt;
++                 Cancel
++               &lt;/button&gt;
++               &lt;button
++                 onClick={handleConfirmRenameSection}
++                 disabled={!renameSectionValue.trim()}
++                 className="flex-1 h-[44px] bg-[#E44A19] rounded-[8px] text-[14px] font-medium text-white active:bg-[#D03F14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
++               &gt;
++                 Save
++               &lt;/button&gt;
++             &lt;/div&gt;
++           &lt;/div&gt;
++         &lt;/div&gt;
++       )}
+      &lt;/div&gt;
+    )
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now let me verify the build:
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /Users/bharath.s/zuper-subcategory && npx vite build 2>&1 | tail -10</summary>
+
+```bash
+cd /Users/bharath.s/zuper-subcategory && npx vite build 2>&1 | tail -10
+```
+
+```
+dist/index.html                                                        0.73 kB │ gzip:   0.41 kB
+dist/assets/6718db1f1d1ce90fa5eb49c325d04010b62ca586-DAF2paW0.png      7.20 kB
+dist/assets/index-C0qlNr_v.css                                        79.86 kB │ gzip:  14.01 kB
+dist/assets/index-KUicA6J8.js                                      1,067.22 kB │ gzip: 239.75 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.94s
+
+```
+</details>
+</tool-use>
+
+---
+
+Build passes. Now let me push:
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /Users/bharath.s/zuper-subcategory && git add -A && git commit -m "Move section rename from config sheet to kebab menu with dialog
+
+- Remove section name input from SectionConfigSheet (desktop) and MobileSectionConfigSheet (mobile)
+- Add 'Rename' option with pencil icon to kebab menu in both desktop and mobile section headers
+- Add rename dialog (centered modal) that prompts for new section name
+- Supports Enter key to confirm, Cancel/backdrop click to dismiss
+- Desktop: uses IconPencil from tabler-icons; Mobile: adds inline PencilIcon SVG component"</summary>
+
+```bash
+cd /Users/bharath.s/zuper-subcategory && git add -A && git commit -m "Move section rename from config sheet to kebab menu with dialog
+
+- Remove section name input from SectionConfigSheet (desktop) and MobileSectionConfigSheet (mobile)
+- Add 'Rename' option with pencil icon to kebab menu in both desktop and mobile section headers
+- Add rename dialog (centered modal) that prompts for new section name
+- Supports Enter key to confirm, Cancel/backdrop click to dismiss
+- Desktop: uses IconPencil from tabler-icons; Mobile: adds inline PencilIcon SVG component"
+```
+
+```
+[main fe81dc15] Move section rename from config sheet to kebab menu with dialog
+ 7 files changed, 901 insertions(+), 87 deletions(-)
+ delete mode 100644 dist/assets/index-BZYXTHU0.css
+ create mode 100644 dist/assets/index-C0qlNr_v.css
+ rename dist/assets/{index-sypuGgVa.js =&gt; index-KUicA6J8.js} (55%)
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /Users/bharath.s/zuper-subcategory && git push</summary>
+
+```bash
+cd /Users/bharath.s/zuper-subcategory && git push
+```
+
+```
+To github.com:bharathsparky/zuper-subcategory.git
+   0b2c7055..fe81dc15  main -&gt; main
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="task" data-tool-name="todo_write">
+<details><summary>Tool use: **todo_write** • Todo List</summary>
+
+- [x] Remove section name input from desktop config sheet
+- [x] Add Rename option to desktop kebab menu + dialog
+- [x] Remove section name input from mobile config sheet
+- [x] Add Rename option to mobile kebab menu + dialog
+
+</details>
+</tool-use>
+
+---
+
+Pushed (`0b2c7055..fe81dc15`). Here's what changed:
+
+### Config Sheet (desktop + mobile)
+- **Removed** the "Section Name" input field — the config sheet now only shows Display Settings toggles
+
+### Kebab Menu (desktop + mobile)
+- **Added** a **"Rename"** option with a pencil icon, placed at the top of the kebab dropdown (above Clone and Remove)
+
+### Rename Dialog
+- Clicking "Rename" opens a centered modal dialog with:
+  - A text input pre-filled with the current section name
+  - **Enter** key to confirm
+  - **Cancel** button or backdrop click to dismiss
+  - **Save** button (disabled if name is empty)
+- Desktop: clean white dialog with border/shadow
+- Mobile: rounded bottom-sheet style dialog matching the app's mobile design language
+
+---
+
+_**User (2026-02-10 05:21Z)**_
+
+since now config has only 3 toggle and its short we dont need side sheet, we can handle it in model center dialogue itself.
+
+---
+
+_**Agent (model claude-4.6-opus-high-thinking, mode Agent)**_
+
+
+
+
+
+---
+
+<think><details><summary>Thought Process</summary>
+The user wants to replace the side sheet (desktop) and bottom sheet (mobile) for section config with a centered modal dialog, since it now only has 3 toggles and is short.
+
+Let me look at the current config sheet implementations and convert them to centered dialogs.</details></think>
+
+---
+
+<tool-use data-tool-type="task" data-tool-name="todo_write">
+<details><summary>Tool use: **todo_write** • Todo List</summary>
+
+- [-] Convert desktop SectionConfigSheet from side sheet to center dialog
+- [ ] Convert mobile MobileSectionConfigSheet from bottom sheet to center dialog
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+Now I have both components. Let me replace them with centered dialog versions:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+Status: **loading**
+
+</details>
+
+</tool-use>
+
+---
+
 
 
 ---

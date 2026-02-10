@@ -568,8 +568,8 @@ function MobileToggleSwitch({ checked, onChange, disabled = false }) {
   )
 }
 
-// ─── Section Config Sheet (simplified - bottom sheet) ────────────────
-function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onSave, onClose }) {
+// ─── Section Config Dialog (centered modal) ────────────────
+function MobileSectionConfigDialog({ section, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onSave, onClose }) {
   const sectionDisplay = section?.sectionDisplay || 'expanded'
   const showSubtotal = section?.showSubtotal || false
   const showChildPrices = section?.showChildPrices !== false
@@ -578,40 +578,36 @@ function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, 
   const isHidden = sectionDisplay === 'hidden'
 
   return (
-    <div className="absolute inset-0 z-50" onClick={onClose}>
+    <div className="absolute inset-0 z-50 flex items-center justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/40" />
       <div
-        className="absolute bottom-0 left-0 right-0 bg-white rounded-t-[16px] flex flex-col max-h-[85%] overflow-hidden"
+        className="relative bg-white rounded-[16px] shadow-xl w-[340px] overflow-hidden mx-[20px]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-center pt-[8px] pb-[4px] shrink-0">
-          <div className="w-[36px] h-[4px] bg-[#CBD5E1] rounded-full" />
-        </div>
-        <div className="flex items-center justify-between px-[16px] pb-[12px] pt-[4px] border-b border-[#E8EDF1] shrink-0">
+        {/* Header */}
+        <div className="px-[20px] pt-[20px] pb-[4px] flex items-center justify-between">
           <p className="font-semibold text-[16px] text-[#252A31]">Section Settings</p>
-          <button onClick={onClose} className="w-[32px] h-[32px] flex items-center justify-center">
-            <CloseIcon size={20} className="text-[#64748B]" />
+          <button onClick={onClose} className="w-[28px] h-[28px] flex items-center justify-center rounded-full active:bg-[#F1F5F9]">
+            <CloseIcon size={18} className="text-[#64748B]" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-[16px] py-[16px] min-h-0">
-          {/* Display Settings */}
-          <h4 className="font-semibold text-[14px] text-[#252A31] mb-[10px]">Display Settings</h4>
-
-          {/* Show child items */}
-          <div className={`flex items-center justify-between py-[12px] px-[14px] rounded-[10px] mb-[6px] ${isHidden ? 'opacity-50' : 'active:bg-[#F8FAFC]'}`}>
+        {/* Toggles */}
+        <div className="px-[16px] py-[10px] space-y-[2px]">
+          {/* Show Line-Items */}
+          <div className={`flex items-center justify-between py-[10px] px-[12px] rounded-[10px] ${isHidden ? 'opacity-50' : 'active:bg-[#F8FAFC]'}`}>
             <div className="flex items-center gap-[10px] flex-1 min-w-0 pr-[12px]">
               <EyeIcon size={18} className="text-[#94A3B8] shrink-0" />
               <div>
                 <span className="text-[13px] font-medium text-[#252A31]">Show Line-Items</span>
-                    <p className="text-[10px] text-[#94A3B8] mt-[1px]">Expand items for customers</p>
+                <p className="text-[10px] text-[#94A3B8] mt-[1px]">Expand items for customers</p>
               </div>
             </div>
             <MobileToggleSwitch checked={isExpanded} onChange={(val) => onUpdateDisplay(val ? 'expanded' : 'collapsed')} disabled={isHidden} />
           </div>
 
           {/* Show section total */}
-          <div className={`flex items-center justify-between py-[12px] px-[14px] rounded-[10px] mb-[6px] ${isHidden ? 'opacity-50' : 'active:bg-[#F8FAFC]'}`}>
+          <div className={`flex items-center justify-between py-[10px] px-[12px] rounded-[10px] ${isHidden ? 'opacity-50' : 'active:bg-[#F8FAFC]'}`}>
             <div className="flex items-center gap-[10px] flex-1 min-w-0 pr-[12px]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
               <div>
@@ -622,14 +618,14 @@ function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, 
             <MobileToggleSwitch checked={showSubtotal} onChange={(val) => onUpdateSubtotal(val)} disabled={isHidden} />
           </div>
 
-          {/* Show child prices — always visible, disabled when collapsed or hidden */}
-          <div className={`flex items-center justify-between py-[12px] px-[14px] rounded-[10px] mb-[6px] ${(isCollapsed || isHidden) ? 'opacity-50' : 'active:bg-[#F8FAFC]'}`}>
+          {/* Show Line-Item Prices */}
+          <div className={`flex items-center justify-between py-[10px] px-[12px] rounded-[10px] ${(isCollapsed || isHidden) ? 'opacity-50' : 'active:bg-[#F8FAFC]'}`}>
             <div className="flex items-center gap-[10px] flex-1 min-w-0 pr-[12px]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
               <div>
                 <span className="text-[13px] font-medium text-[#252A31]">Show Line-Item Prices</span>
-                    <p className="text-[10px] text-[#94A3B8] mt-[1px]">
-                      {isCollapsed ? 'Enable "Show Line-Items" first' : 'Individual price per line item'}
+                <p className="text-[10px] text-[#94A3B8] mt-[1px]">
+                  {isCollapsed ? 'Enable "Show Line-Items" first' : 'Individual price per line item'}
                 </p>
               </div>
             </div>
@@ -637,22 +633,22 @@ function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, 
           </div>
 
           {/* Divider */}
-          <div className="border-t border-[#E8EDF1] my-[8px]" />
+          <div className="border-t border-[#E8EDF1] my-[4px]" />
 
-          {/* Hide from proposal */}
-          <div className="flex items-center justify-between py-[12px] px-[14px] rounded-[10px] active:bg-[#FEF2F2]/60">
+          {/* Hide Section */}
+          <div className="flex items-center justify-between py-[10px] px-[12px] rounded-[10px] active:bg-[#FEF2F2]/60">
             <div className="flex items-center gap-[10px] flex-1 min-w-0 pr-[12px]">
               <EyeOffIcon size={18} className={isHidden ? 'text-[#DC2626] shrink-0' : 'text-[#94A3B8] shrink-0'} />
               <div>
                 <span className={`text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#252A31]'}`}>Hide Section</span>
-                    <p className="text-[10px] text-[#94A3B8] mt-[1px]">Completely hide from customer view</p>
+                <p className="text-[10px] text-[#94A3B8] mt-[1px]">Completely hide from customer view</p>
               </div>
             </div>
             <MobileToggleSwitch checked={isHidden} onChange={(val) => onUpdateDisplay(val ? 'hidden' : 'expanded')} />
           </div>
 
           {isHidden && (
-            <div className="border border-[#FECACA] bg-[#FEF2F2] rounded-[10px] p-[12px] mt-[8px]">
+            <div className="border border-[#FECACA] bg-[#FEF2F2] rounded-[10px] p-[12px] mt-[4px]">
               <div className="flex items-start gap-[10px]">
                 <WarningIcon size={16} className="text-[#DC2626] shrink-0 mt-[1px]" />
                 <p className="text-[11px] text-[#991B1B] leading-[16px]">
@@ -664,7 +660,7 @@ function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, 
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[#E8EDF1] px-[16px] py-[12px] flex items-center gap-[10px] shrink-0">
+        <div className="px-[16px] pb-[16px] pt-[4px] flex items-center gap-[10px]">
           <button onClick={onClose} className="flex-1 h-[44px] border border-[#E8EDF1] rounded-[8px] text-[14px] font-medium text-[#475569] bg-white active:bg-[#F8FAFC] transition-colors">Cancel</button>
           <button
             onClick={onSave}
@@ -673,7 +669,6 @@ function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, 
             Save
           </button>
         </div>
-        <div className="h-[20px] shrink-0" />
       </div>
     </div>
   )
@@ -1191,7 +1186,7 @@ export default function MobileProposalPage() {
 
       {/* ── Section Config Sheet ── */}
       {sectionConfigOpen && configSection && (
-        <MobileSectionConfigSheet
+        <MobileSectionConfigDialog
           section={configSection}
           onUpdateDisplay={handleUpdateDisplay}
           onUpdateSubtotal={(checked) => setConfigSection(prev => ({ ...prev, showSubtotal: checked }))}

@@ -866,7 +866,7 @@ function ToggleSwitch({ checked, onChange, size = 'default', disabled = false })
 }
 
 // ─── Section Configuration Sheet (simplified) ───────────────────────
-function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onSave, onClose }) {
+function SectionConfigDialog({ header, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onSave, onClose }) {
   const sectionDisplay = header.sectionDisplay || 'expanded'
   const showSubtotal = header.showSubtotal || false
   const showChildPrices = header.showChildPrices !== false
@@ -876,126 +876,112 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
   const isHidden = sectionDisplay === 'hidden'
 
   return (
-    <div className="fixed inset-0 z-[70]" onClick={onClose}>
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-[70] flex items-center justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/30" />
-
-      {/* Sheet Panel - slides from right */}
       <div
-        className="absolute right-0 top-0 bottom-0 w-[400px] bg-white shadow-[0px_8px_32px_rgba(0,0,0,0.18)] flex flex-col"
+        className="relative bg-white rounded-[12px] shadow-[0px_8px_32px_rgba(0,0,0,0.16)] w-[420px] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Sheet Header */}
-        <div className="h-[56px] px-[21px] flex items-center justify-between border-b border-[#E2E8F0] flex-shrink-0">
-          <h3 className="text-[16px] font-semibold text-[#1E293B]">Section Settings</h3>
+        {/* Header */}
+        <div className="px-[20px] pt-[20px] pb-[4px] flex items-center justify-between">
+          <h3 className="text-[15px] font-semibold text-[#1E293B]">Section Settings</h3>
           <button
             onClick={onClose}
-            className="w-[32px] h-[32px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors"
+            className="w-[28px] h-[28px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors"
           >
-            <IconX size={18} stroke={2} className="text-[#64748B]" />
+            <IconX size={16} stroke={2} className="text-[#64748B]" />
           </button>
         </div>
 
-        {/* Sheet Content */}
-        <div className="flex-1 overflow-y-auto p-[21px] space-y-[16px]">
-          {/* Simple Toggles */}
-          <div className="space-y-[4px]">
-            <h4 className="text-[14px] font-semibold text-[#1E293B] mb-[12px]">Display Settings</h4>
-
-            {/* Show child items (expanded vs collapsed) */}
-            <div className={`flex items-center justify-between py-[12px] px-[14px] rounded-[8px] transition-colors ${isHidden ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}`}>
-              <div className="flex items-center gap-[10px]">
-                <IconEye size={18} stroke={1.8} className="text-[#64748B]" />
-                <div>
-                  <span className="text-[13px] font-medium text-[#1E293B]">Show Line-Items</span>
-                      <p className="text-[11px] text-[#94A3B8] mt-[1px]">Expand items under this section for customers</p>
-                </div>
+        {/* Toggles */}
+        <div className="px-[20px] py-[12px] space-y-[2px]">
+          {/* Show Line-Items */}
+          <div className={`flex items-center justify-between py-[10px] px-[12px] rounded-[8px] transition-colors ${isHidden ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}`}>
+            <div className="flex items-center gap-[10px]">
+              <IconEye size={18} stroke={1.8} className="text-[#64748B]" />
+              <div>
+                <span className="text-[13px] font-medium text-[#1E293B]">Show Line-Items</span>
+                <p className="text-[11px] text-[#94A3B8] mt-[1px]">Expand items under this section for customers</p>
               </div>
-              <ToggleSwitch
-                checked={isExpanded}
-                onChange={(val) => onUpdateDisplay(val ? 'expanded' : 'collapsed')}
-                disabled={isHidden}
-              />
             </div>
-
-            {/* Show section total */}
-            <div className={`flex items-center justify-between py-[12px] px-[14px] rounded-[8px] transition-colors ${isHidden ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}`}>
-              <div className="flex items-center gap-[10px]">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                <div>
-                  <span className="text-[13px] font-medium text-[#1E293B]">Show section total</span>
-                  <p className="text-[11px] text-[#94A3B8] mt-[1px]">Display aggregate subtotal for this section</p>
-                </div>
-              </div>
-              <ToggleSwitch
-                checked={showSubtotal}
-                onChange={(val) => onUpdateSubtotal(val)}
-                disabled={isHidden}
-              />
-            </div>
-
-            {/* Show child prices — always visible, disabled when collapsed or hidden */}
-            <div className={`flex items-center justify-between py-[12px] px-[14px] rounded-[8px] transition-colors ${(isCollapsed || isHidden) ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}`}>
-              <div className="flex items-center gap-[10px]">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                <div>
-                  <span className="text-[13px] font-medium text-[#1E293B]">Show Line-Item Prices</span>
-                      <p className="text-[11px] text-[#94A3B8] mt-[1px]">
-                        {isCollapsed ? 'Enable "Show Line-Items" first' : 'Display individual price for each line item'}
-                  </p>
-                </div>
-              </div>
-              <ToggleSwitch
-                checked={showChildPrices}
-                onChange={(val) => onUpdateChildPrices(val)}
-                disabled={isCollapsed || isHidden}
-              />
-            </div>
-
-            {/* Divider */}
-            <div className="border-t border-[#E2E8F0] my-[4px]" />
-
-            {/* Hide from proposal */}
-            <div className="flex items-center justify-between py-[12px] px-[14px] rounded-[8px] hover:bg-[#FEF2F2]/60 transition-colors">
-              <div className="flex items-center gap-[10px]">
-                <IconEyeOff size={18} stroke={1.8} className={isHidden ? 'text-[#DC2626]' : 'text-[#64748B]'} />
-                <div>
-                  <span className={`text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#1E293B]'}`}>Hide Section</span>
-                      <p className="text-[11px] text-[#94A3B8] mt-[1px]">Completely hide this section from customer view</p>
-                </div>
-              </div>
-              <ToggleSwitch
-                checked={isHidden}
-                onChange={(val) => {
-                  if (val) {
-                    onUpdateDisplay('hidden')
-                  } else {
-                    onUpdateDisplay('expanded')
-                  }
-                }}
-              />
-            </div>
-
-            {/* Hidden Mode Warning */}
-            {isHidden && (
-              <div className="mx-[4px] border border-[#FECACA] bg-[#FEF2F2] rounded-[8px] p-[12px]">
-                <div className="flex items-start gap-[8px]">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-[1px]">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                    <line x1="12" y1="9" x2="12" y2="13"/>
-                    <line x1="12" y1="17" x2="12.01" y2="17"/>
-                  </svg>
-                  <p className="text-[11px] text-[#991B1B] leading-[16px]">
-                    Section &amp; Line-Item level prices will be hidden for the customer. Only final total will be visible.
-                  </p>
-                </div>
-              </div>
-            )}
+            <ToggleSwitch
+              checked={isExpanded}
+              onChange={(val) => onUpdateDisplay(val ? 'expanded' : 'collapsed')}
+              disabled={isHidden}
+            />
           </div>
+
+          {/* Show section total */}
+          <div className={`flex items-center justify-between py-[10px] px-[12px] rounded-[8px] transition-colors ${isHidden ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}`}>
+            <div className="flex items-center gap-[10px]">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <div>
+                <span className="text-[13px] font-medium text-[#1E293B]">Show section total</span>
+                <p className="text-[11px] text-[#94A3B8] mt-[1px]">Display aggregate subtotal for this section</p>
+              </div>
+            </div>
+            <ToggleSwitch
+              checked={showSubtotal}
+              onChange={(val) => onUpdateSubtotal(val)}
+              disabled={isHidden}
+            />
+          </div>
+
+          {/* Show Line-Item Prices */}
+          <div className={`flex items-center justify-between py-[10px] px-[12px] rounded-[8px] transition-colors ${(isCollapsed || isHidden) ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}`}>
+            <div className="flex items-center gap-[10px]">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              <div>
+                <span className="text-[13px] font-medium text-[#1E293B]">Show Line-Item Prices</span>
+                <p className="text-[11px] text-[#94A3B8] mt-[1px]">
+                  {isCollapsed ? 'Enable "Show Line-Items" first' : 'Display individual price for each line item'}
+                </p>
+              </div>
+            </div>
+            <ToggleSwitch
+              checked={showChildPrices}
+              onChange={(val) => onUpdateChildPrices(val)}
+              disabled={isCollapsed || isHidden}
+            />
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-[#E2E8F0] my-[4px]" />
+
+          {/* Hide Section */}
+          <div className="flex items-center justify-between py-[10px] px-[12px] rounded-[8px] hover:bg-[#FEF2F2]/60 transition-colors">
+            <div className="flex items-center gap-[10px]">
+              <IconEyeOff size={18} stroke={1.8} className={isHidden ? 'text-[#DC2626]' : 'text-[#64748B]'} />
+              <div>
+                <span className={`text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#1E293B]'}`}>Hide Section</span>
+                <p className="text-[11px] text-[#94A3B8] mt-[1px]">Completely hide this section from customer view</p>
+              </div>
+            </div>
+            <ToggleSwitch
+              checked={isHidden}
+              onChange={(val) => onUpdateDisplay(val ? 'hidden' : 'expanded')}
+            />
+          </div>
+
+          {/* Hidden Mode Warning */}
+          {isHidden && (
+            <div className="border border-[#FECACA] bg-[#FEF2F2] rounded-[8px] p-[12px] mt-[4px]">
+              <div className="flex items-start gap-[8px]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-[1px]">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <p className="text-[11px] text-[#991B1B] leading-[16px]">
+                  Section &amp; Line-Item level prices will be hidden for the customer. Only final total will be visible.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Sheet Footer */}
-        <div className="border-t border-[#E2E8F0] px-[21px] py-[14px] flex items-center justify-end gap-[10px] flex-shrink-0">
+        {/* Footer */}
+        <div className="px-[20px] pb-[16px] pt-[4px] flex items-center justify-end gap-[8px]">
           <button
             onClick={onClose}
             className="h-[36px] px-[16px] border border-[#E2E8F0] rounded-[6px] text-[13px] font-medium text-[#334155] bg-white hover:bg-[#F8FAFC] transition-colors"
@@ -2181,7 +2167,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
 
       {/* Section Config Sheet (for existing sections) */}
       {sectionConfigOpen && headerBeingConfigured && (
-        <SectionConfigSheet
+        <SectionConfigDialog
           header={headerBeingConfigured}
           onUpdateDisplay={updateSectionDisplay}
           onUpdateSubtotal={(checked) => setHeaderBeingConfigured(prev => ({ ...prev, showSubtotal: checked }))}
