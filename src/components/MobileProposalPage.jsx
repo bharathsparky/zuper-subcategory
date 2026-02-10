@@ -26,9 +26,9 @@ const ICO_CELLULAR = `${ASSETS}/32ad76797a82fcc0c87056789b40cce1d1c1eda0.svg`
 
 // ─── Section display color helpers ─────────────────────────────────
 const SECTION_COLORS = {
-  expanded: { bg: '#EFF6FF', border: '#3B82F6', badge: '#DBEAFE', badgeText: '#1D4ED8', itemBorder: '#BFDBFE' },
-  collapsed: { bg: '#FFF7ED', border: '#F97316', badge: '#FFEDD5', badgeText: '#C2410C', itemBorder: '#FED7AA' },
-  hidden: { bg: '#FEF2F2', border: '#EF4444', badge: '#FEE2E2', badgeText: '#B91C1C', itemBorder: '#FECACA' },
+  expanded: { bg: '#EFF6FF', border: '#3B82F6', itemBorder: '#BFDBFE' },
+  collapsed: { bg: '#FFF7ED', border: '#F97316', itemBorder: '#FED7AA' },
+  hidden: { bg: '#FEF2F2', border: '#EF4444', itemBorder: '#FECACA' },
 }
 
 // ─── Mock data ─────────────────────────────────────────────────────
@@ -313,7 +313,6 @@ function LineItemCard({ item, onQtyChange, sectionDisplay }) {
 function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onAddItem, isKebabOpen, onToggleKebab, onConfigure, onClone, onRemove }) {
   const display = section.sectionDisplay || 'expanded'
   const colors = SECTION_COLORS[display]
-  const badgeLabels = { expanded: 'Expanded', collapsed: 'Collapsed', hidden: 'Hidden' }
   const kebabRef = useRef(null)
   const [menuPos, setMenuPos] = useState({ top: 0, right: 0 })
 
@@ -361,13 +360,12 @@ function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onAddItem
           {section.title}
         </p>
 
-        {/* Display badge */}
-        <span
-          className="text-[10px] font-semibold px-[6px] py-[2px] rounded-[4px] shrink-0 uppercase tracking-[0.3px]"
-          style={{ backgroundColor: colors.badge, color: colors.badgeText }}
-        >
-          {badgeLabels[display]}
-        </span>
+        {/* Hidden indicator icon (no text badges) */}
+        {display === 'hidden' && (
+          <span className="inline-flex items-center shrink-0" title="Hidden from customer view">
+            <EyeOffIcon size={15} className="text-[#DC2626]" />
+          </span>
+        )}
 
         {/* Add item to section */}
         <button

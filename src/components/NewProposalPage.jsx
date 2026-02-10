@@ -38,7 +38,6 @@ import {
   IconPackage,
   IconEyeOff,
   IconEye,
-  IconStack2,
   IconCircleCheck,
   IconSettings,
 } from '@tabler/icons-react'
@@ -1635,33 +1634,12 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                   className="text-[13px] font-semibold text-[#1E293B] leading-[20px] bg-transparent outline-none border-none min-w-[100px] flex-shrink-0"
                                 />
 
-                                {/* Display Mode Badge (customer-facing config) */}
-                                <div className="flex items-center gap-[6px]">
-                                  <span
-                                    title={
-                                      isDisplayHidden
-                                        ? 'Hidden: Section header is hidden from customer view. Items remain editable here.'
-                                        : isDisplayCollapsed
-                                        ? 'Collapsed: Only the section header is shown to customers. Child items are hidden.'
-                                        : 'Expanded: Section header and all child items are visible to customers.'
-                                    }
-                                    className={`inline-flex items-center gap-1 px-[8px] py-[2px] rounded text-[10px] font-medium cursor-default ${
-                                    isDisplayHidden
-                                      ? 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
-                                      : isDisplayCollapsed
-                                      ? 'bg-[#FFF7ED] text-[#C2410C] border border-[#FDBA74]'
-                                      : 'bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0]'
-                                  }`}>
-                                    {isDisplayHidden ? (
-                                      <IconEyeOff className="w-3 h-3" />
-                                    ) : isDisplayCollapsed ? (
-                                      <IconStack2 className="w-3 h-3" />
-                                    ) : (
-                                      <IconEye className="w-3 h-3" />
-                                    )}
-                                    {displayMode === 'expanded' ? 'Expanded' : displayMode === 'collapsed' ? 'Collapsed' : 'Hidden'}
+                                {/* Hidden indicator icon (no text badges) */}
+                                {isDisplayHidden && (
+                                  <span className="inline-flex items-center" title="Hidden from customer view">
+                                    <IconEyeOff size={15} stroke={2} className="text-[#DC2626]" />
                                   </span>
-                                </div>
+                                )}
 
                                 {/* Inline + Add button for section */}
                                 <div className="relative">
