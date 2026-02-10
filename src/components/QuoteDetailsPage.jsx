@@ -473,12 +473,12 @@ function QuoteDetailsPage({ onBack }) {
                                       <div className="flex items-center gap-[6px]">
                                         <span className="text-[12px] text-[#0172CB] leading-[16px]">{item.name}</span>
                                         {isHidden && (
-                                          <span className="inline-flex items-center gap-[3px] text-[9px] text-[#9D174D]/50" title="This item is hidden from customer view">
+                                          <span className="inline-flex items-center gap-[3px] text-[9px] text-[#9D174D]/50" title="This item will be hidden from the customer.">
                                             <IconEyeOff size={10} stroke={1.5} />
                                           </span>
                                         )}
                                         {isCollapsed && (
-                                          <span className="inline-flex items-center gap-[3px] text-[9px] text-[#92400E]/40" title="This item is inside a collapsed section — customer sees only the section header">
+                                          <span className="inline-flex items-center gap-[3px] text-[9px] text-[#92400E]/40" title="This item will be hidden from the customer.">
                                             <IconEyeOff size={10} stroke={1.5} />
                                           </span>
                                         )}

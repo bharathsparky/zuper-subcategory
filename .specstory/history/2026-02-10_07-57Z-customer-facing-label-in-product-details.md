@@ -7483,7 +7483,552 @@ Now I have a clear picture. Here's what I need to do:
 
 2. **Child items already have eye-off icon** for hidden sections (lines 288-290) - that's good
 
-The key insight is to strip out all text badges entirely and rely on the eye-off icon to signal hidden state, since the eye icon already communicates collapsed state to users. The user is clarifying that for collapsed sections, the visual indicator is already clear enough, so we just need the eye-off icon specifically for hidden sections—both next to the section title and on child items. I should remove all text badges entirely and only add the eye icon where it's needed for hidden state.</details></think>
+The key insight is to strip out all text badges entirely and rely on the eye-off icon to signal hidden state, since the eye icon already communicates collapsed state to users. The user is clarifying that for collapsed sections, the visual indicator is already clear enough, so we just need the eye-off icon specifically for hidden sections—both next to the section title and on child items. I should remove all text badges entirely and only add the eye icon where it's needed for hidden state. I need to verify whether there's already a visual indicator for collapsed sections—the user mentioned an eye icon for collapsed state, but I'm seeing a chevron rotation instead. Let me check the mobile `LineItemCard` to see if it's displaying an eye-off icon there.
+
+Once I understand the current state, I'll implement the changes: remove all text badges from section headers across both desktop and mobile, add an eye-off icon specifically for hidden sections next to the title, and leave the child item indicators unchanged since they already show the appropriate icons for both hidden and collapsed parents.</details></think>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+Now I have the full picture. Let me make the changes:
+
+**Desktop:** Replace the full badge block with a simple eye-off icon only for hidden sections.
+**Mobile:** Replace the badge with a simple eye-off icon only for hidden sections.
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 5, lines removed: 26
+
+```diff
+@@ -1636,31 +1636,10 @@
+                                  /&gt;
+  
+-                                 {/* Display Mode Badge (customer-facing config) */}
+-                                 &lt;div className="flex items-center gap-[6px]"&gt;
+-                                   &lt;span
+-                                     title={
+-                                       isDisplayHidden
+-                                         ? 'Hidden: Section header is hidden from customer view. Items remain editable here.'
+-                                         : isDisplayCollapsed
+-                                         ? 'Collapsed: Only the section header is shown to customers. Child items are hidden.'
+-                                         : 'Expanded: Section header and all child items are visible to customers.'
+-                                     }
+-                                     className={&#96;inline-flex items-center gap-1 px-[8px] py-[2px] rounded text-[10px] font-medium cursor-default ${
+-                                     isDisplayHidden
+-                                       ? 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
+-                                       : isDisplayCollapsed
+-                                       ? 'bg-[#FFF7ED] text-[#C2410C] border border-[#FDBA74]'
+-                                       : 'bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0]'
+-                                   }&#96;}&gt;
+-                                     {isDisplayHidden ? (
+-                                       &lt;IconEyeOff className="w-3 h-3" /&gt;
+-                                     ) : isDisplayCollapsed ? (
+-                                       &lt;IconStack2 className="w-3 h-3" /&gt;
+-                                     ) : (
+-                                       &lt;IconEye className="w-3 h-3" /&gt;
+-                                     )}
+-                                     {displayMode === 'expanded' ? 'Expanded' : displayMode === 'collapsed' ? 'Collapsed' : 'Hidden'}
++                                 {/* Hidden indicator icon (no text badges) */}
++                                 {isDisplayHidden &amp;&amp; (
++                                   &lt;span className="inline-flex items-center" title="Hidden from customer view"&gt;
++                                     &lt;IconEyeOff size={15} stroke={2} className="text-[#DC2626]" /&gt;
+                                    &lt;/span&gt;
+-                                 &lt;/div&gt;
++                                 )}
+  
+                                  {/* Inline + Add button for section */}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 6, lines removed: 7
+
+```diff
+@@ -362,11 +362,10 @@
+          &lt;/p&gt;
+  
+-         {/* Display badge */}
+-         &lt;span
+-           className="text-[10px] font-semibold px-[6px] py-[2px] rounded-[4px] shrink-0 uppercase tracking-[0.3px]"
+-           style={{ backgroundColor: colors.badge, color: colors.badgeText }}
+-         &gt;
+-           {badgeLabels[display]}
+-         &lt;/span&gt;
++         {/* Hidden indicator icon (no text badges) */}
++         {display === 'hidden' &amp;&amp; (
++           &lt;span className="inline-flex items-center shrink-0" title="Hidden from customer view"&gt;
++             &lt;EyeOffIcon size={15} className="text-[#DC2626]" /&gt;
++           &lt;/span&gt;
++         )}
+  
+          {/* Add item to section */}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now let me clean up unused variables. The `badgeLabels` in mobile is no longer needed, and `IconStack2`/`IconEye` might be unused in desktop:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "badgeLabels" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 1 match</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/MobileProposalPage.jsx` | `const badgeLabels = \{ expanded: 'Expanded', collapsed: 'Collapsed', hidden: 'Hidden' \}` | L316 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "IconStack2|IconEye[^O]" in "/Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx" • 3 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/NewProposalPage.jsx` | `IconEye,` | L40 |
+| `src/components/NewProposalPage.jsx` | `IconStack2,` | L41 |
+| `src/components/NewProposalPage.jsx` | `<IconEye size=\{18\} stroke=\{1.8\} className="text-[#64748B]" />` | L924 |
+
+
+</details>
+</tool-use>
+
+---
+
+`IconEye` is still used in the config sheet toggle, so keep it. `IconStack2` may no longer be used — let me check:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "IconStack2" in "/Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx" • 1 match</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/NewProposalPage.jsx` | `IconStack2,` | L41 |
+
+
+</details>
+</tool-use>
+
+---
+
+`IconStack2` is imported but no longer used. Let me remove it, and also remove the unused `badgeLabels` in mobile:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: undefined, lines removed: 1
+
+```diff
+@@ -39,5 +39,4 @@
+    IconEyeOff,
+    IconEye,
+-   IconStack2,
+    IconCircleCheck,
+    IconSettings,
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: undefined, lines removed: 1
+
+```diff
+@@ -314,5 +314,4 @@
+    const display = section.sectionDisplay || 'expanded'
+    const colors = SECTION_COLORS[display]
+-   const badgeLabels = { expanded: 'Expanded', collapsed: 'Collapsed', hidden: 'Hidden' }
+    const kebabRef = useRef(null)
+    const [menuPos, setMenuPos] = useState({ top: 0, right: 0 })
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now let me also check the `SECTION_COLORS` badge-related fields in mobile — still used for border/bg so those are fine. Let me also check if the `badge` / `badgeText` keys in `SECTION_COLORS` are still used anywhere:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "colors\.badge" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 0 matches</summary>
+
+Output mode: content
+
+
+_No matches found_
+
+</details>
+</tool-use>
+
+---
+
+Good, `badge` and `badgeText` are no longer used. Let me clean those up too:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: 3
+
+```diff
+@@ -27,7 +27,7 @@
+  // ─── Section display color helpers ─────────────────────────────────
+  const SECTION_COLORS = {
+-   expanded: { bg: '#EFF6FF', border: '#3B82F6', badge: '#DBEAFE', badgeText: '#1D4ED8', itemBorder: '#BFDBFE' },
+-   collapsed: { bg: '#FFF7ED', border: '#F97316', badge: '#FFEDD5', badgeText: '#C2410C', itemBorder: '#FED7AA' },
+-   hidden: { bg: '#FEF2F2', border: '#EF4444', badge: '#FEE2E2', badgeText: '#B91C1C', itemBorder: '#FECACA' },
++   expanded: { bg: '#EFF6FF', border: '#3B82F6', itemBorder: '#BFDBFE' },
++   collapsed: { bg: '#FFF7ED', border: '#F97316', itemBorder: '#FED7AA' },
++   hidden: { bg: '#FEF2F2', border: '#EF4444', itemBorder: '#FECACA' },
+  }
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now let me check lints and build:
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 2 files</summary>
+      
+Lint paths:
+
+- `/Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx`
+- `/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /Users/bharath.s/zuper-subcategory && npx vite build 2>&1 | tail -10</summary>
+
+```bash
+cd /Users/bharath.s/zuper-subcategory && npx vite build 2>&1 | tail -10
+```
+
+```
+dist/index.html                                                        0.73 kB │ gzip:   0.41 kB
+dist/assets/6718db1f1d1ce90fa5eb49c325d04010b62ca586-DAF2paW0.png      7.20 kB
+dist/assets/index-BZYXTHU0.css                                        79.76 kB │ gzip:  13.99 kB
+dist/assets/index-BFSy-IPB.js                                      1,064.11 kB │ gzip: 239.22 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.52s
+
+```
+</details>
+</tool-use>
+
+---
+
+Build passes. Now let me push:
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /Users/bharath.s/zuper-subcategory && git add -A && git commit -m "Remove text badges (Expanded/Collapsed/Hidden) from section headers
+
+- Replace verbose text badges with subtle eye-off icon shown only for hidden sections
+- Desktop: remove badge block, show IconEyeOff next to section name when hidden
+- Mobile: remove badge span, show EyeOffIcon next to section title when hidden
+- Clean up unused imports (IconStack2) and dead code (badgeLabels, badge/badgeText colors)
+- Child items retain existing eye-off indicators for hidden/collapsed parents"</summary>
+
+```bash
+cd /Users/bharath.s/zuper-subcategory && git add -A && git commit -m "Remove text badges (Expanded/Collapsed/Hidden) from section headers
+
+- Replace verbose text badges with subtle eye-off icon shown only for hidden sections
+- Desktop: remove badge block, show IconEyeOff next to section name when hidden
+- Mobile: remove badge span, show EyeOffIcon next to section title when hidden
+- Clean up unused imports (IconStack2) and dead code (badgeLabels, badge/badgeText colors)
+- Child items retain existing eye-off indicators for hidden/collapsed parents"
+```
+
+```
+[main c2eb9227] Remove text badges (Expanded/Collapsed/Hidden) from section headers
+ 5 files changed, 2734 insertions(+), 146 deletions(-)
+ rename dist/assets/{index-Ct7MNiMp.js =&gt; index-BFSy-IPB.js} (71%)
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /Users/bharath.s/zuper-subcategory && git push</summary>
+
+```bash
+cd /Users/bharath.s/zuper-subcategory && git push
+```
+
+```
+To github.com:bharathsparky/zuper-subcategory.git
+   b105acbf..c2eb9227  main -&gt; main
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="task" data-tool-name="todo_write">
+<details><summary>Tool use: **todo_write** • Todo List</summary>
+
+- [x] Remove text badges from desktop section headers
+- [x] Remove text badges from mobile section headers
+- [x] Add eye-off icon for hidden sections (header + children) desktop
+- [x] Add eye-off icon for hidden sections (header + children) mobile
+
+</details>
+</tool-use>
+
+---
+
+Pushed (`b105acbf..c2eb9227`). Here's what changed:
+
+### Removed
+- **Text badges** ("Expanded", "Collapsed", "Hidden") from both desktop and mobile section headers
+- Unused `IconStack2` import, `badgeLabels` map, and `badge`/`badgeText` color keys
+
+### Added / Kept
+- **Hidden sections** → subtle red `eye-off` icon (🚫👁) next to the section name in the header
+- **Child items** of hidden/collapsed sections → existing `eye-off` indicators remain untouched
+- **Collapsed sections** → the rotated chevron already communicates the state clearly — no extra icon needed
+
+---
+
+_**User (2026-02-10 05:21Z)**_
+
+Show Line-Items - Instead of the word child we will use this ux copy
+Show Line-Item Prices - Instead of the word child we will use this ux copy
+And we will just use Hide Section instead of hide it from prpoosal 
+
+And the below info message when hidden will be "Section & Line-Item level prices will be hidden for the customer. Only final total will be visible."
+
+and when use hovers on hidden items with eye icon we should show this as tooltip "This item will be hidden from the customer."
+
+---
+
+_**Agent (model claude-4.6-opus-high-thinking, mode Agent)**_
+
+
+
+
+
+---
+
+<think><details><summary>Thought Process</summary>
+The user wants to update UX copy in both desktop and mobile config sheets, and also update tooltips on hidden items. Let me make all these changes.</details></think>
+
+---
+
+<tool-use data-tool-type="task" data-tool-name="todo_write">
+<details><summary>Tool use: **todo_write** • Todo List</summary>
+
+- [-] Update config sheet labels: child→Line-Item (desktop)
+- [ ] Update config sheet labels: child→Line-Item (mobile)
+- [ ] Update hidden warning message (desktop + mobile)
+- [ ] Update eye-off tooltips on hidden items (desktop + mobile)
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "Show child|child items|child prices|Hide from proposal|Hide section|hidden from customer" in "/Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx" • 13 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/NewProposalPage.jsx` | `\{/* Show child items (expanded vs collapsed) */\}` | L920 |
+| `src/components/NewProposalPage.jsx` | `<span className="text-[13px] font-medium text-[#1E293B]">Show child items</span>` | L925 |
+| `src/components/NewProposalPage.jsx` | `\{/* Show child prices — always visible, disabled when collapsed or hidden */\}` | L952 |
+| `src/components/NewProposalPage.jsx` | `<span className="text-[13px] font-medium text-[#1E293B]">Show child prices</span>` | L957 |
+| `src/components/NewProposalPage.jsx` | `\{isCollapsed ? 'Enable "Show child items" first' : 'Display individual price for each line item'\}` | L959 |
+| `src/components/NewProposalPage.jsx` | `\{/* Hide from proposal */\}` | L973 |
+| `src/components/NewProposalPage.jsx` | `<span className=\{`text-[13px] font-medium $\{isHidden ? 'text-[#DC2626]' : 'text-[#1E293B]'\}`\}>Hide from proposal</span>` | L978 |
+| `src/components/NewProposalPage.jsx` | `// Collapsed: child prices not applicable (children are hidden), auto-disable` | L1210 |
+| `src/components/NewProposalPage.jsx` | `// Expanded: if child prices were auto-disabled by collapsed, restore to true` | L1214 |
+| `src/components/NewProposalPage.jsx` | `// Skip child items of UI-collapsed sections (builder view only)` | L1571 |
+| `src/components/NewProposalPage.jsx` | `<span className="inline-flex items-center" title="Hidden from customer view">` | L1639 |
+| `src/components/NewProposalPage.jsx` | `// Compute section subtotal from child items` | L1665 |
+| `src/components/NewProposalPage.jsx` | `<span className="inline-flex items-center text-[#DC2626]/50" title="Hidden from customer view">` | L1792 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "Show child|child items|child prices|Hide from proposal|Hide section|hidden from customer" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 10 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/MobileProposalPage.jsx` | `<span className="inline-flex items-center shrink-0" title="Hidden from customer view">` | L365 |
+| `src/components/MobileProposalPage.jsx` | `\{/* Show child items */\}` | L599 |
+| `src/components/MobileProposalPage.jsx` | `<span className="text-[13px] font-medium text-[#252A31]">Show child items</span>` | L604 |
+| `src/components/MobileProposalPage.jsx` | `\{/* Show child prices — always visible, disabled when collapsed or hidden */\}` | L623 |
+| `src/components/MobileProposalPage.jsx` | `<span className="text-[13px] font-medium text-[#252A31]">Show child prices</span>` | L628 |
+| `src/components/MobileProposalPage.jsx` | `\{isCollapsed ? 'Enable "Show child items" first' : 'Individual price per line item'\}` | L630 |
+| `src/components/MobileProposalPage.jsx` | `\{/* Hide from proposal */\}` | L640 |
+| `src/components/MobileProposalPage.jsx` | `<span className=\{`text-[13px] font-medium $\{isHidden ? 'text-[#DC2626]' : 'text-[#252A31]'\}`\}>Hide from proposal</span>` | L645 |
+| `src/components/MobileProposalPage.jsx` | `// Collapsed: child prices not applicable (children are hidden), auto-disable` | L843 |
+| `src/components/MobileProposalPage.jsx` | `// Expanded: if child prices were auto-disabled by collapsed, restore to true` | L846 |
+
+
+</details>
+</tool-use>
+
+---
+
+Now let me also find the hidden warning messages and the eye-off tooltips on child items:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "Pricing across the entire proposal|Only the final total" in "/Users/bharath.s/zuper-subcategory/src/components" • 2 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/MobileProposalPage.jsx` | `Pricing across the entire proposal will be hidden. Only the final total will be visible.` | L657 |
+| `src/components/NewProposalPage.jsx` | `Pricing across the entire proposal will be hidden. Only the final total will be visible.` | L1004 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "title=.*[Hh]idden from customer" in "/Users/bharath.s/zuper-subcategory/src/components" • 4 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/MobileProposalPage.jsx` | `<span className="inline-flex items-center shrink-0" title="Hidden from customer view">` | L365 |
+| `src/components/NewProposalPage.jsx` | `<span className="inline-flex items-center" title="Hidden from customer view">` | L1639 |
+| `src/components/NewProposalPage.jsx` | `<span className="inline-flex items-center text-[#DC2626]/50" title="Hidden from customer view">` | L1792 |
+| `src/components/QuoteDetailsPage.jsx` | `<span className="inline-flex items-center gap-[3px] text-[9px] text-[#9D174D]/50" title="This item is hidden from customer view">` | L476 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "title=.*collapsed section" in "/Users/bharath.s/zuper-subcategory/src/components" • 2 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/NewProposalPage.jsx` | `<span className="inline-flex items-center text-[#C2410C]/50" title="Inside collapsed section — customer sees only the header">` | L1797 |
+| `src/components/QuoteDetailsPage.jsx` | `<span className="inline-flex items-center gap-[3px] text-[9px] text-[#92400E]/40" title="This item is inside a collapsed section — customer sees only the section header">` | L481 |
+
+
+</details>
+</tool-use>
+
+---
+
+Now I have all the locations. Let me make all the changes at once:
+
+**Desktop (`NewProposalPage.jsx`):**
 
 ---
 

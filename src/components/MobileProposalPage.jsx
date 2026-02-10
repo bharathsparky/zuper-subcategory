@@ -286,7 +286,9 @@ function LineItemCard({ item, onQtyChange, sectionDisplay }) {
           <div className="flex items-center gap-[4px]">
             <p className="font-medium text-[16px] text-[#252A31] truncate">{item.name}</p>
             {isHiddenOrCollapsed && (
-              <EyeOffIcon size={14} className="text-[#94A3B8] shrink-0" />
+              <span title="This item will be hidden from the customer.">
+                <EyeOffIcon size={14} className="text-[#94A3B8] shrink-0" />
+              </span>
             )}
           </div>
           <p className="font-normal text-[12px] text-[#4F5E71] w-full">{item.sku}</p>
@@ -362,7 +364,7 @@ function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onAddItem
 
         {/* Hidden indicator icon (no text badges) */}
         {display === 'hidden' && (
-          <span className="inline-flex items-center shrink-0" title="Hidden from customer view">
+          <span className="inline-flex items-center shrink-0" title="This item will be hidden from the customer.">
             <EyeOffIcon size={15} className="text-[#DC2626]" />
           </span>
         )}
@@ -601,8 +603,8 @@ function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, 
             <div className="flex items-center gap-[10px] flex-1 min-w-0 pr-[12px]">
               <EyeIcon size={18} className="text-[#94A3B8] shrink-0" />
               <div>
-                <span className="text-[13px] font-medium text-[#252A31]">Show child items</span>
-                <p className="text-[10px] text-[#94A3B8] mt-[1px]">Expand items for customers</p>
+                <span className="text-[13px] font-medium text-[#252A31]">Show Line-Items</span>
+                    <p className="text-[10px] text-[#94A3B8] mt-[1px]">Expand items for customers</p>
               </div>
             </div>
             <MobileToggleSwitch checked={isExpanded} onChange={(val) => onUpdateDisplay(val ? 'expanded' : 'collapsed')} disabled={isHidden} />
@@ -625,9 +627,9 @@ function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, 
             <div className="flex items-center gap-[10px] flex-1 min-w-0 pr-[12px]">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
               <div>
-                <span className="text-[13px] font-medium text-[#252A31]">Show child prices</span>
-                <p className="text-[10px] text-[#94A3B8] mt-[1px]">
-                  {isCollapsed ? 'Enable "Show child items" first' : 'Individual price per line item'}
+                <span className="text-[13px] font-medium text-[#252A31]">Show Line-Item Prices</span>
+                    <p className="text-[10px] text-[#94A3B8] mt-[1px]">
+                      {isCollapsed ? 'Enable "Show Line-Items" first' : 'Individual price per line item'}
                 </p>
               </div>
             </div>
@@ -642,8 +644,8 @@ function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, 
             <div className="flex items-center gap-[10px] flex-1 min-w-0 pr-[12px]">
               <EyeOffIcon size={18} className={isHidden ? 'text-[#DC2626] shrink-0' : 'text-[#94A3B8] shrink-0'} />
               <div>
-                <span className={`text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#252A31]'}`}>Hide from proposal</span>
-                <p className="text-[10px] text-[#94A3B8] mt-[1px]">Completely hide from customer view</p>
+                <span className={`text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#252A31]'}`}>Hide Section</span>
+                    <p className="text-[10px] text-[#94A3B8] mt-[1px]">Completely hide from customer view</p>
               </div>
             </div>
             <MobileToggleSwitch checked={isHidden} onChange={(val) => onUpdateDisplay(val ? 'hidden' : 'expanded')} />
@@ -654,7 +656,7 @@ function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, 
               <div className="flex items-start gap-[10px]">
                 <WarningIcon size={16} className="text-[#DC2626] shrink-0 mt-[1px]" />
                 <p className="text-[11px] text-[#991B1B] leading-[16px]">
-                  Pricing across the entire proposal will be hidden. Only the final total will be visible.
+                  Section &amp; Line-Item level prices will be hidden for the customer. Only final total will be visible.
                 </p>
               </div>
             </div>

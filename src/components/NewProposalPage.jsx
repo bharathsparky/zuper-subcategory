@@ -922,8 +922,8 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
               <div className="flex items-center gap-[10px]">
                 <IconEye size={18} stroke={1.8} className="text-[#64748B]" />
                 <div>
-                  <span className="text-[13px] font-medium text-[#1E293B]">Show child items</span>
-                  <p className="text-[11px] text-[#94A3B8] mt-[1px]">Expand items under this section for customers</p>
+                  <span className="text-[13px] font-medium text-[#1E293B]">Show Line-Items</span>
+                      <p className="text-[11px] text-[#94A3B8] mt-[1px]">Expand items under this section for customers</p>
                 </div>
               </div>
               <ToggleSwitch
@@ -954,9 +954,9 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
               <div className="flex items-center gap-[10px]">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                 <div>
-                  <span className="text-[13px] font-medium text-[#1E293B]">Show child prices</span>
-                  <p className="text-[11px] text-[#94A3B8] mt-[1px]">
-                    {isCollapsed ? 'Enable "Show child items" first' : 'Display individual price for each line item'}
+                  <span className="text-[13px] font-medium text-[#1E293B]">Show Line-Item Prices</span>
+                      <p className="text-[11px] text-[#94A3B8] mt-[1px]">
+                        {isCollapsed ? 'Enable "Show Line-Items" first' : 'Display individual price for each line item'}
                   </p>
                 </div>
               </div>
@@ -975,8 +975,8 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
               <div className="flex items-center gap-[10px]">
                 <IconEyeOff size={18} stroke={1.8} className={isHidden ? 'text-[#DC2626]' : 'text-[#64748B]'} />
                 <div>
-                  <span className={`text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#1E293B]'}`}>Hide from proposal</span>
-                  <p className="text-[11px] text-[#94A3B8] mt-[1px]">Completely hide this section from customer view</p>
+                  <span className={`text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#1E293B]'}`}>Hide Section</span>
+                      <p className="text-[11px] text-[#94A3B8] mt-[1px]">Completely hide this section from customer view</p>
                 </div>
               </div>
               <ToggleSwitch
@@ -1001,7 +1001,7 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
                     <line x1="12" y1="17" x2="12.01" y2="17"/>
                   </svg>
                   <p className="text-[11px] text-[#991B1B] leading-[16px]">
-                    Pricing across the entire proposal will be hidden. Only the final total will be visible.
+                    Section &amp; Line-Item level prices will be hidden for the customer. Only final total will be visible.
                   </p>
                 </div>
               </div>
@@ -1636,7 +1636,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
 
                                 {/* Hidden indicator icon (no text badges) */}
                                 {isDisplayHidden && (
-                                  <span className="inline-flex items-center" title="Hidden from customer view">
+                                  <span className="inline-flex items-center" title="This item will be hidden from the customer.">
                                     <IconEyeOff size={15} stroke={2} className="text-[#DC2626]" />
                                   </span>
                                 )}
@@ -1789,12 +1789,12 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                   {item.productId}<br />- {item.name}
                                 </span>
                                 {isGrouped && parentIsHidden && (
-                                  <span className="inline-flex items-center text-[#DC2626]/50" title="Hidden from customer view">
+                                  <span className="inline-flex items-center text-[#DC2626]/50" title="This item will be hidden from the customer.">
                                     <IconEyeOff size={11} stroke={1.5} />
                                   </span>
                                 )}
                                 {isGrouped && parentIsCollapsed && (
-                                  <span className="inline-flex items-center text-[#C2410C]/50" title="Inside collapsed section — customer sees only the header">
+                                  <span className="inline-flex items-center text-[#C2410C]/50" title="This item will be hidden from the customer.">
                                     <IconEyeOff size={11} stroke={1.5} />
                                   </span>
                                 )}
