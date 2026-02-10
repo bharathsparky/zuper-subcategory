@@ -781,37 +781,100 @@ function OptionPreviewModal({ isOpen, onClose, option }) {
   )
 }
 
-// ─── Section Configuration Sheet ────────────────────────────────────
-function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdateHidden, onUpdateName, onSave, onClose, isNew }) {
+// ─── Add Section Popover (just name input) ─────────────────────────
+function AddSectionPopover({ onAdd, onClose }) {
+  const [name, setName] = useState('')
+  const popoverRef = useRef(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target)) {
+        onClose()
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [onClose])
+
+  const handleSubmit = () => {
+    if (!name.trim()) return
+    onAdd(name.trim())
+  }
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/20" onClick={onClose} />
+      <div
+        ref={popoverRef}
+        className="relative bg-white rounded-[12px] shadow-[0px_8px_32px_rgba(0,0,0,0.16)] w-[380px] overflow-hidden"
+      >
+        <div className="px-[20px] pt-[20px] pb-[6px]">
+          <h3 className="text-[15px] font-semibold text-[#1E293B]">Add Section</h3>
+          <p className="text-[12px] text-[#64748B] mt-[2px]">Enter a name for the new section</p>
+        </div>
+        <div className="px-[20px] py-[12px]">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleSubmit(); if (e.key === 'Escape') onClose() }}
+            placeholder="e.g. Roofing Materials, Labor, etc."
+            autoFocus
+            className="w-full h-[40px] px-[12px] border border-[#E2E8F0] rounded-[8px] text-[14px] text-[#1E293B] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] focus:ring-2 focus:ring-[#3B82F6]/10 transition-all bg-white"
+          />
+        </div>
+        <div className="px-[20px] pb-[16px] flex items-center justify-end gap-[8px]">
+          <button
+            onClick={onClose}
+            className="h-[34px] px-[14px] border border-[#E2E8F0] rounded-[6px] text-[13px] font-medium text-[#334155] bg-white hover:bg-[#F8FAFC] transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!name.trim()}
+            className="h-[34px] px-[16px] bg-[#E44A19] rounded-[6px] text-[13px] font-medium text-white hover:bg-[#D03F14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Add Section
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Toggle Switch Component ────────────────────────────────────────
+function ToggleSwitch({ checked, onChange, size = 'default', disabled = false }) {
+  const w = size === 'small' ? 'w-[38px]' : 'w-[44px]'
+  const h = size === 'small' ? 'h-[22px]' : 'h-[24px]'
+  const dotSize = size === 'small' ? 'w-[16px] h-[16px]' : 'w-[18px] h-[18px]'
+  const dotOn = size === 'small' ? 'left-[19px]' : 'left-[23px]'
+  return (
+    <button
+      onClick={() => !disabled && onChange(!checked)}
+      disabled={disabled}
+      className={`relative ${w} ${h} rounded-full transition-colors flex-shrink-0 ${
+        disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+      } ${
+        checked ? 'bg-[#E44A19]' : 'bg-[#CBD5E1]'
+      }`}
+    >
+      <div className={`absolute top-[3px] ${dotSize} bg-white rounded-full shadow-sm transition-transform ${
+        checked ? dotOn : 'left-[3px]'
+      }`} />
+    </button>
+  )
+}
+
+// ─── Section Configuration Sheet (simplified) ───────────────────────
+function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onUpdateName, onSave, onClose }) {
   const sectionDisplay = header.sectionDisplay || 'expanded'
   const showSubtotal = header.showSubtotal || false
-  const showChildPrices = header.showChildPrices !== false // default true
+  const showChildPrices = header.showChildPrices !== false
 
-  const displayModes = [
-    {
-      id: 'expanded',
-      label: 'Expanded',
-      description: 'Show all',
-      icon: IconEye,
-    },
-    {
-      id: 'collapsed',
-      label: 'Collapsed',
-      description: 'Hide child items, show section',
-      icon: IconStack2,
-    },
-    {
-      id: 'hidden',
-      label: 'Hidden',
-      description: 'Hide all',
-      icon: IconEyeOff,
-    },
-  ]
-
-  // Toggle for showChildPrices
-  const handleToggleChildPrices = () => {
-    onUpdateHidden?.({ showChildPrices: !showChildPrices })
-  }
+  const isExpanded = sectionDisplay === 'expanded'
+  const isCollapsed = sectionDisplay === 'collapsed'
+  const isHidden = sectionDisplay === 'hidden'
 
   return (
     <div className="fixed inset-0 z-[70]" onClick={onClose}>
@@ -820,12 +883,12 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
 
       {/* Sheet Panel - slides from right */}
       <div
-        className="absolute right-0 top-0 bottom-0 w-[420px] bg-white shadow-[0px_8px_32px_rgba(0,0,0,0.18)] flex flex-col"
+        className="absolute right-0 top-0 bottom-0 w-[400px] bg-white shadow-[0px_8px_32px_rgba(0,0,0,0.18)] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Sheet Header */}
         <div className="h-[56px] px-[21px] flex items-center justify-between border-b border-[#E2E8F0] flex-shrink-0">
-          <h3 className="text-[16px] font-semibold text-[#1E293B]">{isNew ? 'Add Section' : 'Section Configuration'}</h3>
+          <h3 className="text-[16px] font-semibold text-[#1E293B]">Section Settings</h3>
           <button
             onClick={onClose}
             className="w-[32px] h-[32px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors"
@@ -835,7 +898,7 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
         </div>
 
         {/* Sheet Content */}
-        <div className="flex-1 overflow-y-auto p-[21px] space-y-[21px]">
+        <div className="flex-1 overflow-y-auto p-[21px] space-y-[16px]">
           {/* Section Name */}
           <div className="space-y-[6px]">
             <label className="text-[13px] font-medium text-[#334155]">Section Name</label>
@@ -844,118 +907,107 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
               value={header.name}
               onChange={(e) => onUpdateName?.(e.target.value)}
               placeholder="Enter section name"
-              autoFocus={isNew}
               className="w-full h-[38px] px-[11px] border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors bg-white"
             />
           </div>
 
-          {/* Section Display Card */}
-          <div className="border border-[#E2E8F0] rounded-[12px] p-[20px] space-y-[16px]">
-            {/* Title */}
-            <div>
-              <h4 className="text-[15px] font-semibold text-[#1E293B]">Section Display</h4>
-              <p className="text-[13px] text-[#64748B] mt-[2px]">Control visibility of section and child items</p>
-            </div>
+          {/* Divider */}
+          <div className="border-t border-[#E2E8F0]" />
 
-            {/* Display Mode Selector - 3 cards */}
-            <div className="grid grid-cols-3 gap-[8px]">
-              {displayModes.map((mode) => {
-                const ModeIcon = mode.icon
-                const isActive = sectionDisplay === mode.id
-                return (
-                  <button
-                    key={mode.id}
-                    onClick={() => onUpdateDisplay(mode.id)}
-                    className={`flex flex-col items-center gap-[8px] py-[16px] px-[8px] rounded-[10px] border-2 transition-all ${
-                      isActive
-                        ? 'border-[#E44A19] bg-[#FEF2EE]'
-                        : 'border-[#E2E8F0] bg-white hover:border-[#CBD5E1] hover:bg-[#F8FAFC]'
-                    }`}
-                  >
-                    <ModeIcon size={24} stroke={1.8} className={isActive ? 'text-[#475569]' : 'text-[#64748B]'} />
-                    <div className="text-center">
-                      <div className={`text-[13px] font-semibold leading-[18px] ${isActive ? 'text-[#E44A19]' : 'text-[#334155]'}`}>
-                        {mode.label}
-                      </div>
-                      <p className="text-[11px] text-[#64748B] leading-[15px] mt-[3px]">{mode.description}</p>
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+          {/* Simple Toggles */}
+          <div className="space-y-[4px]">
+            <h4 className="text-[14px] font-semibold text-[#1E293B] mb-[12px]">Display Settings</h4>
 
-          {/* Hidden Mode Warning */}
-          {sectionDisplay === 'hidden' && (
-            <div className="border border-[#FECACA] bg-[#FEF2F2] rounded-[10px] p-[16px]">
-              <div className="flex items-start gap-[10px]">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-[1px]">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-                  <line x1="12" y1="9" x2="12" y2="13"/>
-                  <line x1="12" y1="17" x2="12.01" y2="17"/>
-                </svg>
-                <div className="flex-1">
-                  <p className="text-[13px] font-semibold text-[#991B1B]">
-                    Important: Price visibility will be disabled
-                  </p>
-                  <p className="text-[12px] text-[#991B1B] mt-[4px] leading-[18px]">
-                    When a section is hidden, pricing across the proposal will be concealed. This includes the hidden section as well as all other sections and line items. Only the final total price will be visible.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Display Options - Only shown for expanded and collapsed */}
-          {sectionDisplay !== 'hidden' && (
-            <div className="space-y-[10px]">
-              <h4 className="text-[15px] font-semibold text-[#1E293B]">Display Options</h4>
-
-              {/* Show section total */}
-              <div className="flex items-center justify-between py-[14px] px-[16px] bg-white rounded-[10px] border border-[#E2E8F0]">
+            {/* Show child items (expanded vs collapsed) */}
+            <div className={`flex items-center justify-between py-[12px] px-[14px] rounded-[8px] transition-colors ${isHidden ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}`}>
+              <div className="flex items-center gap-[10px]">
+                <IconEye size={18} stroke={1.8} className="text-[#64748B]" />
                 <div>
-                  <span className="text-[13px] font-semibold text-[#1E293B]">Show section total</span>
-                  <p className="text-[12px] text-[#64748B] mt-[2px]">
-                    {sectionDisplay === 'collapsed'
-                      ? 'Display aggregate total for collapsed section'
-                      : 'Display aggregate total for all child items'
-                    }
+                  <span className="text-[13px] font-medium text-[#1E293B]">Show child items</span>
+                  <p className="text-[11px] text-[#94A3B8] mt-[1px]">Expand items under this section for customers</p>
+                </div>
+              </div>
+              <ToggleSwitch
+                checked={isExpanded}
+                onChange={(val) => onUpdateDisplay(val ? 'expanded' : 'collapsed')}
+                disabled={isHidden}
+              />
+            </div>
+
+            {/* Show section total */}
+            <div className={`flex items-center justify-between py-[12px] px-[14px] rounded-[8px] transition-colors ${isHidden ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}`}>
+              <div className="flex items-center gap-[10px]">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <div>
+                  <span className="text-[13px] font-medium text-[#1E293B]">Show section total</span>
+                  <p className="text-[11px] text-[#94A3B8] mt-[1px]">Display aggregate subtotal for this section</p>
+                </div>
+              </div>
+              <ToggleSwitch
+                checked={showSubtotal}
+                onChange={(val) => onUpdateSubtotal(val)}
+                disabled={isHidden}
+              />
+            </div>
+
+            {/* Show child prices — always visible, disabled when collapsed or hidden */}
+            <div className={`flex items-center justify-between py-[12px] px-[14px] rounded-[8px] transition-colors ${(isCollapsed || isHidden) ? 'opacity-50' : 'hover:bg-[#F8FAFC]'}`}>
+              <div className="flex items-center gap-[10px]">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                <div>
+                  <span className="text-[13px] font-medium text-[#1E293B]">Show child prices</span>
+                  <p className="text-[11px] text-[#94A3B8] mt-[1px]">
+                    {isCollapsed ? 'Enable "Show child items" first' : 'Display individual price for each line item'}
                   </p>
                 </div>
-                <button
-                  onClick={() => onUpdateSubtotal(!showSubtotal)}
-                  className={`relative w-[44px] h-[24px] rounded-full transition-colors flex-shrink-0 ${
-                    showSubtotal ? 'bg-[#E44A19]' : 'bg-[#CBD5E1]'
-                  }`}
-                >
-                  <div className={`absolute top-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform ${
-                    showSubtotal ? 'left-[23px]' : 'left-[3px]'
-                  }`} />
-                </button>
               </div>
-
-              {/* Show child prices - Only in expanded mode */}
-              {sectionDisplay === 'expanded' && (
-                <div className="flex items-center justify-between py-[14px] px-[16px] bg-white rounded-[10px] border border-[#E2E8F0]">
-                  <div>
-                    <span className="text-[13px] font-semibold text-[#1E293B]">Show child prices</span>
-                    <p className="text-[12px] text-[#64748B] mt-[2px]">Display individual prices for each child item</p>
-                  </div>
-                  <button
-                    onClick={handleToggleChildPrices}
-                    className={`relative w-[44px] h-[24px] rounded-full transition-colors flex-shrink-0 ${
-                      showChildPrices ? 'bg-[#E44A19]' : 'bg-[#CBD5E1]'
-                    }`}
-                  >
-                    <div className={`absolute top-[3px] w-[18px] h-[18px] bg-white rounded-full shadow-sm transition-transform ${
-                      showChildPrices ? 'left-[23px]' : 'left-[3px]'
-                    }`} />
-                  </button>
-                </div>
-              )}
+              <ToggleSwitch
+                checked={showChildPrices}
+                onChange={(val) => onUpdateChildPrices(val)}
+                disabled={isCollapsed || isHidden}
+              />
             </div>
-          )}
 
+            {/* Divider */}
+            <div className="border-t border-[#E2E8F0] my-[4px]" />
+
+            {/* Hide from proposal */}
+            <div className="flex items-center justify-between py-[12px] px-[14px] rounded-[8px] hover:bg-[#FEF2F2]/60 transition-colors">
+              <div className="flex items-center gap-[10px]">
+                <IconEyeOff size={18} stroke={1.8} className={isHidden ? 'text-[#DC2626]' : 'text-[#64748B]'} />
+                <div>
+                  <span className={`text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#1E293B]'}`}>Hide from proposal</span>
+                  <p className="text-[11px] text-[#94A3B8] mt-[1px]">Completely hide this section from customer view</p>
+                </div>
+              </div>
+              <ToggleSwitch
+                checked={isHidden}
+                onChange={(val) => {
+                  if (val) {
+                    onUpdateDisplay('hidden')
+                  } else {
+                    onUpdateDisplay('expanded')
+                  }
+                }}
+              />
+            </div>
+
+            {/* Hidden Mode Warning */}
+            {isHidden && (
+              <div className="mx-[4px] border border-[#FECACA] bg-[#FEF2F2] rounded-[8px] p-[12px]">
+                <div className="flex items-start gap-[8px]">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-[1px]">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                  <p className="text-[11px] text-[#991B1B] leading-[16px]">
+                    Pricing across the entire proposal will be hidden. Only the final total will be visible.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Sheet Footer */}
@@ -968,10 +1020,10 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
           </button>
           <button
             onClick={onSave}
-            disabled={isNew && !header.name?.trim()}
+            disabled={!header.name?.trim()}
             className="h-[36px] px-[20px] bg-[#E44A19] border border-[#E44A19] rounded-[6px] text-[13px] font-medium text-white hover:bg-[#D03F14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isNew ? 'Add Section' : 'Save Configuration'}
+            Save
           </button>
         </div>
       </div>
@@ -1037,7 +1089,8 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
       name: 'Roofing Materials',
       sectionDisplay: 'expanded',
       sectionHidden: false,
-      showSubtotal: false,
+      showSubtotal: true,
+      showChildPrices: true,
     },
     {
       id: 2,
@@ -1083,28 +1136,23 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
     }
   ])
 
-  // Open config sheet for a brand new section (no dialog step)
+  // Show the add section name popover
   const handleStartAddSection = () => {
+    setIsAddingNewSection(true)
+  }
+
+  // Create section with just a name — defaults: expanded, subtotal enabled
+  const handleCreateSection = (name) => {
     const newSection = {
       id: Date.now(),
       type: 'header',
-      name: '',
+      name,
       sectionDisplay: 'expanded',
       sectionHidden: false,
-      showSubtotal: false,
+      showSubtotal: true,
+      showChildPrices: true,
     }
-    setHeaderBeingConfigured(newSection)
-    setIsAddingNewSection(true)
-    setSectionConfigOpen(true)
-  }
-
-  // Finalize adding the new section from the config sheet
-  const handleFinalizeAddSection = () => {
-    if (!headerBeingConfigured?.name?.trim()) return
-    const sectionToAdd = { ...headerBeingConfigured, name: headerBeingConfigured.name.trim() }
-    setLineItems(prev => [...prev, sectionToAdd])
-    setSectionConfigOpen(false)
-    setHeaderBeingConfigured(null)
+    setLineItems(prev => [...prev, newSection])
     setIsAddingNewSection(false)
   }
 
@@ -1156,16 +1204,16 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
     setHeaderBeingConfigured(prev => {
       const updated = { ...prev, sectionDisplay: mode }
       if (mode === 'hidden') {
-        // Hidden mode: no display options, reset everything
-        updated.showSubtotal = false
-        updated.showChildPrices = false
-        updated.sectionHidden = false
+        // Hidden mode: toggles are disabled in UI, preserve values so they restore on unhide
+        updated.sectionHidden = true
       } else if (mode === 'collapsed') {
-        // Collapsed: no child prices toggle (children are hidden)
+        updated.sectionHidden = false
+        // Collapsed: child prices not applicable (children are hidden), auto-disable
         updated.showChildPrices = false
       } else if (mode === 'expanded') {
-        // Expanded: default child prices to true
-        if (prev.showChildPrices === undefined || prev.showChildPrices === false) {
+        updated.sectionHidden = false
+        // Expanded: if child prices were auto-disabled by collapsed, restore to true
+        if (prev.sectionDisplay === 'collapsed' || prev.showChildPrices === undefined) {
           updated.showChildPrices = true
         }
       }
@@ -1649,43 +1697,44 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                 )
                               })()}
                             </td>
-                            <td className={`w-[72px] px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle sticky right-0 ${sectionBg}`}>
-                              <div className="relative" ref={sectionKebabOpenId === item.id ? sectionKebabRef : null}>
+                            <td className={`w-[90px] px-[8px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle sticky right-0 ${sectionBg}`}>
+                              <div className="flex items-center gap-[2px] justify-end">
+                                {/* Gear icon — opens config directly */}
                                 <button
-                                  onClick={() => setSectionKebabOpenId(sectionKebabOpenId === item.id ? null : item.id)}
-                                  className="w-[40px] h-[40px] flex items-center justify-center rounded-full hover:bg-white/80 transition-colors"
+                                  onClick={() => handleOpenSectionConfig(item)}
+                                  className="w-[32px] h-[32px] flex items-center justify-center rounded-full hover:bg-white/80 transition-colors"
+                                  title="Section settings"
                                 >
-                                  <IconDotsVertical size={15.5} stroke={2} className="text-[rgba(30,41,59,0.87)]" />
+                                  <IconSettings size={15} stroke={2} className="text-[#64748B]" />
                                 </button>
-                                {sectionKebabOpenId === item.id && (
-                                  <div className="absolute right-0 top-full mt-[4px] w-[180px] bg-white border border-[#E2E8F0] rounded-[8px] shadow-lg z-50 py-[4px] overflow-hidden">
-                                    <button
-                                      onClick={() => {
-                                        setSectionKebabOpenId(null)
-                                        handleOpenSectionConfig(item)
-                                      }}
-                                      className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[8px]"
-                                    >
-                                      <IconSettings size={14} stroke={2} className="text-[#64748B]" />
-                                      Configure
-                                    </button>
-                                    <button
-                                      onClick={() => handleCloneSection(item)}
-                                      className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[8px]"
-                                    >
-                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                                      Clone
-                                    </button>
-                                    <div className="my-[2px] mx-[10px] border-t border-[#E2E8F0]" />
-                                    <button
-                                      onClick={() => handleRemoveSection(item.id)}
-                                      className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#DC2626] hover:bg-[#FEF2F2] transition-colors flex items-center gap-[8px]"
-                                    >
-                                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                      Remove
-                                    </button>
-                                  </div>
-                                )}
+                                {/* Kebab menu */}
+                                <div className="relative" ref={sectionKebabOpenId === item.id ? sectionKebabRef : null}>
+                                  <button
+                                    onClick={() => setSectionKebabOpenId(sectionKebabOpenId === item.id ? null : item.id)}
+                                    className="w-[32px] h-[32px] flex items-center justify-center rounded-full hover:bg-white/80 transition-colors"
+                                  >
+                                    <IconDotsVertical size={15.5} stroke={2} className="text-[rgba(30,41,59,0.87)]" />
+                                  </button>
+                                  {sectionKebabOpenId === item.id && (
+                                    <div className="absolute right-0 top-full mt-[4px] w-[160px] bg-white border border-[#E2E8F0] rounded-[8px] shadow-lg z-50 py-[4px] overflow-hidden">
+                                      <button
+                                        onClick={() => handleCloneSection(item)}
+                                        className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[8px]"
+                                      >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                        Clone
+                                      </button>
+                                      <div className="my-[2px] mx-[10px] border-t border-[#E2E8F0]" />
+                                      <button
+                                        onClick={() => handleRemoveSection(item.id)}
+                                        className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#DC2626] hover:bg-[#FEF2F2] transition-colors flex items-center gap-[8px]"
+                                      >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                        Remove
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </td>
                             </>
@@ -2134,16 +2183,24 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
         option={previewOption}
       />
 
+      {/* Add Section Name Popover */}
+      {isAddingNewSection && (
+        <AddSectionPopover
+          onAdd={handleCreateSection}
+          onClose={() => setIsAddingNewSection(false)}
+        />
+      )}
+
+      {/* Section Config Sheet (for existing sections) */}
       {sectionConfigOpen && headerBeingConfigured && (
         <SectionConfigSheet
           header={headerBeingConfigured}
-          isNew={isAddingNewSection}
           onUpdateDisplay={updateSectionDisplay}
           onUpdateName={(name) => setHeaderBeingConfigured(prev => ({ ...prev, name }))}
           onUpdateSubtotal={(checked) => setHeaderBeingConfigured(prev => ({ ...prev, showSubtotal: checked }))}
-          onUpdateHidden={(updates) => setHeaderBeingConfigured(prev => ({ ...prev, ...updates }))}
-          onSave={isAddingNewSection ? handleFinalizeAddSection : handleSaveSectionConfig}
-          onClose={() => { setSectionConfigOpen(false); setHeaderBeingConfigured(null); setIsAddingNewSection(false) }}
+          onUpdateChildPrices={(checked) => setHeaderBeingConfigured(prev => ({ ...prev, showChildPrices: checked }))}
+          onSave={handleSaveSectionConfig}
+          onClose={() => { setSectionConfigOpen(false); setHeaderBeingConfigured(null) }}
         />
       )}
     </div>

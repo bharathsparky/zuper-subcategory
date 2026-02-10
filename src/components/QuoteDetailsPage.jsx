@@ -195,15 +195,15 @@ function QuoteDetailsPage({ onBack }) {
   const statusOptions = ['Draft', 'Sent', 'Viewed', 'Accepted', 'Declined', 'Expired'];
 
   return (
-    <div className="flex flex-col h-full bg-[#F8FAFC]">
+    <div className="flex flex-col h-full bg-[#FCFCFC]">
       {/* ─── Top Bar ─── */}
-      <div className="bg-white border-b border-[#E2E8F0]">
+      <div className="bg-white border-b border-[#E8EDF1]">
         <div className="h-[49px] flex items-center justify-between px-[21px]">
           {/* Breadcrumb */}
           <div className="flex items-center gap-[8px]">
-            <button onClick={onBack} className="text-[14px] text-[#3B82F6] hover:underline">Quotes</button>
-            <IconChevronRight size={14} stroke={2} className="text-[#94A3B8]" />
-            <span className="text-[14px] text-[#1E293B]">
+            <button onClick={onBack} className="text-[14px] text-[#0172CB] hover:underline">Quotes</button>
+            <IconChevronRight size={14} stroke={2} className="text-[#697D95]" />
+            <span className="text-[14px] text-[#252A31]">
               Quote # {QUOTE_DATA.quoteNo} - {QUOTE_DATA.quoteTitle}
             </span>
           </div>
@@ -211,29 +211,29 @@ function QuoteDetailsPage({ onBack }) {
           {/* Actions */}
           <div className="flex items-center gap-[7px]">
             {/* New button */}
-            <button className="h-[32px] px-[12px] flex items-center gap-[6px] border border-[#E2E8F0] rounded-[4px] text-[13px] font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors">
+            <button className="h-[32px] px-[12px] flex items-center gap-[6px] border border-[#E8EDF1] rounded-[4px] text-[13px] font-medium text-[#252A31] hover:bg-[#FCFCFC] transition-colors">
               <span>New</span>
               <IconChevronDown size={13} stroke={2} />
             </button>
             {/* Print / PDF / Send group */}
-            <div className="flex items-center border border-[#E2E8F0] rounded-[4px] overflow-hidden">
-              <button className="h-[32px] px-[12px] flex items-center gap-[6px] text-[13px] text-[#334155] hover:bg-[#F8FAFC] transition-colors border-r border-[#E2E8F0]">
+            <div className="flex items-center border border-[#E8EDF1] rounded-[4px] overflow-hidden">
+              <button className="h-[32px] px-[12px] flex items-center gap-[6px] text-[13px] text-[#252A31] hover:bg-[#FCFCFC] transition-colors border-r border-[#E8EDF1]">
                 <IconPrinter size={15} stroke={1.5} />
                 <span>Print</span>
-                <IconChevronDown size={12} stroke={2} className="text-[#94A3B8]" />
+                <IconChevronDown size={12} stroke={2} className="text-[#697D95]" />
               </button>
-              <button className="h-[32px] px-[12px] flex items-center gap-[6px] text-[13px] text-[#334155] hover:bg-[#F8FAFC] transition-colors border-r border-[#E2E8F0]">
+              <button className="h-[32px] px-[12px] flex items-center gap-[6px] text-[13px] text-[#252A31] hover:bg-[#FCFCFC] transition-colors border-r border-[#E8EDF1]">
                 <IconFileText size={15} stroke={1.5} />
                 <span>PDF</span>
-                <IconChevronDown size={12} stroke={2} className="text-[#94A3B8]" />
+                <IconChevronDown size={12} stroke={2} className="text-[#697D95]" />
               </button>
-              <button className="h-[32px] px-[12px] flex items-center gap-[6px] text-[13px] text-[#334155] hover:bg-[#F8FAFC] transition-colors">
+              <button className="h-[32px] px-[12px] flex items-center gap-[6px] text-[13px] text-[#252A31] hover:bg-[#FCFCFC] transition-colors">
                 <IconSend size={15} stroke={1.5} />
                 <span>Send</span>
               </button>
             </div>
             {/* More Actions */}
-            <button className="h-[32px] px-[12px] flex items-center gap-[6px] border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] hover:bg-[#F8FAFC] transition-colors">
+            <button className="h-[32px] px-[12px] flex items-center gap-[6px] border border-[#E8EDF1] rounded-[4px] text-[13px] text-[#252A31] hover:bg-[#FCFCFC] transition-colors">
               <span>More Actions</span>
               <IconChevronDown size={13} stroke={2} />
             </button>
@@ -247,27 +247,27 @@ function QuoteDetailsPage({ onBack }) {
         <div className="flex-1 overflow-y-auto p-[21px]">
 
           {/* ─── Job & Status Row ─── */}
-          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px]">
+          <div className="bg-white rounded-[4px] border border-[#E8EDF1] mb-[14px]">
             <div className="flex">
-              <div className="flex-1 p-[14px] border-r border-[#E2E8F0]">
-                <div className="text-[13px] text-[#64748B] mb-[4px]">Job</div>
-                <div className="text-[13px] text-[#334155]">{QUOTE_DATA.job.id || '---'}</div>
+              <div className="flex-1 p-[14px] border-r border-[#E8EDF1]">
+                <div className="text-[13px] text-[#697D95] mb-[4px]">Job</div>
+                <div className="text-[13px] text-[#252A31]">{QUOTE_DATA.job.id || '---'}</div>
               </div>
               <div className="flex-1 p-[14px]">
-                <div className="text-[13px] text-[#64748B] mb-[4px]">Status</div>
+                <div className="text-[13px] text-[#697D95] mb-[4px]">Status</div>
                 <div className="relative">
                   <button
                     onClick={() => setStatusDropdownOpen(!statusDropdownOpen)}
-                    className="w-full h-[36px] px-[10px] flex items-center justify-between border border-[#E2E8F0] rounded-[4px] text-[13px] text-[#334155] hover:border-[#CBD5E1] transition-colors"
+                    className="w-full h-[36px] px-[10px] flex items-center justify-between border border-[#E8EDF1] rounded-[4px] text-[13px] text-[#252A31] hover:border-[#CBD5E1] transition-colors"
                   >
                     <span>{currentStatus}</span>
-                    <IconChevronDown size={16} stroke={1.5} className="text-[#64748B]" />
+                    <IconChevronDown size={16} stroke={1.5} className="text-[#697D95]" />
                   </button>
                   {statusDropdownOpen && (
-                    <div className="absolute top-[40px] left-0 right-0 bg-white border border-[#E2E8F0] rounded-[4px] shadow-lg z-10">
+                    <div className="absolute top-[40px] left-0 right-0 bg-white border border-[#E8EDF1] rounded-[4px] shadow-lg z-10">
                       {statusOptions.map(s => (
                         <button key={s} onClick={() => { setCurrentStatus(s); setStatusDropdownOpen(false); }}
-                          className={`w-full px-[12px] py-[8px] text-left text-[13px] hover:bg-[#F8FAFC] ${currentStatus === s ? 'bg-[#F1F5F9] text-[#3B82F6]' : 'text-[#334155]'}`}
+                          className={`w-full px-[12px] py-[8px] text-left text-[13px] hover:bg-[#FCFCFC] ${currentStatus === s ? 'bg-[#EFF2F5] text-[#0172CB]' : 'text-[#252A31]'}`}
                         >{s}</button>
                       ))}
                     </div>
@@ -278,23 +278,23 @@ function QuoteDetailsPage({ onBack }) {
           </div>
 
           {/* ─── Main Info Card ─── */}
-          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px]">
+          <div className="bg-white rounded-[4px] border border-[#E8EDF1] mb-[14px]">
             {/* Logo row + ACCEPTED ribbon */}
-            <div className="relative p-[21px] border-b border-[#E2E8F0] overflow-hidden">
+            <div className="relative p-[21px] border-b border-[#E8EDF1] overflow-hidden">
               <div className="flex items-start">
                 {/* Company logo */}
                 <div>
                   <div className="flex items-center gap-[4px]">
-                    <span className="text-[22px] font-extrabold text-[#1E293B] tracking-tight italic">SUMMIT</span>
+                    <span className="text-[22px] font-extrabold text-[#252A31] tracking-tight italic">SUMMIT</span>
                   </div>
-                  <div className="text-[7px] font-medium text-[#64748B] tracking-[0.15em] uppercase -mt-[2px]">Roofing & Exteriors</div>
+                  <div className="text-[7px] font-medium text-[#697D95] tracking-[0.15em] uppercase -mt-[2px]">Roofing & Exteriors</div>
                 </div>
               </div>
               {/* ACCEPTED diagonal ribbon */}
               <div className="absolute -top-[2px] -right-[2px] w-[120px] h-[120px] overflow-hidden">
                 <div
-                  className="absolute bg-[#22C55E] text-white text-[11px] font-semibold tracking-wide text-center py-[6px] w-[170px]"
-                  style={{ top: '26px', right: '-40px', transform: 'rotate(45deg)', boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }}
+                  className="absolute bg-[#28A138] text-white text-[11px] font-semibold tracking-wide text-center py-[6px] w-[170px]"
+                  style={{ top: '26px', right: '-40px', transform: 'rotate(45deg)', boxShadow: '0 2px 4px rgba(0,0,0,0.12)' }}
                 >ACCEPTED</div>
               </div>
             </div>
@@ -302,45 +302,45 @@ function QuoteDetailsPage({ onBack }) {
             {/* Addresses + Quote Details */}
             <div className="flex p-[14px] gap-[14px]">
               {/* Billing Address */}
-              <div className="flex-1 border border-[#E2E8F0] rounded-[4px] p-[12px]">
-                <div className="text-[12px] font-semibold text-[#334155] mb-[6px]">Billing Address</div>
-                <div className="space-y-[1px] text-[12px] text-[#64748B] leading-[18px]">
-                  <div className="font-medium text-[#334155]">{QUOTE_DATA.billingAddress.name}</div>
+              <div className="flex-1 border border-[#E8EDF1] rounded-[4px] p-[12px]">
+                <div className="text-[12px] font-semibold text-[#252A31] mb-[6px]">Billing Address</div>
+                <div className="space-y-[1px] text-[12px] text-[#697D95] leading-[18px]">
+                  <div className="font-medium text-[#252A31]">{QUOTE_DATA.billingAddress.name}</div>
                   {QUOTE_DATA.billingAddress.lines.map((l, i) => <div key={i}>{l}</div>)}
                   <div className="flex items-center gap-[6px] pt-[4px]">
-                    <IconPhone size={13} stroke={1.5} className="text-[#64748B] flex-shrink-0" />
+                    <IconPhone size={13} stroke={1.5} className="text-[#697D95] flex-shrink-0" />
                     <span>{QUOTE_DATA.billingAddress.phone}</span>
                   </div>
                   <div className="flex items-center gap-[6px]">
-                    <IconMail size={13} stroke={1.5} className="text-[#64748B] flex-shrink-0" />
-                    <a href={`mailto:${QUOTE_DATA.billingAddress.email}`} className="text-[#3B82F6] hover:underline">{QUOTE_DATA.billingAddress.email}</a>
+                    <IconMail size={13} stroke={1.5} className="text-[#697D95] flex-shrink-0" />
+                    <a href={`mailto:${QUOTE_DATA.billingAddress.email}`} className="text-[#0172CB] hover:underline">{QUOTE_DATA.billingAddress.email}</a>
                   </div>
                 </div>
               </div>
 
               {/* Customer Address */}
-              <div className="flex-1 border border-[#E2E8F0] rounded-[4px] p-[12px]">
-                <div className="text-[12px] font-semibold text-[#334155] mb-[6px]">Customer Address</div>
-                <div className="space-y-[1px] text-[12px] text-[#64748B] leading-[18px]">
-                  <div className="font-medium text-[#334155]">{QUOTE_DATA.customerAddress.name}</div>
+              <div className="flex-1 border border-[#E8EDF1] rounded-[4px] p-[12px]">
+                <div className="text-[12px] font-semibold text-[#252A31] mb-[6px]">Customer Address</div>
+                <div className="space-y-[1px] text-[12px] text-[#697D95] leading-[18px]">
+                  <div className="font-medium text-[#252A31]">{QUOTE_DATA.customerAddress.name}</div>
                   {QUOTE_DATA.customerAddress.lines.map((l, i) => <div key={i}>{l}</div>)}
                   <div className="flex items-center gap-[6px] pt-[4px]">
-                    <IconPhone size={13} stroke={1.5} className="text-[#64748B] flex-shrink-0" />
+                    <IconPhone size={13} stroke={1.5} className="text-[#697D95] flex-shrink-0" />
                     <span>{QUOTE_DATA.customerAddress.phone}</span>
                   </div>
                   <div className="flex items-center gap-[6px]">
-                    <IconMail size={13} stroke={1.5} className="text-[#64748B] flex-shrink-0" />
-                    <a href={`mailto:${QUOTE_DATA.customerAddress.email}`} className="text-[#3B82F6] hover:underline">{QUOTE_DATA.customerAddress.email}</a>
+                    <IconMail size={13} stroke={1.5} className="text-[#697D95] flex-shrink-0" />
+                    <a href={`mailto:${QUOTE_DATA.customerAddress.email}`} className="text-[#0172CB] hover:underline">{QUOTE_DATA.customerAddress.email}</a>
                   </div>
                 </div>
               </div>
 
               {/* Right - Total Amount & Details */}
-              <div className="w-[240px] flex-shrink-0 border border-[#E2E8F0] rounded-[4px] overflow-hidden">
+              <div className="w-[240px] flex-shrink-0 border border-[#E8EDF1] rounded-[4px] overflow-hidden">
                 {/* Total Amount Header */}
-                <div className="bg-[#F1F5F9] p-[12px] text-center border-b border-[#E2E8F0]">
-                  <div className="text-[11px] text-[#3B82F6] font-semibold uppercase tracking-wide">Total Amount</div>
-                  <div className="text-[20px] font-bold text-[#1E293B]">{QUOTE_DATA.totalAmount}</div>
+                <div className="bg-[#FCFCFC] p-[12px] text-center border-b border-[#E8EDF1]">
+                  <div className="text-[11px] text-[#4F5E71] font-medium uppercase tracking-wide">Total Amount</div>
+                  <div className="text-[20px] font-semibold text-[#252A31]">{QUOTE_DATA.totalAmount}</div>
                 </div>
                 {/* Quote Detail Rows */}
                 <div className="p-[12px] space-y-[6px]">
@@ -352,8 +352,8 @@ function QuoteDetailsPage({ onBack }) {
                     ['Quote Sold By', QUOTE_DATA.quoteSoldBy],
                   ].map(([label, val]) => (
                     <div key={label} className="flex justify-between">
-                      <span className="text-[12px] text-[#64748B]">{label}</span>
-                      <span className="text-[12px] text-[#334155] font-medium">{val}</span>
+                      <span className="text-[12px] text-[#697D95]">{label}</span>
+                      <span className="text-[12px] text-[#252A31] font-medium">{val}</span>
                     </div>
                   ))}
                 </div>
@@ -361,11 +361,11 @@ function QuoteDetailsPage({ onBack }) {
             </div>
 
             {/* ─── Line Items Table ─── */}
-            <div className="border-t border-[#E2E8F0]">
+            <div className="border-t border-[#E8EDF1]">
               {/* Toolbar row */}
               <div className="flex justify-end px-[14px] py-[6px]">
-                <button className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9] transition-colors" title="Table layout">
-                  <IconLayoutColumns size={15} stroke={1.5} className="text-[#94A3B8]" />
+                <button className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#EFF2F5] transition-colors" title="Table layout">
+                  <IconLayoutColumns size={15} stroke={1.5} className="text-[#697D95]" />
                 </button>
               </div>
 
@@ -373,16 +373,16 @@ function QuoteDetailsPage({ onBack }) {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[960px]">
                   <thead>
-                    <tr className="bg-[#F8FAFC] border-b border-t border-[#E2E8F0]">
-                      <th className="w-[44px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">#</th>
-                      <th className="px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Product / Service</th>
-                      <th className="w-[100px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Unit Cost</th>
-                      <th className="w-[70px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Markup</th>
-                      <th className="w-[110px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Tax Preference</th>
-                      <th className="w-[100px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Location</th>
-                      <th className="w-[60px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Brand</th>
-                      <th className="w-[90px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Specification</th>
-                      <th className="w-[130px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#64748B]">Price</th>
+                    <tr className="bg-[#FCFCFC] border-b border-t border-[#E8EDF1]">
+                      <th className="w-[44px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#4F5E71]">#</th>
+                      <th className="px-[12px] py-[10px] text-left text-[12px] font-medium text-[#4F5E71]">Product / Service</th>
+                      <th className="w-[100px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#4F5E71]">Unit Cost</th>
+                      <th className="w-[70px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#4F5E71]">Markup</th>
+                      <th className="w-[110px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#4F5E71]">Tax Preference</th>
+                      <th className="w-[100px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#4F5E71]">Location</th>
+                      <th className="w-[60px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#4F5E71]">Brand</th>
+                      <th className="w-[90px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#4F5E71]">Specification</th>
+                      <th className="w-[130px] px-[12px] py-[10px] text-left text-[12px] font-medium text-[#4F5E71]">Price</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -402,10 +402,10 @@ function QuoteDetailsPage({ onBack }) {
                       return (
                         <React.Fragment key={category.id}>
                           {/* Section Header Row */}
-                          <tr className={`border-b border-[#E2E8F0] border-l-[3px] ${
-                            isHidden ? 'border-l-[#FCA5A5] bg-[#FEF2F2]/30' :
-                            isCollapsed ? 'border-l-[#FDBA74] bg-[#FFF7ED]/30' :
-                            'border-l-[#3B82F6] bg-[#F8FAFC]'
+                          <tr className={`border-b border-[#E8EDF1] border-l-[3px] ${
+                            isHidden ? 'border-l-[#E8A0BF] bg-[#FDF2F8]/40' :
+                            isCollapsed ? 'border-l-[#D4B896] bg-[#FFFBF5]/40' :
+                            'border-l-[#0172CB] bg-[#FCFCFC]'
                           }`}>
                             <td colSpan={9} className="px-[12px] py-[10px]">
                               <div className="flex items-center gap-[10px]">
@@ -417,13 +417,13 @@ function QuoteDetailsPage({ onBack }) {
                                   <IconChevronDown
                                     size={14}
                                     stroke={2}
-                                    className={`text-[#64748B] transition-transform ${isSectionCollapsedInUI ? '-rotate-90' : ''}`}
+                                    className={`text-[#697D95] transition-transform ${isSectionCollapsedInUI ? '-rotate-90' : ''}`}
                                   />
                                 </button>
-                                <span className="text-[13px] font-semibold text-[#1E293B]">{category.category}</span>
+                                <span className="text-[13px] font-semibold text-[#252A31]">{category.category}</span>
                                 {/* Item count when collapsed */}
                                 {isSectionCollapsedInUI && (
-                                  <span className="text-[11px] text-[#94A3B8]">({category.items.length} items)</span>
+                                  <span className="text-[11px] text-[#697D95]">({category.items.length} items)</span>
                                 )}
                                 {/* Display Mode Badge with tooltip */}
                                 <span
@@ -434,12 +434,12 @@ function QuoteDetailsPage({ onBack }) {
                                       ? 'Collapsed: Customer sees only the section header with total. Items are hidden from customer.'
                                       : 'Hidden: Entire section is hidden from customer view.'
                                   }
-                                  className={`inline-flex items-center gap-1 px-[6px] py-[1px] rounded text-[10px] font-medium cursor-default ${
+                                  className={`inline-flex items-center gap-1 px-[6px] py-[2px] rounded-[4px] text-[10px] font-medium cursor-default ${
                                     isHidden
-                                      ? 'bg-[#FEF2F2] text-[#DC2626] border border-[#FECACA]'
+                                      ? 'bg-[#FDF2F8] text-[#9D174D] border border-[#FBCFE8]/60'
                                       : isCollapsed
-                                      ? 'bg-[#FFF7ED] text-[#C2410C] border border-[#FDBA74]'
-                                      : 'bg-[#F0FDF4] text-[#16A34A] border border-[#BBF7D0]'
+                                      ? 'bg-[#FFFBF5] text-[#92400E] border border-[#FDE68A]/50'
+                                      : 'bg-[#EBF4EC] text-[#28A138] border border-[#CDDFCF]/60'
                                   }`}
                                 >
                                   {isHidden ? <IconEyeOff className="w-3 h-3" /> : isCollapsed ? <IconStack2 className="w-3 h-3" /> : <IconEye className="w-3 h-3" />}
@@ -447,8 +447,8 @@ function QuoteDetailsPage({ onBack }) {
                                 </span>
                                 {/* Section total */}
                                 {category.showSubtotal && (
-                                  <span className="ml-auto text-[11px] text-[#64748B]">
-                                    Section Total: <span className="font-semibold text-[#1E293B]">${sectionTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                                  <span className="ml-auto text-[11px] text-[#4F5E71]">
+                                    Section Total: <span className="font-semibold text-[#252A31]">${sectionTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                                   </span>
                                 )}
                               </div>
@@ -458,55 +458,55 @@ function QuoteDetailsPage({ onBack }) {
                           {/* Items — always present, accordion controls UI collapse */}
                           {!isSectionCollapsedInUI && category.items.map((item, idx) => (
                             <React.Fragment key={item.id}>
-                              <tr className={`border-b border-[#E2E8F0] hover:bg-[#FAFAFA] border-l-[3px] ${
-                                isHidden ? 'border-l-[#FCA5A5]' :
-                                isCollapsed ? 'border-l-[#FDBA74]' :
-                                'border-l-[#3B82F6]'
+                              <tr className={`border-b border-[#E8EDF1] hover:bg-[#FAFBFC] border-l-[3px] ${
+                                isHidden ? 'border-l-[#E8A0BF]' :
+                                isCollapsed ? 'border-l-[#D4B896]' :
+                                'border-l-[#0172CB]'
                               }`}>
-                                <td className="px-[12px] py-[12px] text-[12px] text-[#64748B] align-top">{idx + 1}</td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#697D95] align-top">{idx + 1}</td>
                                 <td className="px-[12px] py-[12px] align-top">
                                   <div className="flex items-start gap-[10px]">
-                                    <div className="w-[40px] h-[40px] bg-[#F1F5F9] rounded-[4px] overflow-hidden flex-shrink-0 flex items-center justify-center">
-                                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke="#94A3B8" strokeWidth="1.5"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" stroke="#94A3B8" strokeWidth="1.5"/></svg>
+                                    <div className="w-[40px] h-[40px] bg-[#EFF2F5] rounded-[4px] overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" stroke="#697D95" strokeWidth="1.5"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12" stroke="#697D95" strokeWidth="1.5"/></svg>
                                     </div>
                                     <div className="min-w-0">
                                       <div className="flex items-center gap-[6px]">
-                                        <span className="text-[12px] text-[#3B82F6] leading-[16px]">{item.name}</span>
+                                        <span className="text-[12px] text-[#0172CB] leading-[16px]">{item.name}</span>
                                         {isHidden && (
-                                          <span className="inline-flex items-center gap-[3px] text-[9px] text-[#DC2626]/60" title="This item is hidden from customer view">
+                                          <span className="inline-flex items-center gap-[3px] text-[9px] text-[#9D174D]/50" title="This item is hidden from customer view">
                                             <IconEyeOff size={10} stroke={1.5} />
                                           </span>
                                         )}
                                         {isCollapsed && (
-                                          <span className="inline-flex items-center gap-[3px] text-[9px] text-[#C2410C]/60" title="This item is inside a collapsed section — customer sees only the section header">
+                                          <span className="inline-flex items-center gap-[3px] text-[9px] text-[#92400E]/40" title="This item is inside a collapsed section — customer sees only the section header">
                                             <IconEyeOff size={10} stroke={1.5} />
                                           </span>
                                         )}
                                       </div>
                                       {item.desc && (
-                                        <div className="text-[10px] text-[#94A3B8] mt-[2px] leading-[14px] whitespace-pre-line">{item.desc}</div>
+                                        <div className="text-[10px] text-[#697D95] mt-[2px] leading-[14px] whitespace-pre-line">{item.desc}</div>
                                       )}
                                       {item.hasReadMore && (
-                                        <button className="text-[10px] text-[#E44A19] hover:underline mt-[1px]">Read More</button>
+                                        <button className="text-[10px] text-[#0172CB] hover:underline mt-[1px]">Read More</button>
                                       )}
                                       {item.isBundle && (
                                         <div className="flex items-center gap-[4px] mt-[2px]">
-                                          <IconChevronDown size={12} stroke={2} className="text-[#64748B]" />
-                                          <button className="text-[10px] text-[#3B82F6] hover:underline">{item.bundleCount} item(s)</button>
+                                          <IconChevronDown size={12} stroke={2} className="text-[#697D95]" />
+                                          <button className="text-[10px] text-[#0172CB] hover:underline">{item.bundleCount} item(s)</button>
                                         </div>
                                       )}
                                     </div>
                                   </div>
                                 </td>
-                                <td className="px-[12px] py-[12px] text-[12px] text-[#334155] align-top">{item.unitCost}</td>
-                                <td className="px-[12px] py-[12px] text-[12px] text-[#64748B] align-top">{item.markup}</td>
-                                <td className="px-[12px] py-[12px] text-[12px] text-[#334155] align-top">{item.taxPreference}</td>
-                                <td className="px-[12px] py-[12px] text-[12px] text-[#334155] align-top whitespace-pre-line">{item.location}</td>
-                                <td className="px-[12px] py-[12px] text-[12px] text-[#334155] align-top">{item.brand || ''}</td>
-                                <td className="px-[12px] py-[12px] text-[12px] text-[#334155] align-top">{item.spec || ''}</td>
-                                <td className="px-[12px] py-[12px] text-[12px] text-[#334155] align-top whitespace-nowrap">
-                                  <div>{item.quantity} <span className="text-[#94A3B8]">×</span> {item.price}</div>
-                                  <div className="text-[10px] text-[#94A3B8] mt-[1px]">{item.taxNote}</div>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#252A31] align-top">{item.unitCost}</td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#697D95] align-top">{item.markup}</td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#252A31] align-top">{item.taxPreference}</td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#252A31] align-top whitespace-pre-line">{item.location}</td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#252A31] align-top">{item.brand || ''}</td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#252A31] align-top">{item.spec || ''}</td>
+                                <td className="px-[12px] py-[12px] text-[12px] text-[#252A31] align-top whitespace-nowrap">
+                                  <div>{item.quantity} <span className="text-[#697D95]">×</span> {item.price}</div>
+                                  <div className="text-[10px] text-[#697D95] mt-[1px]">{item.taxNote}</div>
                                 </td>
                               </tr>
                             </React.Fragment>
@@ -519,15 +519,15 @@ function QuoteDetailsPage({ onBack }) {
               </div>
 
               {/* ─── Summary ─── */}
-              <div className="border-t border-[#E2E8F0]">
+              <div className="border-t border-[#E8EDF1]">
                 {[
                   ['Sub-Total', QUOTE_DATA.summary.subTotal, false],
                   ...QUOTE_DATA.summary.taxes.map(t => [t.name, t.amount, false]),
                   ['Total', QUOTE_DATA.summary.total, true],
                 ].map(([label, val, isBold], i) => (
-                  <div key={i} className="flex justify-end border-b border-[#E2E8F0] last:border-b-0">
-                    <div className={`w-[160px] px-[12px] py-[8px] text-[12px] ${isBold ? 'font-bold text-[#1E293B] text-[14px]' : 'text-[#64748B]'}`}>{label}</div>
-                    <div className={`w-[120px] px-[12px] py-[8px] text-[12px] ${isBold ? 'font-bold text-[#1E293B] text-[14px]' : 'text-[#334155]'}`}>{val}</div>
+                  <div key={i} className="flex justify-end border-b border-[#E8EDF1] last:border-b-0">
+                    <div className={`w-[160px] px-[12px] py-[8px] text-[12px] font-medium ${isBold ? 'text-[#4F5E71] text-[12px]' : 'text-[#4F5E71]'}`}>{label}</div>
+                    <div className={`w-[140px] px-[12px] py-[8px] text-right ${isBold ? 'font-semibold text-[#0172CB] text-[16px]' : 'font-medium text-[#252A31] text-[13px]'}`}>{val}</div>
                   </div>
                 ))}
               </div>
@@ -535,25 +535,25 @@ function QuoteDetailsPage({ onBack }) {
           </div>
 
           {/* ─── Cost & Profit Breakdown ─── */}
-          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px]">
+          <div className="bg-white rounded-[4px] border border-[#E8EDF1] mb-[14px]">
             <button
               onClick={() => setCostBreakdownOpen(!costBreakdownOpen)}
-              className="w-full h-[44px] px-[14px] flex items-center justify-between hover:bg-[#F8FAFC] transition-colors"
+              className="w-full h-[44px] px-[14px] flex items-center justify-between hover:bg-[#FCFCFC] transition-colors"
             >
-              <span className="text-[14px] font-semibold text-[#1E293B]">Cost & Profit Breakdown</span>
-              <IconChevronUp size={16} stroke={2} className={`text-[#64748B] transition-transform ${costBreakdownOpen ? '' : 'rotate-180'}`} />
+              <span className="text-[14px] font-semibold text-[#252A31]">Cost & Profit Breakdown</span>
+              <IconChevronUp size={16} stroke={2} className={`text-[#697D95] transition-transform ${costBreakdownOpen ? '' : 'rotate-180'}`} />
             </button>
             {costBreakdownOpen && (
-              <div className="px-[14px] pb-[14px] border-t border-[#E2E8F0] pt-[14px]">
+              <div className="px-[14px] pb-[14px] border-t border-[#E8EDF1] pt-[14px]">
                 <div className="grid grid-cols-4 gap-[14px]">
                   {/* Profit Margin */}
                   <div className="flex items-center gap-[10px]">
-                    <div className={`w-[36px] h-[36px] rounded-full flex items-center justify-center ${QUOTE_DATA.costBreakdown.profitMarginNegative ? 'bg-[#FEF2F2]' : 'bg-[#F0FDF4]'}`}>
-                      <IconTrendingDown size={18} stroke={1.5} className={QUOTE_DATA.costBreakdown.profitMarginNegative ? 'text-[#EF4444]' : 'text-[#22C55E]'} />
+                    <div className={`w-[36px] h-[36px] rounded-full flex items-center justify-center ${QUOTE_DATA.costBreakdown.profitMarginNegative ? 'bg-[#FEF2F2]' : 'bg-[#EBF4EC]'}`}>
+                      <IconTrendingDown size={18} stroke={1.5} className={QUOTE_DATA.costBreakdown.profitMarginNegative ? 'text-[#EF4444]' : 'text-[#28A138]'} />
                     </div>
                     <div>
-                      <div className="text-[11px] text-[#64748B]">Profit Margin</div>
-                      <div className={`text-[14px] font-bold ${QUOTE_DATA.costBreakdown.profitMarginNegative ? 'text-[#EF4444]' : 'text-[#1E293B]'}`}>{QUOTE_DATA.costBreakdown.profitMargin}</div>
+                      <div className="text-[11px] text-[#697D95]">Profit Margin</div>
+                      <div className={`text-[14px] font-bold ${QUOTE_DATA.costBreakdown.profitMarginNegative ? 'text-[#EF4444]' : 'text-[#252A31]'}`}>{QUOTE_DATA.costBreakdown.profitMargin}</div>
                     </div>
                   </div>
                   {/* COGS */}
@@ -562,31 +562,31 @@ function QuoteDetailsPage({ onBack }) {
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#EF4444" strokeWidth="1.5"/><path d="M12 8V12M12 16H12.01" stroke="#EF4444" strokeWidth="1.5" strokeLinecap="round"/></svg>
                     </div>
                     <div>
-                      <div className="text-[11px] text-[#64748B] flex items-center gap-[3px]">COGS <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#94A3B8" strokeWidth="1.5"/><path d="M8 5.5V8.5M8 10.5H8.005" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round"/></svg></div>
-                      <div className="text-[14px] font-bold text-[#1E293B]">{QUOTE_DATA.costBreakdown.cogs}</div>
+                      <div className="text-[11px] text-[#697D95] flex items-center gap-[3px]">COGS <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="#697D95" strokeWidth="1.5"/><path d="M8 5.5V8.5M8 10.5H8.005" stroke="#697D95" strokeWidth="1.5" strokeLinecap="round"/></svg></div>
+                      <div className="text-[14px] font-bold text-[#252A31]">{QUOTE_DATA.costBreakdown.cogs}</div>
                     </div>
                   </div>
                   {/* Quote Total */}
                   <div className="flex items-center gap-[10px]">
-                    <div className="w-[36px] h-[36px] rounded-full bg-[#EFF6FF] flex items-center justify-center">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="#3B82F6" strokeWidth="1.5"/><path d="M8 10H16M8 14H12" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                    <div className="w-[36px] h-[36px] rounded-full bg-[#E8F4FD] flex items-center justify-center">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="#0172CB" strokeWidth="1.5"/><path d="M8 10H16M8 14H12" stroke="#0172CB" strokeWidth="1.5" strokeLinecap="round"/></svg>
                     </div>
                     <div>
-                      <div className="text-[11px] text-[#64748B]">Quote Total</div>
-                      <div className="text-[14px] font-bold text-[#1E293B]">{QUOTE_DATA.costBreakdown.quoteTotal}</div>
+                      <div className="text-[11px] text-[#697D95]">Quote Total</div>
+                      <div className="text-[14px] font-bold text-[#252A31]">{QUOTE_DATA.costBreakdown.quoteTotal}</div>
                     </div>
                   </div>
                   {/* Profit */}
                   <div className="flex items-center gap-[10px]">
-                    <div className={`w-[36px] h-[36px] rounded-full flex items-center justify-center ${QUOTE_DATA.costBreakdown.profitNegative ? 'bg-[#FEF2F2]' : 'bg-[#F0FDF4]'}`}>
+                    <div className={`w-[36px] h-[36px] rounded-full flex items-center justify-center ${QUOTE_DATA.costBreakdown.profitNegative ? 'bg-[#FEF2F2]' : 'bg-[#EBF4EC]'}`}>
                       {QUOTE_DATA.costBreakdown.profitNegative
                         ? <IconTrendingDown size={18} stroke={1.5} className="text-[#EF4444]" />
-                        : <IconTrendingUp size={18} stroke={1.5} className="text-[#22C55E]" />
+                        : <IconTrendingUp size={18} stroke={1.5} className="text-[#28A138]" />
                       }
                     </div>
                     <div>
-                      <div className="text-[11px] text-[#64748B]">Profit</div>
-                      <div className={`text-[14px] font-bold ${QUOTE_DATA.costBreakdown.profitNegative ? 'text-[#EF4444]' : 'text-[#22C55E]'}`}>{QUOTE_DATA.costBreakdown.profit}</div>
+                      <div className="text-[11px] text-[#697D95]">Profit</div>
+                      <div className={`text-[14px] font-bold ${QUOTE_DATA.costBreakdown.profitNegative ? 'text-[#EF4444]' : 'text-[#28A138]'}`}>{QUOTE_DATA.costBreakdown.profit}</div>
                     </div>
                   </div>
                 </div>
@@ -595,59 +595,59 @@ function QuoteDetailsPage({ onBack }) {
           </div>
 
           {/* ─── Templates & Trade ─── */}
-          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px] p-[14px]">
+          <div className="bg-white rounded-[4px] border border-[#E8EDF1] mb-[14px] p-[14px]">
             <div className="grid grid-cols-3 gap-[14px] mb-[14px]">
               <div>
-                <div className="text-[12px] text-[#64748B] mb-[2px]">Proposal Template</div>
-                <div className="text-[12px] text-[#334155]">{QUOTE_DATA.templates.proposalTemplate}</div>
+                <div className="text-[12px] text-[#697D95] mb-[2px]">Proposal Template</div>
+                <div className="text-[12px] text-[#252A31]">{QUOTE_DATA.templates.proposalTemplate}</div>
               </div>
               <div>
-                <div className="text-[12px] text-[#64748B] mb-[2px]">Proposal Layout</div>
-                <div className="text-[12px] text-[#334155]">{QUOTE_DATA.templates.proposalLayout}</div>
+                <div className="text-[12px] text-[#697D95] mb-[2px]">Proposal Layout</div>
+                <div className="text-[12px] text-[#252A31]">{QUOTE_DATA.templates.proposalLayout}</div>
               </div>
               <div>
-                <div className="text-[12px] text-[#64748B] mb-[2px]">Quote Template</div>
-                <div className="text-[12px] text-[#334155]">{QUOTE_DATA.templates.quoteTemplate}</div>
+                <div className="text-[12px] text-[#697D95] mb-[2px]">Quote Template</div>
+                <div className="text-[12px] text-[#252A31]">{QUOTE_DATA.templates.quoteTemplate}</div>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-[14px]">
               <div>
-                <div className="text-[12px] text-[#64748B] mb-[2px]">Trade Type</div>
-                <div className="text-[12px] text-[#334155]">{QUOTE_DATA.templates.tradeType}</div>
+                <div className="text-[12px] text-[#697D95] mb-[2px]">Trade Type</div>
+                <div className="text-[12px] text-[#252A31]">{QUOTE_DATA.templates.tradeType}</div>
               </div>
               <div>
-                <div className="text-[12px] text-[#64748B] mb-[2px]">Pricelist</div>
-                <div className="text-[12px] text-[#334155]">{QUOTE_DATA.templates.pricelist}</div>
+                <div className="text-[12px] text-[#697D95] mb-[2px]">Pricelist</div>
+                <div className="text-[12px] text-[#252A31]">{QUOTE_DATA.templates.pricelist}</div>
               </div>
             </div>
           </div>
 
           {/* ─── Description ─── */}
-          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px]">
-            <div className="px-[14px] py-[10px] border-b border-[#E2E8F0]">
-              <h3 className="text-[14px] font-semibold text-[#1E293B]">Scope of Work</h3>
+          <div className="bg-white rounded-[4px] border border-[#E8EDF1] mb-[14px]">
+            <div className="px-[14px] py-[10px] border-b border-[#E8EDF1]">
+              <h3 className="text-[14px] font-semibold text-[#252A31]">Scope of Work</h3>
             </div>
             <div className="p-[14px]">
-              <p className="text-[12px] text-[#64748B] leading-[18px]">
+              <p className="text-[12px] text-[#697D95] leading-[18px]">
                 Complete tear-off and replacement of existing 3-tab asphalt shingle roof system. Work includes removal and disposal of existing roofing materials (1 layer), inspection and repair of roof decking as needed, installation of synthetic underlayment, GAF Timberline HDZ architectural shingles (Weathered Wood), new drip edge flashing, starter strips, hip & ridge caps, and ridge vent system. All work performed per local building codes with required permits. Includes magnetic nail sweep and final site cleanup. Covered by GAF Golden Pledge 50-Year warranty.
               </p>
             </div>
           </div>
 
           {/* ─── Other Details ─── */}
-          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px]">
-            <div className="flex items-center justify-between px-[14px] py-[10px] border-b border-[#E2E8F0]">
-              <h3 className="text-[14px] font-semibold text-[#1E293B]">Roof Details</h3>
-              <button className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9]">
-                <IconPencil size={14} stroke={1.5} className="text-[#3B82F6]" />
+          <div className="bg-white rounded-[4px] border border-[#E8EDF1] mb-[14px]">
+            <div className="flex items-center justify-between px-[14px] py-[10px] border-b border-[#E8EDF1]">
+              <h3 className="text-[14px] font-semibold text-[#252A31]">Roof Details</h3>
+              <button className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#EFF2F5]">
+                <IconPencil size={14} stroke={1.5} className="text-[#0172CB]" />
               </button>
             </div>
             <div className="p-[14px]">
               <div className="grid grid-cols-3 gap-x-[14px] gap-y-[12px]">
                 {QUOTE_DATA.otherDetails.map((f, i) => (
                   <div key={i}>
-                    <div className="text-[11px] font-medium text-[#334155] mb-[2px]">{f.label}</div>
-                    <div className="text-[12px] text-[#64748B]">{f.value}</div>
+                    <div className="text-[11px] font-medium text-[#252A31] mb-[2px]">{f.label}</div>
+                    <div className="text-[12px] text-[#697D95]">{f.value}</div>
                   </div>
                 ))}
               </div>
@@ -655,19 +655,19 @@ function QuoteDetailsPage({ onBack }) {
           </div>
 
           {/* ─── Test Section ─── */}
-          <div className="bg-white rounded-[4px] border border-[#E2E8F0] mb-[14px]">
-            <div className="flex items-center justify-between px-[14px] py-[10px] border-b border-[#E2E8F0]">
-              <h3 className="text-[14px] font-semibold text-[#1E293B]">Roof Inspection & Insurance</h3>
-              <button className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#F1F5F9]">
-                <IconPencil size={14} stroke={1.5} className="text-[#3B82F6]" />
+          <div className="bg-white rounded-[4px] border border-[#E8EDF1] mb-[14px]">
+            <div className="flex items-center justify-between px-[14px] py-[10px] border-b border-[#E8EDF1]">
+              <h3 className="text-[14px] font-semibold text-[#252A31]">Roof Inspection & Insurance</h3>
+              <button className="w-[28px] h-[28px] flex items-center justify-center rounded hover:bg-[#EFF2F5]">
+                <IconPencil size={14} stroke={1.5} className="text-[#0172CB]" />
               </button>
             </div>
             <div className="p-[14px]">
               <div className="grid grid-cols-3 gap-x-[14px] gap-y-[12px]">
                 {QUOTE_DATA.testSection.map((f, i) => (
                   <div key={i}>
-                    <div className="text-[11px] font-medium text-[#334155] mb-[2px]">{f.label}</div>
-                    <div className="text-[12px] text-[#64748B]">{f.value}</div>
+                    <div className="text-[11px] font-medium text-[#252A31] mb-[2px]">{f.label}</div>
+                    <div className="text-[12px] text-[#697D95]">{f.value}</div>
                   </div>
                 ))}
               </div>
@@ -677,46 +677,46 @@ function QuoteDetailsPage({ onBack }) {
         </div>
 
         {/* ─── Right Sidebar ─── */}
-        <div className="w-[300px] bg-white border-l border-[#E2E8F0] flex flex-shrink-0">
+        <div className="w-[300px] bg-white border-l border-[#E8EDF1] flex flex-shrink-0">
           {/* Main sidebar content */}
           <div className="flex-1 overflow-y-auto">
 
             {/* ── Quote Status ── */}
-            <div className="border-b border-[#E2E8F0]">
+            <div className="border-b border-[#E8EDF1]">
               <button
                 onClick={() => toggleSidebarSection('quote-status')}
-                className="w-full h-[42px] px-[14px] flex items-center justify-between hover:bg-[#F8FAFC] transition-colors"
+                className="w-full h-[42px] px-[14px] flex items-center justify-between hover:bg-[#FCFCFC] transition-colors"
               >
                 <div className="flex items-center gap-[8px]">
-                  <IconClock size={18} stroke={1.5} className="text-[#64748B]" />
-                  <span className="text-[13px] font-medium text-[#334155]">Quote Status</span>
+                  <IconClock size={18} stroke={1.5} className="text-[#697D95]" />
+                  <span className="text-[13px] font-medium text-[#252A31]">Quote Status</span>
                 </div>
-                <IconChevronDown size={14} stroke={2} className={`text-[#94A3B8] transition-transform ${expandedSidebar['quote-status'] ? 'rotate-180' : ''}`} />
+                <IconChevronDown size={14} stroke={2} className={`text-[#697D95] transition-transform ${expandedSidebar['quote-status'] ? 'rotate-180' : ''}`} />
               </button>
               {expandedSidebar['quote-status'] && (
                 <div className="px-[14px] pb-[14px]">
                   <div className="relative pl-[20px]">
                     {/* Timeline line */}
-                    <div className="absolute left-[7px] top-[10px] bottom-[10px] w-[2px] bg-[#E2E8F0]"></div>
+                    <div className="absolute left-[7px] top-[10px] bottom-[10px] w-[2px] bg-[#E8EDF1]"></div>
                     {QUOTE_DATA.quoteStatusTimeline.map((ev, i) => (
                       <div key={i} className="relative flex items-start gap-[10px] mb-[12px] last:mb-0">
-                        <div className="absolute left-[-20px] top-[2px] w-[16px] h-[16px] rounded-full bg-[#22C55E] flex items-center justify-center z-10">
+                        <div className="absolute left-[-20px] top-[2px] w-[16px] h-[16px] rounded-full bg-[#28A138] flex items-center justify-center z-10">
                           <IconCheck size={10} stroke={3} className="text-white" />
                         </div>
                         <div>
                           {ev.label && (
-                            <div className={`text-[12px] font-semibold ${ev.isAccepted ? 'text-[#22C55E]' : 'text-[#1E293B]'}`}>
+                            <div className={`text-[12px] font-semibold ${ev.isAccepted ? 'text-[#28A138]' : 'text-[#252A31]'}`}>
                               {ev.label}
                             </div>
                           )}
-                          <div className="text-[11px] text-[#64748B]">{ev.date}</div>
-                          <div className="text-[11px] text-[#64748B]">{ev.sub}</div>
+                          <div className="text-[11px] text-[#697D95]">{ev.date}</div>
+                          <div className="text-[11px] text-[#697D95]">{ev.sub}</div>
                         </div>
                       </div>
                     ))}
                   </div>
                   {/* Gray placeholder image */}
-                  <div className="mt-[12px] w-full h-[80px] bg-[#F1F5F9] rounded-[4px] flex items-center justify-center">
+                  <div className="mt-[12px] w-full h-[80px] bg-[#EFF2F5] rounded-[4px] flex items-center justify-center">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#CBD5E1" strokeWidth="1.5"/><circle cx="8.5" cy="8.5" r="1.5" stroke="#CBD5E1" strokeWidth="1.5"/><path d="M21 15L16 10L5 21" stroke="#CBD5E1" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                   </div>
                 </div>
@@ -724,30 +724,30 @@ function QuoteDetailsPage({ onBack }) {
             </div>
 
             {/* ── Organization ── */}
-            <div className="border-b border-[#E2E8F0]">
+            <div className="border-b border-[#E8EDF1]">
               <button
                 onClick={() => toggleSidebarSection('organization')}
-                className="w-full h-[42px] px-[14px] flex items-center justify-between hover:bg-[#F8FAFC] transition-colors"
+                className="w-full h-[42px] px-[14px] flex items-center justify-between hover:bg-[#FCFCFC] transition-colors"
               >
                 <div className="flex items-center gap-[8px]">
-                  <IconBuilding size={18} stroke={1.5} className="text-[#64748B]" />
-                  <span className="text-[13px] font-medium text-[#334155]">Organization</span>
+                  <IconBuilding size={18} stroke={1.5} className="text-[#697D95]" />
+                  <span className="text-[13px] font-medium text-[#252A31]">Organization</span>
                 </div>
-                <IconChevronDown size={14} stroke={2} className={`text-[#94A3B8] transition-transform ${expandedSidebar['organization'] ? 'rotate-180' : ''}`} />
+                <IconChevronDown size={14} stroke={2} className={`text-[#697D95] transition-transform ${expandedSidebar['organization'] ? 'rotate-180' : ''}`} />
               </button>
               {expandedSidebar['organization'] && (
                 <div className="px-[14px] pb-[14px] space-y-[8px]">
                   <div className="flex items-center gap-[8px]">
                     <div className="w-[28px] h-[28px] rounded-full bg-[#FFC107] flex items-center justify-center text-white text-[13px] font-bold">{QUOTE_DATA.organization.letter}</div>
-                    <span className="text-[12px] font-medium text-[#334155]">{QUOTE_DATA.organization.name}</span>
+                    <span className="text-[12px] font-medium text-[#252A31]">{QUOTE_DATA.organization.name}</span>
                     <span className="ml-auto px-[8px] py-[1px] text-[10px] font-medium text-[#DC2626] bg-white border border-[#DC2626] rounded">{QUOTE_DATA.organization.status}</span>
                   </div>
-                  <div className="flex items-center gap-[6px] text-[11px] text-[#64748B]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" stroke="#94A3B8" strokeWidth="1.5"/><path d="M4 20C4 16.134 7.582 13 12 13C16.418 13 20 16.134 20 20" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round"/></svg>
+                  <div className="flex items-center gap-[6px] text-[11px] text-[#697D95]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="4" stroke="#697D95" strokeWidth="1.5"/><path d="M4 20C4 16.134 7.582 13 12 13C16.418 13 20 16.134 20 20" stroke="#697D95" strokeWidth="1.5" strokeLinecap="round"/></svg>
                     <span>{QUOTE_DATA.organization.customerCount} Customers</span>
                   </div>
-                  <div className="flex items-start gap-[6px] text-[11px] text-[#64748B]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="mt-[1px] flex-shrink-0"><circle cx="12" cy="10" r="3" stroke="#94A3B8" strokeWidth="1.5"/><path d="M12 21C12 21 4 15 4 10C4 5.582 7.582 2 12 2C16.418 2 20 5.582 20 10C20 15 12 21 12 21Z" stroke="#94A3B8" strokeWidth="1.5"/></svg>
+                  <div className="flex items-start gap-[6px] text-[11px] text-[#697D95]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="mt-[1px] flex-shrink-0"><circle cx="12" cy="10" r="3" stroke="#697D95" strokeWidth="1.5"/><path d="M12 21C12 21 4 15 4 10C4 5.582 7.582 2 12 2C16.418 2 20 5.582 20 10C20 15 12 21 12 21Z" stroke="#697D95" strokeWidth="1.5"/></svg>
                     <span>{QUOTE_DATA.organization.address}</span>
                   </div>
                 </div>
@@ -755,40 +755,40 @@ function QuoteDetailsPage({ onBack }) {
             </div>
 
             {/* ── Customer ── */}
-            <div className="border-b border-[#E2E8F0]">
+            <div className="border-b border-[#E8EDF1]">
               <button
                 onClick={() => toggleSidebarSection('customer')}
-                className="w-full h-[42px] px-[14px] flex items-center justify-between hover:bg-[#F8FAFC] transition-colors"
+                className="w-full h-[42px] px-[14px] flex items-center justify-between hover:bg-[#FCFCFC] transition-colors"
               >
                 <div className="flex items-center gap-[8px]">
-                  <IconUser size={18} stroke={1.5} className="text-[#64748B]" />
-                  <span className="text-[13px] font-medium text-[#334155]">Customer</span>
+                  <IconUser size={18} stroke={1.5} className="text-[#697D95]" />
+                  <span className="text-[13px] font-medium text-[#252A31]">Customer</span>
                 </div>
-                <IconChevronDown size={14} stroke={2} className={`text-[#94A3B8] transition-transform ${expandedSidebar['customer'] ? 'rotate-180' : ''}`} />
+                <IconChevronDown size={14} stroke={2} className={`text-[#697D95] transition-transform ${expandedSidebar['customer'] ? 'rotate-180' : ''}`} />
               </button>
               {expandedSidebar['customer'] && (
                 <div className="px-[14px] pb-[14px] space-y-[8px]">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-[6px]">
-                      <span className="text-[12px] font-bold text-[#1E293B] bg-[#F1F5F9] w-[20px] h-[20px] rounded flex items-center justify-center text-[10px]">#</span>
-                      <span className="text-[12px] font-semibold text-[#1E293B]">{QUOTE_DATA.customer.name}</span>
+                      <span className="text-[12px] font-bold text-[#252A31] bg-[#EFF2F5] w-[20px] h-[20px] rounded flex items-center justify-center text-[10px]">#</span>
+                      <span className="text-[12px] font-semibold text-[#252A31]">{QUOTE_DATA.customer.name}</span>
                     </div>
                     <div className="flex items-center gap-[4px]">
-                      <button className="w-[26px] h-[26px] flex items-center justify-center rounded hover:bg-[#F1F5F9]"><IconMail size={14} stroke={1.5} className="text-[#64748B]" /></button>
-                      <button className="w-[26px] h-[26px] flex items-center justify-center rounded hover:bg-[#F1F5F9]"><IconPhone size={14} stroke={1.5} className="text-[#64748B]" /></button>
-                      <button className="w-[26px] h-[26px] flex items-center justify-center rounded hover:bg-[#F1F5F9]"><IconCopy size={14} stroke={1.5} className="text-[#64748B]" /></button>
+                      <button className="w-[26px] h-[26px] flex items-center justify-center rounded hover:bg-[#EFF2F5]"><IconMail size={14} stroke={1.5} className="text-[#697D95]" /></button>
+                      <button className="w-[26px] h-[26px] flex items-center justify-center rounded hover:bg-[#EFF2F5]"><IconPhone size={14} stroke={1.5} className="text-[#697D95]" /></button>
+                      <button className="w-[26px] h-[26px] flex items-center justify-center rounded hover:bg-[#EFF2F5]"><IconCopy size={14} stroke={1.5} className="text-[#697D95]" /></button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-[6px] text-[11px] text-[#64748B]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="14" rx="2" stroke="#94A3B8" strokeWidth="1.5"/><path d="M8 6V4C8 2.895 8.895 2 10 2H14C15.105 2 16 2.895 16 4V6" stroke="#94A3B8" strokeWidth="1.5"/></svg>
+                  <div className="flex items-center gap-[6px] text-[11px] text-[#697D95]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="14" rx="2" stroke="#697D95" strokeWidth="1.5"/><path d="M8 6V4C8 2.895 8.895 2 10 2H14C15.105 2 16 2.895 16 4V6" stroke="#697D95" strokeWidth="1.5"/></svg>
                     <span>{QUOTE_DATA.customer.company}</span>
                   </div>
-                  <div className="flex items-center gap-[6px] text-[11px] text-[#64748B]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 10L12 3L21 10V19H3V10Z" stroke="#94A3B8" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><rect x="9" y="13" width="6" height="6" stroke="#94A3B8" strokeWidth="1.5"/></svg>
+                  <div className="flex items-center gap-[6px] text-[11px] text-[#697D95]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M3 10L12 3L21 10V19H3V10Z" stroke="#697D95" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><rect x="9" y="13" width="6" height="6" stroke="#697D95" strokeWidth="1.5"/></svg>
                     <span>{QUOTE_DATA.customer.type}</span>
                   </div>
-                  <div className="flex items-start gap-[6px] text-[11px] text-[#64748B]">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="mt-[1px] flex-shrink-0"><circle cx="12" cy="10" r="3" stroke="#94A3B8" strokeWidth="1.5"/><path d="M12 21C12 21 4 15 4 10C4 5.582 7.582 2 12 2C16.418 2 20 5.582 20 10C20 15 12 21 12 21Z" stroke="#94A3B8" strokeWidth="1.5"/></svg>
+                  <div className="flex items-start gap-[6px] text-[11px] text-[#697D95]">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="mt-[1px] flex-shrink-0"><circle cx="12" cy="10" r="3" stroke="#697D95" strokeWidth="1.5"/><path d="M12 21C12 21 4 15 4 10C4 5.582 7.582 2 12 2C16.418 2 20 5.582 20 10C20 15 12 21 12 21Z" stroke="#697D95" strokeWidth="1.5"/></svg>
                     <span>{QUOTE_DATA.customer.address}</span>
                   </div>
                 </div>
@@ -796,18 +796,18 @@ function QuoteDetailsPage({ onBack }) {
             </div>
 
             {/* ── Property ── */}
-            <div className="border-b border-[#E2E8F0]">
+            <div className="border-b border-[#E8EDF1]">
               <button
                 onClick={() => toggleSidebarSection('property')}
-                className="w-full h-[42px] px-[14px] flex items-center justify-between hover:bg-[#F8FAFC] transition-colors"
+                className="w-full h-[42px] px-[14px] flex items-center justify-between hover:bg-[#FCFCFC] transition-colors"
               >
                 <div className="flex items-center gap-[8px]">
-                  <IconHome size={18} stroke={1.5} className="text-[#64748B]" />
-                  <span className="text-[13px] font-medium text-[#334155]">Property</span>
+                  <IconHome size={18} stroke={1.5} className="text-[#697D95]" />
+                  <span className="text-[13px] font-medium text-[#252A31]">Property</span>
                 </div>
                 <div className="flex items-center gap-[4px]">
-                  <IconPlus size={14} stroke={2} className="text-[#64748B]" />
-                  <IconChevronDown size={14} stroke={2} className={`text-[#94A3B8] transition-transform ${expandedSidebar['property'] ? 'rotate-180' : ''}`} />
+                  <IconPlus size={14} stroke={2} className="text-[#697D95]" />
+                  <IconChevronDown size={14} stroke={2} className={`text-[#697D95] transition-transform ${expandedSidebar['property'] ? 'rotate-180' : ''}`} />
                 </div>
               </button>
             </div>
@@ -815,7 +815,7 @@ function QuoteDetailsPage({ onBack }) {
           </div>
 
           {/* ── Right Icon Strip ── */}
-          <div className="w-[48px] min-w-[48px] bg-white border-l border-[#E2E8F0] flex flex-col py-[3.5px]">
+          <div className="w-[48px] min-w-[48px] bg-white border-l border-[#E8EDF1] flex flex-col py-[3.5px]">
             {SIDEBAR_ITEMS.map((item) => {
               const Icon = item.icon;
               return (
@@ -823,11 +823,11 @@ function QuoteDetailsPage({ onBack }) {
                   <button
                     onClick={() => toggleSidebarSection(item.id)}
                     className={`w-[31.5px] h-[31.5px] flex items-center justify-center transition-colors rounded-[7px] ${
-                      expandedSidebar[item.id] ? 'bg-[#FBE9E7]' : 'hover:bg-[#F1F5F9]'
+                      expandedSidebar[item.id] ? 'bg-[#E8F4FD]' : 'hover:bg-[#EFF2F5]'
                     }`}
                     title={item.label}
                   >
-                    <Icon size={21} stroke={1.5} className="text-[#64748B]" />
+                    <Icon size={21} stroke={1.5} className="text-[#697D95]" />
                   </button>
                 </div>
               );
