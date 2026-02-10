@@ -196,6 +196,12 @@ const TrashIcon = ({ size = 18, className = '' }) => (
   </svg>
 )
 
+const PencilIcon = ({ size = 18, className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+  </svg>
+)
+
 const SettingsIcon = ({ size = 18, className = '' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <circle cx="12" cy="12" r="3" />
@@ -312,7 +318,7 @@ function LineItemCard({ item, onQtyChange, sectionDisplay }) {
 }
 
 // ─── Section Header (interactive with display badges) ───────────────
-function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onAddItem, isKebabOpen, onToggleKebab, onConfigure, onClone, onRemove }) {
+function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onAddItem, isKebabOpen, onToggleKebab, onConfigure, onRename, onClone, onRemove }) {
   const display = section.sectionDisplay || 'expanded'
   const colors = SECTION_COLORS[display]
   const kebabRef = useRef(null)
@@ -407,6 +413,14 @@ function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onAddItem
               className="bg-white border border-[#E8EDF1] rounded-[12px] shadow-xl w-[160px] py-[6px] overflow-hidden"
               style={{ position: 'fixed', top: menuPos.top, right: menuPos.right, zIndex: 9999 }}
             >
+              <button
+                onClick={() => { onToggleKebab(null); onRename() }}
+                className="w-full flex items-center gap-[10px] px-[14px] py-[12px] text-left active:bg-[#F1F5F9] transition-colors"
+              >
+                <PencilIcon size={16} className="text-[#64748B]" />
+                <span className="text-[14px] text-[#334155]">Rename</span>
+              </button>
+              <div className="h-px bg-[#E8EDF1] mx-[10px]" />
               <button
                 onClick={() => { onToggleKebab(null); onClone() }}
                 className="w-full flex items-center gap-[10px] px-[14px] py-[12px] text-left active:bg-[#F1F5F9] transition-colors"
@@ -555,7 +569,7 @@ function MobileToggleSwitch({ checked, onChange, disabled = false }) {
 }
 
 // ─── Section Config Sheet (simplified - bottom sheet) ────────────────
-function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, onUpdateName, onUpdateChildPrices, onSave, onClose }) {
+function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onSave, onClose }) {
   const sectionDisplay = section?.sectionDisplay || 'expanded'
   const showSubtotal = section?.showSubtotal || false
   const showChildPrices = section?.showChildPrices !== false
@@ -581,20 +595,6 @@ function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, 
         </div>
 
         <div className="flex-1 overflow-y-auto px-[16px] py-[16px] min-h-0">
-          {/* Section Name */}
-          <div className="mb-[20px]">
-            <label className="font-medium text-[13px] text-[#334155] mb-[6px] block">Section Name</label>
-            <div className="bg-[#EFF2F5] rounded-[8px] overflow-hidden">
-              <input
-                type="text"
-                value={section?.title || ''}
-                onChange={(e) => onUpdateName(e.target.value)}
-                placeholder="Enter section name"
-                className="w-full h-[44px] px-[14px] bg-transparent text-[14px] text-[#252A31] placeholder-[#94A3B8] outline-none"
-              />
-            </div>
-          </div>
-
           {/* Display Settings */}
           <h4 className="font-semibold text-[14px] text-[#252A31] mb-[10px]">Display Settings</h4>
 
@@ -668,8 +668,7 @@ function MobileSectionConfigSheet({ section, onUpdateDisplay, onUpdateSubtotal, 
           <button onClick={onClose} className="flex-1 h-[44px] border border-[#E8EDF1] rounded-[8px] text-[14px] font-medium text-[#475569] bg-white active:bg-[#F8FAFC] transition-colors">Cancel</button>
           <button
             onClick={onSave}
-            disabled={!(section?.title?.trim())}
-            className="flex-1 h-[44px] bg-[#E44A19] rounded-[8px] text-[14px] font-medium text-white active:bg-[#D03F14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 h-[44px] bg-[#E44A19] rounded-[8px] text-[14px] font-medium text-white active:bg-[#D03F14] transition-colors"
           >
             Save
           </button>
@@ -708,6 +707,8 @@ export default function MobileProposalPage() {
   const [sectionConfigOpen, setSectionConfigOpen] = useState(false)
   const [configSection, setConfigSection] = useState(null)
   const [isAddingNewSection, setIsAddingNewSection] = useState(false)
+  const [renamingSectionId, setRenamingSectionId] = useState(null)
+  const [renameSectionValue, setRenameSectionValue] = useState('')
 
   // UI-only: tracks which sections are visually collapsed in the builder
   const [collapsedSections, setCollapsedSections] = useState(new Set())
@@ -833,6 +834,28 @@ export default function MobileProposalPage() {
         sections: opt.sections.filter(s => s.id !== sectionId),
       }
     }))
+  }
+
+  const handleStartRenameSection = (section) => {
+    setRenamingSectionId(section.id)
+    setRenameSectionValue(section.title)
+    setKebabSectionId(null)
+  }
+
+  const handleConfirmRenameSection = () => {
+    if (renameSectionValue.trim()) {
+      setOptions(prev => prev.map((opt, oi) => {
+        if (oi !== currentOptionIdx) return opt
+        return {
+          ...opt,
+          sections: opt.sections.map(s =>
+            s.id === renamingSectionId ? { ...s, title: renameSectionValue.trim() } : s
+          ),
+        }
+      }))
+    }
+    setRenamingSectionId(null)
+    setRenameSectionValue('')
   }
 
   // Update section display mode in config
@@ -1046,6 +1069,7 @@ export default function MobileProposalPage() {
                     isKebabOpen={kebabSectionId === section.id}
                     onToggleKebab={setKebabSectionId}
                     onConfigure={() => handleConfigureSection(section)}
+                    onRename={() => handleStartRenameSection(section)}
                     onClone={() => handleCloneSection(section)}
                     onRemove={() => handleRemoveSection(section.id)}
                     onAddItem={() => handleAddItemToSection(section.id)}
@@ -1170,12 +1194,54 @@ export default function MobileProposalPage() {
         <MobileSectionConfigSheet
           section={configSection}
           onUpdateDisplay={handleUpdateDisplay}
-          onUpdateName={(name) => setConfigSection(prev => ({ ...prev, title: name }))}
           onUpdateSubtotal={(checked) => setConfigSection(prev => ({ ...prev, showSubtotal: checked }))}
           onUpdateChildPrices={(checked) => setConfigSection(prev => ({ ...prev, showChildPrices: checked }))}
           onSave={handleSaveSection}
           onClose={handleCloseConfig}
         />
+      )}
+
+      {/* ── Rename Section Dialog ── */}
+      {renamingSectionId && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center" onClick={() => { setRenamingSectionId(null); setRenameSectionValue('') }}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div
+            className="relative bg-white rounded-[16px] shadow-xl w-[320px] overflow-hidden mx-[20px]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-[20px] pt-[20px] pb-[4px]">
+              <p className="font-semibold text-[16px] text-[#252A31]">Rename Section</p>
+            </div>
+            <div className="px-[20px] py-[12px]">
+              <div className="bg-[#EFF2F5] rounded-[8px] overflow-hidden">
+                <input
+                  type="text"
+                  autoFocus
+                  value={renameSectionValue}
+                  onChange={(e) => setRenameSectionValue(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' && renameSectionValue.trim()) handleConfirmRenameSection() }}
+                  placeholder="Enter section name"
+                  className="w-full h-[44px] px-[14px] bg-transparent text-[14px] text-[#252A31] placeholder-[#94A3B8] outline-none"
+                />
+              </div>
+            </div>
+            <div className="px-[20px] pb-[16px] flex items-center gap-[10px]">
+              <button
+                onClick={() => { setRenamingSectionId(null); setRenameSectionValue('') }}
+                className="flex-1 h-[44px] border border-[#E8EDF1] rounded-[8px] text-[14px] font-medium text-[#475569] bg-white active:bg-[#F8FAFC] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmRenameSection}
+                disabled={!renameSectionValue.trim()}
+                className="flex-1 h-[44px] bg-[#E44A19] rounded-[8px] text-[14px] font-medium text-white active:bg-[#D03F14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

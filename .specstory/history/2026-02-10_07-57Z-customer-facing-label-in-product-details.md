@@ -8032,3 +8032,701 @@ Now I have all the locations. Let me make all the changes at once:
 
 ---
 
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 2
+
+```diff
+@@ -923,6 +923,6 @@
+                  &lt;IconEye size={18} stroke={1.8} className="text-[#64748B]" /&gt;
+                  &lt;div&gt;
+-                   &lt;span className="text-[13px] font-medium text-[#1E293B]"&gt;Show child items&lt;/span&gt;
+-                   &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;Expand items under this section for customers&lt;/p&gt;
++                   &lt;span className="text-[13px] font-medium text-[#1E293B]"&gt;Show Line-Items&lt;/span&gt;
++                       &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;Expand items under this section for customers&lt;/p&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: 3
+
+```diff
+@@ -955,7 +955,7 @@
+                  &lt;svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"&gt;&lt;rect x="1" y="4" width="22" height="16" rx="2" ry="2"/&gt;&lt;line x1="1" y1="10" x2="23" y2="10"/&gt;&lt;/svg&gt;
+                  &lt;div&gt;
+-                   &lt;span className="text-[13px] font-medium text-[#1E293B]"&gt;Show child prices&lt;/span&gt;
+-                   &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;
+-                     {isCollapsed ? 'Enable "Show child items" first' : 'Display individual price for each line item'}
++                   &lt;span className="text-[13px] font-medium text-[#1E293B]"&gt;Show Line-Item Prices&lt;/span&gt;
++                       &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;
++                         {isCollapsed ? 'Enable "Show Line-Items" first' : 'Display individual price for each line item'}
+                    &lt;/p&gt;
+                  &lt;/div&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 2
+
+```diff
+@@ -976,6 +976,6 @@
+                  &lt;IconEyeOff size={18} stroke={1.8} className={isHidden ? 'text-[#DC2626]' : 'text-[#64748B]'} /&gt;
+                  &lt;div&gt;
+-                   &lt;span className={&#96;text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#1E293B]'}&#96;}&gt;Hide from proposal&lt;/span&gt;
+-                   &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;Completely hide this section from customer view&lt;/p&gt;
++                   &lt;span className={&#96;text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#1E293B]'}&#96;}&gt;Hide Section&lt;/span&gt;
++                       &lt;p className="text-[11px] text-[#94A3B8] mt-[1px]"&gt;Completely hide this section from customer view&lt;/p&gt;
+                  &lt;/div&gt;
+                &lt;/div&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -1002,5 +1002,5 @@
+                    &lt;/svg&gt;
+                    &lt;p className="text-[11px] text-[#991B1B] leading-[16px]"&gt;
+-                     Pricing across the entire proposal will be hidden. Only the final total will be visible.
++                     Section &amp;amp; Line-Item level prices will be hidden for the customer. Only final total will be visible.
+                    &lt;/p&gt;
+                  &lt;/div&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now update the tooltips on the eye-off icons for hidden items (desktop):
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -1637,5 +1637,5 @@
+                                  {/* Hidden indicator icon (no text badges) */}
+                                  {isDisplayHidden &amp;&amp; (
+-                                   &lt;span className="inline-flex items-center" title="Hidden from customer view"&gt;
++                                   &lt;span className="inline-flex items-center" title="This item will be hidden from the customer."&gt;
+                                      &lt;IconEyeOff size={15} stroke={2} className="text-[#DC2626]" /&gt;
+                                    &lt;/span&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -1790,5 +1790,5 @@
+                                  &lt;/span&gt;
+                                  {isGrouped &amp;&amp; parentIsHidden &amp;&amp; (
+-                                   &lt;span className="inline-flex items-center text-[#DC2626]/50" title="Hidden from customer view"&gt;
++                                   &lt;span className="inline-flex items-center text-[#DC2626]/50" title="This item will be hidden from the customer."&gt;
+                                      &lt;IconEyeOff size={11} stroke={1.5} /&gt;
+                                    &lt;/span&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -1795,5 +1795,5 @@
+                                  )}
+                                  {isGrouped &amp;&amp; parentIsCollapsed &amp;&amp; (
+-                                   &lt;span className="inline-flex items-center text-[#C2410C]/50" title="Inside collapsed section — customer sees only the header"&gt;
++                                   &lt;span className="inline-flex items-center text-[#C2410C]/50" title="This item will be hidden from the customer."&gt;
+                                      &lt;IconEyeOff size={11} stroke={1.5} /&gt;
+                                    &lt;/span&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now **Mobile (`MobileProposalPage.jsx`):**
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 2
+
+```diff
+@@ -602,6 +602,6 @@
+                &lt;EyeIcon size={18} className="text-[#94A3B8] shrink-0" /&gt;
+                &lt;div&gt;
+-                 &lt;span className="text-[13px] font-medium text-[#252A31]"&gt;Show child items&lt;/span&gt;
+-                 &lt;p className="text-[10px] text-[#94A3B8] mt-[1px]"&gt;Expand items for customers&lt;/p&gt;
++                 &lt;span className="text-[13px] font-medium text-[#252A31]"&gt;Show Line-Items&lt;/span&gt;
++                     &lt;p className="text-[10px] text-[#94A3B8] mt-[1px]"&gt;Expand items for customers&lt;/p&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: 3
+
+```diff
+@@ -626,7 +626,7 @@
+                &lt;svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"&gt;&lt;rect x="1" y="4" width="22" height="16" rx="2" ry="2"/&gt;&lt;line x1="1" y1="10" x2="23" y2="10"/&gt;&lt;/svg&gt;
+                &lt;div&gt;
+-                 &lt;span className="text-[13px] font-medium text-[#252A31]"&gt;Show child prices&lt;/span&gt;
+-                 &lt;p className="text-[10px] text-[#94A3B8] mt-[1px]"&gt;
+-                   {isCollapsed ? 'Enable "Show child items" first' : 'Individual price per line item'}
++                 &lt;span className="text-[13px] font-medium text-[#252A31]"&gt;Show Line-Item Prices&lt;/span&gt;
++                     &lt;p className="text-[10px] text-[#94A3B8] mt-[1px]"&gt;
++                       {isCollapsed ? 'Enable "Show Line-Items" first' : 'Individual price per line item'}
+                  &lt;/p&gt;
+                &lt;/div&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 2
+
+```diff
+@@ -643,6 +643,6 @@
+                &lt;EyeOffIcon size={18} className={isHidden ? 'text-[#DC2626] shrink-0' : 'text-[#94A3B8] shrink-0'} /&gt;
+                &lt;div&gt;
+-                 &lt;span className={&#96;text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#252A31]'}&#96;}&gt;Hide from proposal&lt;/span&gt;
+-                 &lt;p className="text-[10px] text-[#94A3B8] mt-[1px]"&gt;Completely hide from customer view&lt;/p&gt;
++                 &lt;span className={&#96;text-[13px] font-medium ${isHidden ? 'text-[#DC2626]' : 'text-[#252A31]'}&#96;}&gt;Hide Section&lt;/span&gt;
++                     &lt;p className="text-[10px] text-[#94A3B8] mt-[1px]"&gt;Completely hide from customer view&lt;/p&gt;
+                &lt;/div&gt;
+              &lt;/div&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -655,5 +655,5 @@
+                  &lt;WarningIcon size={16} className="text-[#DC2626] shrink-0 mt-[1px]" /&gt;
+                  &lt;p className="text-[11px] text-[#991B1B] leading-[16px]"&gt;
+-                   Pricing across the entire proposal will be hidden. Only the final total will be visible.
++                   Section &amp;amp; Line-Item level prices will be hidden for the customer. Only final total will be visible.
+                  &lt;/p&gt;
+                &lt;/div&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -363,5 +363,5 @@
+          {/* Hidden indicator icon (no text badges) */}
+          {display === 'hidden' &amp;&amp; (
+-           &lt;span className="inline-flex items-center shrink-0" title="Hidden from customer view"&gt;
++           &lt;span className="inline-flex items-center shrink-0" title="This item will be hidden from the customer."&gt;
+              &lt;EyeOffIcon size={15} className="text-[#DC2626]" /&gt;
+            &lt;/span&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now let me also check if the mobile child items have an eye-off tooltip that needs updating:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "EyeOffIcon.*title|title.*EyeOff|title.*hidden|title.*Hidden" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 1 match</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/MobileProposalPage.jsx` | `<span className="inline-flex items-center shrink-0" title="This item will be hidden from the customer.">` | L365 |
+
+
+</details>
+</tool-use>
+
+---
+
+The mobile child `LineItemCard` doesn't use a `title` attribute for its eye-off icon. Let me check:
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+Let me add the tooltip to the mobile child item eye-off icon too:
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: 1
+
+```diff
+@@ -287,5 +287,7 @@
+              &lt;p className="font-medium text-[16px] text-[#252A31] truncate"&gt;{item.name}&lt;/p&gt;
+              {isHiddenOrCollapsed &amp;&amp; (
+-               &lt;EyeOffIcon size={14} className="text-[#94A3B8] shrink-0" /&gt;
++               &lt;span title="This item will be hidden from the customer."&gt;
++                 &lt;EyeOffIcon size={14} className="text-[#94A3B8] shrink-0" /&gt;
++               &lt;/span&gt;
+              )}
+            &lt;/div&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now let me also update the `QuoteDetailsPage.jsx` tooltips since they have similar copy:
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/QuoteDetailsPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/QuoteDetailsPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -474,5 +474,5 @@
+                                          &lt;span className="text-[12px] text-[#0172CB] leading-[16px]"&gt;{item.name}&lt;/span&gt;
+                                          {isHidden &amp;&amp; (
+-                                           &lt;span className="inline-flex items-center gap-[3px] text-[9px] text-[#9D174D]/50" title="This item is hidden from customer view"&gt;
++                                           &lt;span className="inline-flex items-center gap-[3px] text-[9px] text-[#9D174D]/50" title="This item will be hidden from the customer."&gt;
+                                              &lt;IconEyeOff size={10} stroke={1.5} /&gt;
+                                            &lt;/span&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/QuoteDetailsPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -479,5 +479,5 @@
+                                          )}
+                                          {isCollapsed &amp;&amp; (
+-                                           &lt;span className="inline-flex items-center gap-[3px] text-[9px] text-[#92400E]/40" title="This item is inside a collapsed section — customer sees only the section header"&gt;
++                                           &lt;span className="inline-flex items-center gap-[3px] text-[9px] text-[#92400E]/40" title="This item will be hidden from the customer."&gt;
+                                              &lt;IconEyeOff size={10} stroke={1.5} /&gt;
+                                            &lt;/span&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now let me verify the build:
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /Users/bharath.s/zuper-subcategory && npx vite build 2>&1 | tail -10</summary>
+
+```bash
+cd /Users/bharath.s/zuper-subcategory && npx vite build 2>&1 | tail -10
+```
+
+```
+dist/index.html                                                        0.73 kB │ gzip:   0.41 kB
+dist/assets/6718db1f1d1ce90fa5eb49c325d04010b62ca586-DAF2paW0.png      7.20 kB
+dist/assets/index-BZYXTHU0.css                                        79.76 kB │ gzip:  13.99 kB
+dist/assets/index-sypuGgVa.js                                      1,064.21 kB │ gzip: 239.22 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.96s
+
+```
+</details>
+</tool-use>
+
+---
+
+Build passes. Let me push:
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /Users/bharath.s/zuper-subcategory && git add -A && git commit -m "Update UX copy: Line-Items labels, Hide Section, tooltip & warning text
+
+- 'Show child items' → 'Show Line-Items'
+- 'Show child prices' → 'Show Line-Item Prices'
+- 'Hide from proposal' → 'Hide Section'
+- Hidden warning: 'Section & Line-Item level prices will be hidden for the customer. Only final total will be visible.'
+- Eye-off tooltip on hidden items: 'This item will be hidden from the customer.'
+- Applied across desktop, mobile, and quote details pages"</summary>
+
+```bash
+cd /Users/bharath.s/zuper-subcategory && git add -A && git commit -m "Update UX copy: Line-Items labels, Hide Section, tooltip & warning text
+
+- 'Show child items' → 'Show Line-Items'
+- 'Show child prices' → 'Show Line-Item Prices'
+- 'Hide from proposal' → 'Hide Section'
+- Hidden warning: 'Section & Line-Item level prices will be hidden for the customer. Only final total will be visible.'
+- Eye-off tooltip on hidden items: 'This item will be hidden from the customer.'
+- Applied across desktop, mobile, and quote details pages"
+```
+
+```
+[main 0b2c7055] Update UX copy: Line-Items labels, Hide Section, tooltip &amp; warning text
+ 6 files changed, 593 insertions(+), 46 deletions(-)
+ rename dist/assets/{index-BFSy-IPB.js =&gt; index-sypuGgVa.js} (76%)
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /Users/bharath.s/zuper-subcategory && git push</summary>
+
+```bash
+cd /Users/bharath.s/zuper-subcategory && git push
+```
+
+```
+To github.com:bharathsparky/zuper-subcategory.git
+   c2eb9227..0b2c7055  main -&gt; main
+
+```
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="task" data-tool-name="todo_write">
+<details><summary>Tool use: **todo_write** • Todo List</summary>
+
+- [x] Update config sheet labels: child→Line-Item (desktop)
+- [x] Update config sheet labels: child→Line-Item (mobile)
+- [x] Update hidden warning message (desktop + mobile)
+- [x] Update eye-off tooltips on hidden items (desktop + mobile)
+
+</details>
+</tool-use>
+
+---
+
+Pushed (`c2eb9227..0b2c7055`). Here's what changed across desktop, mobile, and quote details pages:
+
+| Before | After |
+|--------|-------|
+| Show child items | **Show Line-Items** |
+| Show child prices | **Show Line-Item Prices** |
+| Hide from proposal | **Hide Section** |
+| Enable "Show child items" first | Enable "Show Line-Items" first |
+| *Pricing across the entire proposal will be hidden…* | **Section & Line-Item level prices will be hidden for the customer. Only final total will be visible.** |
+| *Hidden from customer view* (tooltip) | **This item will be hidden from the customer.** (tooltip on all eye-off icons) |
+
+---
+
+_**User (2026-02-10 05:21Z)**_
+
+in config lets not have renaming of section name, let it happen inside kebab , we will add new menu called rename and on licik we show dialogue to rename the section title. 
+
+---
+
+_**Agent (model claude-4.6-opus-high-thinking, mode Agent)**_
+
+
+
+
+
+---
+
+<think><details><summary>Thought Process</summary>
+The user wants to:
+1. Remove the section name input from the config sheet (both desktop and mobile)
+2. Add a "Rename" option to the kebab menu (both desktop and mobile)
+3. On clicking "Rename", show a dialog to rename the section title
+
+Let me find the relevant code sections.</details></think>
+
+---
+
+<tool-use data-tool-type="task" data-tool-name="todo_write">
+<details><summary>Tool use: **todo_write** • Todo List</summary>
+
+- [-] Remove section name input from desktop config sheet
+- [ ] Add Rename option to desktop kebab menu + dialog
+- [ ] Remove section name input from mobile config sheet
+- [ ] Add Rename option to mobile kebab menu + dialog
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "Section Name|onUpdateName|sectionConfigSheet.*name|Section Settings" in "/Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx" • 8 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/NewProposalPage.jsx` | `function SectionConfigSheet(\{ header, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onUpdateName, onSave, onClose \}) \{` | L869 |
+| `src/components/NewProposalPage.jsx` | `<h3 className="text-[16px] font-semibold text-[#1E293B]">Section Settings</h3>` | L890 |
+| `src/components/NewProposalPage.jsx` | `\{/* Section Name */\}` | L901 |
+| `src/components/NewProposalPage.jsx` | `<label className="text-[13px] font-medium text-[#334155]">Section Name</label>` | L903 |
+| `src/components/NewProposalPage.jsx` | `onChange=\{(e) => onUpdateName?.(e.target.value)\}` | L907 |
+| `src/components/NewProposalPage.jsx` | `\{/* Section Name */\}` | L1627 |
+| `src/components/NewProposalPage.jsx` | `\{/* Add Section Name Popover */\}` | L2164 |
+| `src/components/NewProposalPage.jsx` | `onUpdateName=\{(name) => setHeaderBeingConfigured(prev => (\{ ...prev, name \}))\}` | L2177 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "Section Name|onUpdateName|MobileSectionConfigSheet.*name|Section Settings" in "/Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx" • 8 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/MobileProposalPage.jsx` | `<label className="font-medium text-[13px] text-[#334155] mb-[6px] block">Section Name</label>` | L509 |
+| `src/components/MobileProposalPage.jsx` | `function MobileSectionConfigSheet(\{ section, onUpdateDisplay, onUpdateSubtotal, onUpdateName, onUpdateChildPrices, onSave, onClose \}) \{` | L558 |
+| `src/components/MobileProposalPage.jsx` | `<p className="font-semibold text-[16px] text-[#252A31]">Section Settings</p>` | L577 |
+| `src/components/MobileProposalPage.jsx` | `\{/* Section Name */\}` | L584 |
+| `src/components/MobileProposalPage.jsx` | `<label className="font-medium text-[13px] text-[#334155] mb-[6px] block">Section Name</label>` | L586 |
+| `src/components/MobileProposalPage.jsx` | `onChange=\{(e) => onUpdateName(e.target.value)\}` | L591 |
+| `src/components/MobileProposalPage.jsx` | `\{/* ── Add Section Name Sheet ── */\}` | L1160 |
+| `src/components/MobileProposalPage.jsx` | `onUpdateName=\{(name) => setConfigSection(prev => (\{ ...prev, title: name \}))\}` | L1173 |
+
+
+</details>
+</tool-use>
+
+---
+
+Let me read the relevant sections more closely — the config sheet, the kebab menu, and where the config sheet is rendered:
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+Now let me read the mobile kebab menu and config sheet rendering:
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/MobileProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+Now let me also check if there's a save button disabled logic tied to the name in the config sheets:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "disabled=.*name.*trim|disabled=.*title.*trim" in "/Users/bharath.s/zuper-subcategory/src/components" • 5 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/MobileProposalPage.jsx` | `disabled=\{!name.trim()\}` | L526 |
+| `src/components/MobileProposalPage.jsx` | `disabled=\{!(section?.title?.trim())\}` | L671 |
+| `src/components/NewProposalPage.jsx` | `disabled=\{!name.trim()\}` | L834 |
+| `src/components/NewProposalPage.jsx` | `disabled=\{!header.name?.trim()\}` | L1022 |
+| `src/components/CategorySettings.jsx` | `disabled=\{!name.trim()\}` | L518 |
+
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+

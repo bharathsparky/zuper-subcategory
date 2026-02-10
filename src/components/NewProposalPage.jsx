@@ -866,7 +866,7 @@ function ToggleSwitch({ checked, onChange, size = 'default', disabled = false })
 }
 
 // ─── Section Configuration Sheet (simplified) ───────────────────────
-function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onUpdateName, onSave, onClose }) {
+function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdateChildPrices, onSave, onClose }) {
   const sectionDisplay = header.sectionDisplay || 'expanded'
   const showSubtotal = header.showSubtotal || false
   const showChildPrices = header.showChildPrices !== false
@@ -898,21 +898,6 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
 
         {/* Sheet Content */}
         <div className="flex-1 overflow-y-auto p-[21px] space-y-[16px]">
-          {/* Section Name */}
-          <div className="space-y-[6px]">
-            <label className="text-[13px] font-medium text-[#334155]">Section Name</label>
-            <input
-              type="text"
-              value={header.name}
-              onChange={(e) => onUpdateName?.(e.target.value)}
-              placeholder="Enter section name"
-              className="w-full h-[38px] px-[11px] border border-[#E2E8F0] rounded-[6px] text-[13px] text-[#1E293B] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors bg-white"
-            />
-          </div>
-
-          {/* Divider */}
-          <div className="border-t border-[#E2E8F0]" />
-
           {/* Simple Toggles */}
           <div className="space-y-[4px]">
             <h4 className="text-[14px] font-semibold text-[#1E293B] mb-[12px]">Display Settings</h4>
@@ -1019,8 +1004,7 @@ function SectionConfigSheet({ header, onUpdateDisplay, onUpdateSubtotal, onUpdat
           </button>
           <button
             onClick={onSave}
-            disabled={!header.name?.trim()}
-            className="h-[36px] px-[20px] bg-[#E44A19] border border-[#E44A19] rounded-[6px] text-[13px] font-medium text-white hover:bg-[#D03F14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-[36px] px-[20px] bg-[#E44A19] border border-[#E44A19] rounded-[6px] text-[13px] font-medium text-white hover:bg-[#D03F14] transition-colors"
           >
             Save
           </button>
@@ -1071,6 +1055,8 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
   const [headerBeingConfigured, setHeaderBeingConfigured] = useState(null)
   const [isAddingNewSection, setIsAddingNewSection] = useState(false)
   const [sectionKebabOpenId, setSectionKebabOpenId] = useState(null)
+  const [renamingSectionId, setRenamingSectionId] = useState(null) // section id being renamed
+  const [renameSectionValue, setRenameSectionValue] = useState('') // current value in rename dialog
   const [uiCollapsedSections, setUiCollapsedSections] = useState(new Set()) // UI-only: tracks which sections are visually collapsed in the builder
   const [sectionAddMenuId, setSectionAddMenuId] = useState(null) // tracks which section's inline "+ Add" dropdown is open
   const [sectionAddMenuPos, setSectionAddMenuPos] = useState({ top: 0, left: 0 }) // position for fixed dropdown
@@ -1299,6 +1285,22 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
   const handleRemoveSection = (itemId) => {
     setLineItems(prev => prev.filter(li => li.id !== itemId))
     setSectionKebabOpenId(null)
+  }
+
+  const handleStartRenameSection = (item) => {
+    setRenamingSectionId(item.id)
+    setRenameSectionValue(item.name)
+    setSectionKebabOpenId(null)
+  }
+
+  const handleConfirmRenameSection = () => {
+    if (renameSectionValue.trim()) {
+      setLineItems(prev => prev.map(li =>
+        li.id === renamingSectionId ? { ...li, name: renameSectionValue.trim() } : li
+      ))
+    }
+    setRenamingSectionId(null)
+    setRenameSectionValue('')
   }
 
   // ── Drag & Drop Setup ───────────────────────────────────────────────
@@ -1695,6 +1697,14 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                   </button>
                                   {sectionKebabOpenId === item.id && (
                                     <div className="absolute right-0 top-full mt-[4px] w-[160px] bg-white border border-[#E2E8F0] rounded-[8px] shadow-lg z-50 py-[4px] overflow-hidden">
+                                      <button
+                                        onClick={() => handleStartRenameSection(item)}
+                                        className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[8px]"
+                                      >
+                                        <IconPencil size={14} stroke={2} className="text-[#64748B]" />
+                                        Rename
+                                      </button>
+                                      <div className="my-[2px] mx-[10px] border-t border-[#E2E8F0]" />
                                       <button
                                         onClick={() => handleCloneSection(item)}
                                         className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[8px]"
@@ -2174,12 +2184,52 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
         <SectionConfigSheet
           header={headerBeingConfigured}
           onUpdateDisplay={updateSectionDisplay}
-          onUpdateName={(name) => setHeaderBeingConfigured(prev => ({ ...prev, name }))}
           onUpdateSubtotal={(checked) => setHeaderBeingConfigured(prev => ({ ...prev, showSubtotal: checked }))}
           onUpdateChildPrices={(checked) => setHeaderBeingConfigured(prev => ({ ...prev, showChildPrices: checked }))}
           onSave={handleSaveSectionConfig}
           onClose={() => { setSectionConfigOpen(false); setHeaderBeingConfigured(null) }}
         />
+      )}
+
+      {/* Rename Section Dialog */}
+      {renamingSectionId && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center" onClick={() => { setRenamingSectionId(null); setRenameSectionValue('') }}>
+          <div className="absolute inset-0 bg-black/30" />
+          <div
+            className="relative bg-white rounded-[12px] shadow-[0px_8px_32px_rgba(0,0,0,0.16)] w-[380px] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-[20px] pt-[20px] pb-[4px]">
+              <h3 className="text-[15px] font-semibold text-[#1E293B]">Rename Section</h3>
+            </div>
+            <div className="px-[20px] py-[12px]">
+              <input
+                type="text"
+                autoFocus
+                value={renameSectionValue}
+                onChange={(e) => setRenameSectionValue(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && renameSectionValue.trim()) handleConfirmRenameSection() }}
+                placeholder="Enter section name"
+                className="w-full h-[40px] px-[12px] border border-[#E2E8F0] rounded-[8px] text-[14px] text-[#1E293B] placeholder-[#94A3B8] outline-none focus:border-[#3B82F6] focus:ring-1 focus:ring-[#3B82F6]/20 transition-colors bg-white"
+              />
+            </div>
+            <div className="px-[20px] pb-[16px] flex items-center justify-end gap-[8px]">
+              <button
+                onClick={() => { setRenamingSectionId(null); setRenameSectionValue('') }}
+                className="h-[36px] px-[16px] border border-[#E2E8F0] rounded-[6px] text-[13px] font-medium text-[#334155] bg-white hover:bg-[#F8FAFC] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmRenameSection}
+                disabled={!renameSectionValue.trim()}
+                className="h-[36px] px-[20px] bg-[#E44A19] border border-[#E44A19] rounded-[6px] text-[13px] font-medium text-white hover:bg-[#D03F14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
