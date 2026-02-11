@@ -301,8 +301,9 @@ const SAMPLE_PRODUCTS = [
 // ========================================
 
 // Category Grid Card
-function CategoryCard({ category, image, isSelected, onClick, subCount, selectionState, onCheckToggle, onDrillDown }) {
+function CategoryCard({ category, image, isSelected, onClick, subCount, selectedCount, selectionState, onCheckToggle, onDrillDown }) {
   // selectionState: 'none' | 'all' | 'partial'
+  // selectedCount: number of selected subcategories (used when selectionState === 'partial')
   const showCheckbox = onCheckToggle != null;
   
   const handleClick = (e) => {
@@ -317,6 +318,11 @@ function CategoryCard({ category, image, isSelected, onClick, subCount, selectio
     e.stopPropagation();
     onDrillDown?.();
   };
+
+  // Build the badge label: "2/3" when partially selected, just "3" otherwise
+  const badgeLabel = selectionState === 'partial' && selectedCount != null
+    ? `${selectedCount}/${subCount}`
+    : `${subCount}`;
 
   return (
     <div 
@@ -351,10 +357,14 @@ function CategoryCard({ category, image, isSelected, onClick, subCount, selectio
             type="button"
             onClick={handleDrillDown}
             aria-label={`View ${subCount} subcategories`}
-            className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[11px] px-1.5 py-0.5 rounded flex items-center gap-0.5 cursor-pointer hover:bg-black/80 z-10"
+            className={`absolute bottom-2 right-2 backdrop-blur-md text-white text-xs font-semibold pl-2.5 pr-1.5 py-1 rounded-full flex items-center gap-1 cursor-pointer z-10 transition-colors ${
+              selectionState !== 'none'
+                ? 'bg-[#F97316]/90 hover:bg-[#F97316]'
+                : 'bg-white/20 hover:bg-white/30'
+            }`}
           >
-            <span>{subCount}</span>
-            <IconChevronRight size={12} />
+            <span>{badgeLabel}</span>
+            <IconChevronRight size={14} />
           </button>
         )}
         {subCount > 0 && !onDrillDown && (
@@ -523,6 +533,16 @@ function CategoryGridPicker({ isOpen, onClose, onApply, initialSelections = {} }
     if (selected.length === 0) return 'all'; // [] means all
     if (selected.length === cat.subCategories.length) return 'all';
     return 'partial';
+  };
+
+  // Get the number of selected subcategories for a parent
+  const getSelectedCount = (catName) => {
+    if (!(catName in selections)) return 0;
+    const cat = CATEGORIES.find(c => c.name === catName);
+    if (!cat || cat.subCategories.length === 0) return 0;
+    const selected = selections[catName];
+    if (selected.length === 0) return cat.subCategories.length; // [] means all
+    return selected.length;
   };
 
   // Toggle an entire parent category
@@ -807,6 +827,7 @@ function CategoryGridPicker({ isOpen, onClose, onApply, initialSelections = {} }
               category={category.name}
               image={CATEGORY_IMAGES[category.name]}
               subCount={category.subCategories.length}
+              selectedCount={getSelectedCount(category.name)}
               selectionState={getSelectionState(category.name)}
               onCheckToggle={() => toggleParent(category.name)}
               onDrillDown={category.subCategories.length > 0 ? () => setViewingCategory(category.id) : undefined}
