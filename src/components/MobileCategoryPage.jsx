@@ -628,7 +628,7 @@ function CategoryGridPicker({ isOpen, onClose, onApply, initialSelections = {} }
 
       {/* Grid */}
       <div className="flex-1 overflow-y-auto p-4">
-        <div className="grid grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-2 gap-3">
           {CATEGORIES.map(category => (
             <CategoryCard
               key={category.id}
@@ -976,25 +976,6 @@ function MobileFilterPanel({ isOpen, onClose, onOpenCategoryPicker, selectedCate
 }
 
 // Multi-select Checkbox component
-function MultiCheckbox({ checked, indeterminate, onChange, size = 22 }) {
-  return (
-    <button
-      onClick={(e) => { e.stopPropagation(); onChange(!checked); }}
-      className={`w-[${size}px] h-[${size}px] rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${
-        checked || indeterminate
-          ? 'bg-[#F97316] border-[#F97316]'
-          : 'border-[#4B5563] bg-transparent hover:border-[#6B7280]'
-      }`}
-      style={{ width: size, height: size }}
-    >
-      {checked && <IconCheck size={size - 8} className="text-white" strokeWidth={3} />}
-      {!checked && indeterminate && (
-        <div className="w-[10px] h-[2px] bg-white rounded-full" />
-      )}
-    </button>
-  );
-}
-
 // Category Picker Screen (Full Screen - Multi-Select)
 // selections shape: { "Roofing": ["Installation", "Repair"], "HVAC": [] }
 // Key with empty array = entire parent selected (all subs or category itself)
@@ -1111,12 +1092,6 @@ function CategoryPickerScreen({
     setSelections({});
   };
 
-  const selectAll = () => {
-    const all = {};
-    CATEGORIES.forEach(cat => { all[cat.name] = []; });
-    setSelections(all);
-  };
-
   // Count total selections
   const getTotalSelectionCount = () => {
     let count = 0;
@@ -1134,38 +1109,6 @@ function CategoryPickerScreen({
     return count;
   };
 
-  // Build selection chips for display
-  const getSelectionChips = () => {
-    const chips = [];
-    Object.entries(selections).forEach(([catName, subs]) => {
-      const cat = CATEGORIES.find(c => c.name === catName);
-      if (!cat) return;
-      if (cat.subCategories.length === 0 || subs.length === 0) {
-        // Whole category
-        chips.push({ type: 'category', catName, label: catName });
-      } else {
-        // Individual subs
-        subs.forEach(subName => {
-          chips.push({ type: 'sub', catName, subName, label: `${catName} › ${subName}` });
-        });
-      }
-    });
-    return chips;
-  };
-
-  const removeChip = (chip) => {
-    if (chip.type === 'category') {
-      setSelections(prev => {
-        const next = { ...prev };
-        delete next[chip.catName];
-        return next;
-      });
-    } else {
-      const cat = CATEGORIES.find(c => c.name === chip.catName);
-      if (cat) toggleSubCategory(cat, chip.subName);
-    }
-  };
-
   // Filter
   const lowerSearch = searchTerm.toLowerCase();
   const filteredCategories = CATEGORIES.filter(cat => {
@@ -1175,9 +1118,6 @@ function CategoryPickerScreen({
   });
 
   const totalSelected = getTotalSelectionCount();
-  const allSelected = Object.keys(selections).length === CATEGORIES.length &&
-    CATEGORIES.every(c => isCategoryFullySelected(c));
-  const chips = getSelectionChips();
 
   return (
     <div className="fixed inset-0 z-50 bg-[#1A1D21] text-white flex flex-col">
@@ -1191,129 +1131,71 @@ function CategoryPickerScreen({
         </div>
         {totalSelected > 0 && (
           <button onClick={clearAll} className="text-[#F97316] text-sm font-medium">
-            Clear all
-        </button>
+            Clear
+          </button>
         )}
       </div>
 
       {/* Search */}
-        <div className="px-4 py-3 border-b border-[#2D3339]">
-          <div className="relative">
-            <IconSearch size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
-            <input 
-              type="text"
-              placeholder="Search categories..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-[#2D3339] border border-[#3D4349] rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-[#6B7280] text-sm"
-            />
+      <div className="px-4 py-3 border-b border-[#2D3339]">
+        <div className="relative">
+          <IconSearch size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
+          <input 
+            type="text"
+            placeholder="Search categories..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-[#2D3339] border border-[#3D4349] rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-[#6B7280] text-sm"
+          />
         </div>
       </div>
 
-      {/* Selection Chips */}
-      {chips.length > 0 && (
-        <div className="px-4 py-2.5 border-b border-[#2D3339] overflow-x-auto">
-          <div className="flex items-center gap-2 min-w-max">
-            {chips.map((chip, idx) => (
-              <span 
-                key={idx}
-                className="inline-flex items-center gap-1.5 bg-[#F97316]/15 border border-[#F97316]/30 text-[#F97316] text-xs font-medium px-2.5 py-1.5 rounded-full whitespace-nowrap"
-              >
-                {chip.label}
-                <button 
-                  onClick={() => removeChip(chip)}
-                  className="hover:bg-[#F97316]/20 rounded-full p-0.5"
-                >
-                  <IconX size={12} strokeWidth={3} />
-                </button>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Category List */}
       <div className="flex-1 overflow-y-auto">
-        {/* Select All */}
-        {!searchTerm && (
-        <button
-            onClick={() => allSelected ? clearAll() : selectAll()}
-            className="w-full px-4 py-3.5 flex items-center gap-3.5 border-b border-[#2D3339] hover:bg-[#2D3339]/60 transition-colors"
-          >
-            <MultiCheckbox
-              checked={allSelected}
-              indeterminate={!allSelected && totalSelected > 0}
-              onChange={() => allSelected ? clearAll() : selectAll()}
-            />
-            <span className="text-white font-medium">Select All</span>
-            <span className="text-[#6B7280] text-xs ml-auto">{CATEGORIES.length} categories</span>
-          </button>
-        )}
-
         {filteredCategories.map(category => {
           const isFullySelected = isCategoryFullySelected(category);
           const isPartial = isCategoryPartiallySelected(category);
           const hasSubs = category.subCategories.length > 0;
           const isExpanded = expandedCategories[category.id];
-          // When searching, auto-expand categories with matching subs
           const searchExpanded = searchTerm && hasSubs && 
             category.subCategories.some(s => s.name.toLowerCase().includes(lowerSearch));
-
           const showSubs = hasSubs && (isExpanded || searchExpanded);
 
           return (
             <div key={category.id}>
-              {/* Parent Category Row */}
-              <div className="flex items-center border-b border-[#2D3339] hover:bg-[#2D3339]/60 transition-colors">
-                {/* Checkbox area */}
-                <div className="pl-4 pr-2 py-3.5 flex items-center">
-                  <MultiCheckbox
-                    checked={isFullySelected}
-                    indeterminate={isPartial}
-                    onChange={() => toggleCategory(category)}
-                  />
-          </div>
+              {/* Parent Row */}
+              <button
+                onClick={() => {
+                  if (hasSubs) {
+                    toggleExpandCategory(category.id);
+                  } else {
+                    toggleCategory(category);
+                  }
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3.5 border-b border-[#2D3339] active:bg-[#2D3339]/60"
+              >
+                {/* Round checkmark */}
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                  isFullySelected
+                    ? 'bg-[#F97316] border-[#F97316]'
+                    : isPartial
+                      ? 'border-[#F97316] bg-transparent'
+                      : 'border-[#4B5563] bg-transparent'
+                }`}>
+                  {isFullySelected && <IconCheck size={14} className="text-white" strokeWidth={3} />}
+                  {isPartial && <div className="w-2.5 h-2.5 rounded-full bg-[#F97316]" />}
+                </div>
 
-                {/* Category name — tapping here expands subs (or toggles if no subs) */}
-          <button
-            onClick={() => {
-                    if (hasSubs) {
-                      toggleExpandCategory(category.id);
-              } else {
-                      toggleCategory(category);
-                    }
-                  }}
-                  className="flex-1 py-3.5 pr-2 flex items-center gap-2 text-left"
-                >
-                  <span className="text-white flex-1">{category.name}</span>
-                  {hasSubs && (
-                    <span className="text-[#6B7280] text-xs">
-                      {selections[category.name] 
-                        ? selections[category.name].length === 0 
-                          ? `All (${category.subCategories.length})`
-                          : `${selections[category.name].length}/${category.subCategories.length}`
-                        : `${category.subCategories.length} sub`
-                      }
-                    </span>
-                  )}
-                </button>
+                <span className="text-white flex-1 text-left">{category.name}</span>
 
-                {/* Expand chevron for categories with subs */}
                 {hasSubs && (
-                  <button
-                    onClick={() => toggleExpandCategory(category.id)}
-                    className="pr-4 pl-2 py-3.5"
-                  >
-                    {showSubs 
-                      ? <IconChevronDown size={20} className="text-[#6B7280]" />
-                      : <IconChevronRight size={20} className="text-[#6B7280]" />
-                    }
-                  </button>
+                  showSubs 
+                    ? <IconChevronDown size={20} className="text-[#6B7280]" />
+                    : <IconChevronRight size={20} className="text-[#6B7280]" />
                 )}
-                {!hasSubs && <div className="pr-4" />}
-            </div>
+              </button>
 
-              {/* Subcategories (expanded inline) */}
+              {/* Subcategories */}
               {showSubs && (
                 <div className="bg-[#15181B]">
                   {category.subCategories
@@ -1324,37 +1206,38 @@ function CategoryPickerScreen({
                         <button
                           key={sub.id}
                           onClick={() => toggleSubCategory(category, sub.name)}
-                          className="w-full flex items-center gap-3.5 pl-11 pr-4 py-3 border-b border-[#2D3339]/60 hover:bg-[#2D3339]/40 transition-colors"
+                          className="w-full flex items-center gap-3 pl-12 pr-4 py-3 border-b border-[#2D3339]/50 active:bg-[#2D3339]/40"
                         >
-                          <MultiCheckbox
-                            checked={subChecked}
-                            indeterminate={false}
-                            onChange={() => toggleSubCategory(category, sub.name)}
-                            size={20}
-                          />
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                            subChecked
+                              ? 'bg-[#F97316] border-[#F97316]'
+                              : 'border-[#4B5563] bg-transparent'
+                          }`}>
+                            {subChecked && <IconCheck size={12} className="text-white" strokeWidth={3} />}
+                          </div>
                           <span className="text-[#D1D5DB] text-sm">{sub.name}</span>
                         </button>
                       );
                     })
                   }
-              </div>
-            )}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
-      {/* Apply Button */}
+      {/* Apply */}
       <div className="px-4 py-4 border-t border-[#2D3339] bg-[#1A1D21]">
         <button 
           onClick={() => {
             onApply(selections);
             onClose();
           }}
-          className="w-full bg-[#F97316] text-white font-medium py-3.5 rounded-lg transition-colors hover:bg-[#EA6C10]"
+          className="w-full bg-[#F97316] text-white font-medium py-3.5 rounded-lg"
         >
-          {totalSelected > 0 ? `Apply (${totalSelected} selected)` : 'Apply — No filter'}
-          </button>
+          {totalSelected > 0 ? `Apply (${totalSelected})` : 'Show All'}
+        </button>
       </div>
     </div>
   );
