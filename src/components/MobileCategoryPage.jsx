@@ -301,21 +301,63 @@ const SAMPLE_PRODUCTS = [
 // ========================================
 
 // Category Grid Card
-function CategoryCard({ category, image, isSelected, onClick, subCount }) {
+function CategoryCard({ category, image, isSelected, onClick, subCount, selectionState, onCheckToggle, onDrillDown }) {
+  // selectionState: 'none' | 'all' | 'partial'
+  const showCheckbox = onCheckToggle != null;
+  
+  const handleClick = (e) => {
+    if (showCheckbox) {
+      onCheckToggle();
+    } else if (onClick) {
+      onClick();
+    }
+  };
+
+  const handleDrillDown = (e) => {
+    e.stopPropagation();
+    onDrillDown?.();
+  };
+
   return (
-    <button 
-      onClick={onClick}
-      className={`flex flex-col rounded-xl overflow-hidden border ${
+    <div 
+      role="button"
+      tabIndex={0}
+      onClick={handleClick}
+      className={`flex flex-col rounded-xl overflow-hidden border cursor-pointer ${
+        selectionState === 'all' ? 'border-[#F97316] ring-1 ring-[#F97316]' : 
+        selectionState === 'partial' ? 'border-[#F97316]/60' :
         isSelected ? 'border-[#F97316]' : 'border-[#3D4349]'
       }`}
     >
-      <div className="h-24 bg-[#3D4955] flex items-center justify-center relative">
+      <div className="relative h-24 bg-[#3D4955] flex items-center justify-center">
         {image ? (
           <img src={image} alt={category} className="w-full h-full object-cover" />
         ) : (
           <IconPhoto size={32} className="text-[#5B9BD5]" />
         )}
-        {subCount > 0 && (
+        {/* Checkbox overlay */}
+        {showCheckbox && (
+          <div className={`absolute top-2 left-2 w-6 h-6 rounded border-2 flex items-center justify-center ${
+            selectionState === 'all' ? 'bg-[#F97316] border-[#F97316]' : 
+            selectionState === 'partial' ? 'bg-[#F97316] border-[#F97316]' :
+            'border-white/70 bg-black/30'
+          }`}>
+            {selectionState === 'all' && <IconCheck size={16} className="text-white" />}
+            {selectionState === 'partial' && <span className="text-white text-xs font-bold">─</span>}
+          </div>
+        )}
+        {subCount > 0 && onDrillDown && (
+          <button
+            type="button"
+            onClick={handleDrillDown}
+            aria-label={`View ${subCount} subcategories`}
+            className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[11px] px-1.5 py-0.5 rounded flex items-center gap-0.5 cursor-pointer hover:bg-black/80 z-10"
+          >
+            <span>{subCount}</span>
+            <IconChevronRight size={12} />
+          </button>
+        )}
+        {subCount > 0 && !onDrillDown && (
           <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-[11px] px-1.5 py-0.5 rounded flex items-center gap-0.5">
             <span>{subCount}</span>
             <IconChevronRight size={12} />
@@ -325,7 +367,7 @@ function CategoryCard({ category, image, isSelected, onClick, subCount }) {
       <div className="py-3 px-2 bg-[#2D3339] text-center">
         <span className="text-white text-sm">{category}</span>
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -448,25 +490,23 @@ function SelectedProductCard({ product, quantity, onEdit, onRemove }) {
 }
 
 // Category Grid Picker (for Add Products) - Multi-select subcategories
-function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selectedSubCategories = [] }) {
+function CategoryGridPicker({ isOpen, onClose, onApply, initialSelections = {} }) {
+  // selections: { "Roofing": ["Installation", "Repair"], "HVAC": [] }
+  // Empty array = all subs selected (or no-sub category selected)
+  const [selections, setSelections] = useState({});
   const [viewingCategory, setViewingCategory] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [tempSelectedSubs, setTempSelectedSubs] = useState([]);
-  const [selectAll, setSelectAll] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   
-  // Initialize temp selection only when entering subcategory view
+  // Sync from parent when opening
   React.useEffect(() => {
-    if (viewingCategory) {
-      const category = CATEGORIES.find(c => c.id === viewingCategory);
-      if (selectedCategory === category?.name) {
-        setTempSelectedSubs([...selectedSubCategories]);
-        setSelectAll(selectedSubCategories.length === 0);
-      } else {
-        setTempSelectedSubs([]);
-        setSelectAll(false);
-      }
+    if (isOpen) {
+      setSelections(initialSelections || {});
+      setViewingCategory(null);
+      setSearchTerm('');
+      setShowSearch(false);
     }
-  }, [viewingCategory]); // Only trigger when viewingCategory changes
+  }, [isOpen]);
   
   if (!isOpen) return null;
 
@@ -474,30 +514,126 @@ function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selec
     cat.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const toggleSubCategory = (subName) => {
-    setSelectAll(false);
-    setTempSelectedSubs(prev => 
-      prev.includes(subName) 
-        ? prev.filter(s => s !== subName)
-        : [...prev, subName]
-    );
+  // Get selection state for a parent category
+  const getSelectionState = (catName) => {
+    if (!(catName in selections)) return 'none';
+    const cat = CATEGORIES.find(c => c.name === catName);
+    if (!cat || cat.subCategories.length === 0) return 'all'; // no subs = fully selected
+    const selected = selections[catName];
+    if (selected.length === 0) return 'all'; // [] means all
+    if (selected.length === cat.subCategories.length) return 'all';
+    return 'partial';
   };
 
-  const handleSelectAll = () => {
-    setSelectAll(true);
-    setTempSelectedSubs([]);
+  // Toggle an entire parent category
+  const toggleParent = (catName) => {
+    const cat = CATEGORIES.find(c => c.name === catName);
+    setSelections(prev => {
+      const next = { ...prev };
+      if (catName in next) {
+        // Already selected → deselect
+        delete next[catName];
+      } else {
+        // Select all ([] = all subs)
+        next[catName] = [];
+      }
+      return next;
+    });
   };
 
-  const handleApply = (categoryName) => {
-    onSelect(categoryName, selectAll ? [] : tempSelectedSubs);
-    setViewingCategory(null);
+  // Toggle a single subcategory within a parent
+  const toggleSub = (catName, subName) => {
+    const cat = CATEGORIES.find(c => c.name === catName);
+    if (!cat) return;
+    const allSubs = cat.subCategories.map(s => s.name);
+
+    setSelections(prev => {
+      const next = { ...prev };
+      // Current selected subs ([] means all)
+      let currentSubs = catName in next 
+        ? (next[catName].length === 0 ? [...allSubs] : [...next[catName]])
+        : [];
+
+      if (currentSubs.includes(subName)) {
+        currentSubs = currentSubs.filter(s => s !== subName);
+        if (currentSubs.length === 0) {
+          delete next[catName]; // Nothing selected → remove parent
+        } else {
+          next[catName] = currentSubs;
+        }
+      } else {
+        currentSubs.push(subName);
+        // If all subs now selected, store as []
+        if (currentSubs.length === allSubs.length) {
+          next[catName] = [];
+        } else {
+          next[catName] = currentSubs;
+        }
+      }
+      return next;
+    });
+  };
+
+  // Check if a sub is selected
+  const isSubSelected = (catName, subName) => {
+    if (!(catName in selections)) return false;
+    const selected = selections[catName];
+    if (selected.length === 0) return true; // [] = all
+    return selected.includes(subName);
+  };
+
+  // Count total selected
+  const getTotalCount = () => {
+    let count = 0;
+    for (const [catName, subs] of Object.entries(selections)) {
+      const cat = CATEGORIES.find(c => c.name === catName);
+      if (!cat || cat.subCategories.length === 0) {
+        count += 1;
+      } else {
+        count += subs.length === 0 ? cat.subCategories.length : subs.length;
+      }
+    }
+    return count;
+  };
+
+  // Build chip list
+  const getChips = () => {
+    const chips = [];
+    for (const [catName, subs] of Object.entries(selections)) {
+      const cat = CATEGORIES.find(c => c.name === catName);
+      if (!cat || cat.subCategories.length === 0) {
+        chips.push({ label: catName, onRemove: () => toggleParent(catName) });
+      } else if (subs.length === 0) {
+        // All selected
+        chips.push({ label: catName, onRemove: () => toggleParent(catName) });
+      } else {
+        subs.forEach(sub => {
+          chips.push({ 
+            label: `${catName} › ${sub}`, 
+            onRemove: () => toggleSub(catName, sub)
+          });
+        });
+      }
+    }
+    return chips;
+  };
+
+  const totalCount = getTotalCount();
+  const chips = getChips();
+  const hasSelections = Object.keys(selections).length > 0;
+
+  const handleApply = () => {
+    onApply(selections);
     onClose();
   };
 
-  // Subcategory view with multi-select and images
+  // Subcategory drill-down view
   if (viewingCategory) {
     const category = CATEGORIES.find(c => c.id === viewingCategory);
     const categoryImage = CATEGORY_IMAGES[category?.name];
+    const catName = category?.name;
+    const allSubs = category?.subCategories || [];
+    const catState = getSelectionState(catName);
     
     return (
       <div className="fixed inset-0 z-50 bg-[#1A1D21] text-white flex flex-col">
@@ -507,9 +643,9 @@ function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selec
             <button onClick={() => setViewingCategory(null)} className="p-1">
               <IconChevronLeft size={24} className="text-white" />
             </button>
-            <h1 className="text-lg font-semibold">{category?.name}</h1>
+            <h1 className="text-lg font-semibold">{catName}</h1>
           </div>
-          <button onClick={onClose} className="p-1">
+          <button onClick={() => setViewingCategory(null)} className="p-1">
             <IconX size={24} className="text-white" />
           </button>
         </div>
@@ -517,46 +653,55 @@ function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selec
         {/* Subcategory Grid with Images and Checkboxes */}
         <div className="flex-1 overflow-y-auto p-4">
           <div className="grid grid-cols-2 gap-3">
-            {/* All option card */}
+            {/* Select All card */}
             <button
-              onClick={handleSelectAll}
+              onClick={() => {
+                // Toggle: if all selected → deselect; else → select all
+                if (catState === 'all') {
+                  setSelections(prev => {
+                    const next = { ...prev };
+                    delete next[catName];
+                    return next;
+                  });
+                } else {
+                  setSelections(prev => ({ ...prev, [catName]: [] }));
+                }
+              }}
               className={`relative bg-[#2D3339] rounded-xl overflow-hidden ${
-                selectAll ? 'ring-2 ring-[#F97316]' : ''
+                catState === 'all' ? 'ring-2 ring-[#F97316]' : ''
               }`}
             >
               <div className="aspect-[4/3] relative">
                 {categoryImage && (
                   <img 
                     src={categoryImage} 
-                    alt={`All ${category?.name}`}
+                    alt={`All ${catName}`}
                     className="w-full h-full object-cover"
                   />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                {/* Checkbox */}
                 <div className={`absolute top-2 left-2 w-6 h-6 rounded border-2 flex items-center justify-center ${
-                  selectAll ? 'bg-[#F97316] border-[#F97316]' : 'border-white/70 bg-black/30'
+                  catState !== 'none' ? 'bg-[#F97316] border-[#F97316]' : 'border-white/70 bg-black/30'
                 }`}>
-                  {selectAll && <IconCheck size={16} className="text-white" />}
+                  {catState === 'all' && <IconCheck size={16} className="text-white" />}
+                  {catState === 'partial' && <span className="text-white text-xs font-bold">─</span>}
                 </div>
               </div>
               <div className="p-3">
-                <span className="text-white text-sm font-medium">All {category?.name}</span>
+                <span className="text-white text-sm font-medium">All {catName}</span>
               </div>
             </button>
 
             {/* Subcategory cards */}
-            {category?.subCategories.map((sub, index) => {
-              const isSelected = tempSelectedSubs.includes(sub.name);
-              // Use different seed for each subcategory image
-              const subImage = `https://images.unsplash.com/photo-${1600585154340 + index * 1000}-be6161a56a0c?w=400&h=240&fit=crop`;
+            {allSubs.map((sub) => {
+              const selected = isSubSelected(catName, sub.name);
               
               return (
                 <button
                   key={sub.id}
-                  onClick={() => toggleSubCategory(sub.name)}
+                  onClick={() => toggleSub(catName, sub.name)}
                   className={`relative bg-[#2D3339] rounded-xl overflow-hidden ${
-                    isSelected ? 'ring-2 ring-[#F97316]' : ''
+                    selected ? 'ring-2 ring-[#F97316]' : ''
                   }`}
                 >
                   <div className="aspect-[4/3] relative">
@@ -566,11 +711,10 @@ function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selec
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    {/* Checkbox */}
                     <div className={`absolute top-2 left-2 w-6 h-6 rounded border-2 flex items-center justify-center ${
-                      isSelected ? 'bg-[#F97316] border-[#F97316]' : 'border-white/70 bg-black/30'
+                      selected ? 'bg-[#F97316] border-[#F97316]' : 'border-white/70 bg-black/30'
                     }`}>
-                      {isSelected && <IconCheck size={16} className="text-white" />}
+                      {selected && <IconCheck size={16} className="text-white" />}
                     </div>
                   </div>
                   <div className="p-3">
@@ -582,13 +726,13 @@ function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selec
           </div>
         </div>
 
-        {/* Apply Button */}
+        {/* Done button to go back to grid */}
         <div className="px-4 py-4 border-t border-[#2D3339]">
           <button 
-            onClick={() => handleApply(category.name)}
+            onClick={() => setViewingCategory(null)}
             className="w-full bg-[#F97316] text-white font-medium py-3.5 rounded-lg"
           >
-            Apply {tempSelectedSubs.length > 0 ? `(${tempSelectedSubs.length} selected)` : ''}
+            Done
           </button>
         </div>
       </div>
@@ -604,12 +748,55 @@ function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selec
           <button onClick={onClose} className="p-1">
             <IconX size={24} className="text-white" />
           </button>
-          <h1 className="text-lg font-semibold">Select a category</h1>
+          <h1 className="text-lg font-semibold">Select Categories</h1>
         </div>
-        <button className="p-1">
+        <div className="flex items-center gap-2">
+          {hasSelections && (
+            <button 
+              onClick={() => setSelections({})} 
+              className="text-[#F97316] text-sm font-medium px-2"
+            >
+              Clear all
+            </button>
+          )}
+          <button onClick={() => setShowSearch(!showSearch)} className="p-1">
           <IconSearch size={24} className="text-white" />
         </button>
+        </div>
       </div>
+
+      {/* Search bar (toggleable) */}
+      {showSearch && (
+        <div className="px-4 py-3 border-b border-[#2D3339]">
+          <div className="relative">
+            <IconSearch size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
+            <input 
+              type="text"
+              placeholder="Search categories..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              autoFocus
+              className="w-full bg-[#2D3339] border border-[#3D4349] rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-[#6B7280] text-sm"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Selection chips */}
+      {chips.length > 0 && (
+        <div className="flex gap-2 px-4 py-3 overflow-x-auto border-b border-[#2D3339] scrollbar-hide">
+          {chips.map((chip, i) => (
+            <button
+              key={i}
+              onClick={chip.onRemove}
+              className="flex items-center gap-1.5 bg-[#F97316]/20 text-[#F97316] px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap flex-shrink-0"
+            >
+              {chip.label}
+              <IconX size={14} />
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Category Grid */}
       <div className="flex-1 overflow-y-auto p-4">
@@ -619,19 +806,23 @@ function CategoryGridPicker({ isOpen, onClose, onSelect, selectedCategory, selec
               key={category.id}
               category={category.name}
               image={CATEGORY_IMAGES[category.name]}
-              isSelected={selectedCategory === category.name}
               subCount={category.subCategories.length}
-              onClick={() => {
-                if (category.subCategories.length > 0) {
-                  setViewingCategory(category.id);
-                } else {
-                  onSelect(category.name, null);
-                  onClose();
-                }
-              }}
+              selectionState={getSelectionState(category.name)}
+              onCheckToggle={() => toggleParent(category.name)}
+              onDrillDown={category.subCategories.length > 0 ? () => setViewingCategory(category.id) : undefined}
             />
           ))}
         </div>
+      </div>
+
+      {/* Apply Button */}
+      <div className="px-4 py-4 border-t border-[#2D3339]">
+        <button 
+          onClick={handleApply}
+          className="w-full bg-[#F97316] text-white font-medium py-3.5 rounded-lg"
+        >
+          Apply{totalCount > 0 ? ` (${totalCount} selected)` : ' — No filter'}
+        </button>
       </div>
     </div>
   );
@@ -642,8 +833,8 @@ function AddProductsScreen({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState('products'); // 'products' or 'selected'
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedSubCategories, setSelectedSubCategories] = useState([]); // Multi-select
+  // Multi-select: { "Roofing": ["Installation", "Repair"], "HVAC": [] }
+  const [categorySelections, setCategorySelections] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   
   if (!isOpen) return null;
@@ -662,29 +853,43 @@ function AddProductsScreen({ isOpen, onClose }) {
     return selectedProducts.some(p => p.product.id === productId);
   };
 
-  const handleCategorySelect = (category, subCategories) => {
-    setSelectedCategory(category);
-    setSelectedSubCategories(subCategories || []);
+  const handleCategoryApply = (newSelections) => {
+    setCategorySelections(newSelections);
   };
 
   const getCategoryDisplay = () => {
-    if (!selectedCategory) return 'All Categories';
-    if (selectedSubCategories.length > 0) {
-      if (selectedSubCategories.length === 1) return selectedSubCategories[0];
-      return `${selectedSubCategories.length} selected`;
+    const keys = Object.keys(categorySelections);
+    if (keys.length === 0) return 'All Categories';
+    if (keys.length === 1) {
+      const catName = keys[0];
+      const subs = categorySelections[catName];
+      if (subs.length === 0) return catName;
+      if (subs.length === 1) return `${catName} › ${subs[0]}`;
+      return `${catName} (${subs.length})`;
     }
-    return selectedCategory;
+    // Multiple parents
+    let total = 0;
+    for (const [catName, subs] of Object.entries(categorySelections)) {
+      const cat = CATEGORIES.find(c => c.name === catName);
+      if (!cat || cat.subCategories.length === 0) total += 1;
+      else total += subs.length === 0 ? cat.subCategories.length : subs.length;
+    }
+    return `${total} selected`;
   };
 
-  // Filter products
+  // Filter products based on multi-select map
+  const hasFilters = Object.keys(categorySelections).length > 0;
   const filteredProducts = SAMPLE_PRODUCTS.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           product.sku.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = !selectedCategory || product.category === selectedCategory;
-    // Multi-select: if no subcategories selected, show all; otherwise filter by selected
-    const matchesSubCategory = selectedSubCategories.length === 0 || 
-                               selectedSubCategories.includes(product.subCategory);
-    return matchesSearch && matchesCategory && matchesSubCategory;
+    if (!hasFilters) return matchesSearch;
+    // Check if product's category is in selections
+    if (!(product.category in categorySelections)) return false;
+    const subs = categorySelections[product.category];
+    // [] means all subs selected
+    if (subs.length === 0) return matchesSearch;
+    // Check specific subcategory
+    return matchesSearch && subs.includes(product.subCategory);
   });
 
   return (
@@ -816,9 +1021,8 @@ function AddProductsScreen({ isOpen, onClose }) {
       <CategoryGridPicker
         isOpen={showCategoryPicker}
         onClose={() => setShowCategoryPicker(false)}
-        onSelect={handleCategorySelect}
-        selectedCategory={selectedCategory}
-        selectedSubCategories={selectedSubCategories}
+        onApply={handleCategoryApply}
+        initialSelections={categorySelections}
       />
     </div>
   );
@@ -946,92 +1150,210 @@ function MobileFilterPanel({ isOpen, onClose, onOpenCategoryPicker, selectedCate
   );
 }
 
-// Category Picker Screen (Full Screen)
+// Multi-select Checkbox component
+function MultiCheckbox({ checked, indeterminate, onChange, size = 22 }) {
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); onChange(!checked); }}
+      className={`w-[${size}px] h-[${size}px] rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+        checked || indeterminate
+          ? 'bg-[#F97316] border-[#F97316]'
+          : 'border-[#4B5563] bg-transparent hover:border-[#6B7280]'
+      }`}
+      style={{ width: size, height: size }}
+    >
+      {checked && <IconCheck size={size - 8} className="text-white" strokeWidth={3} />}
+      {!checked && indeterminate && (
+        <div className="w-[10px] h-[2px] bg-white rounded-full" />
+      )}
+    </button>
+  );
+}
+
+// Category Picker Screen (Full Screen - Multi-Select)
+// selections shape: { "Roofing": ["Installation", "Repair"], "HVAC": [] }
+// Key with empty array = entire parent selected (all subs or category itself)
+// Key with sub-array = only those subs are selected
 function CategoryPickerScreen({ 
   isOpen, 
   onClose, 
-  onSelect, 
-  selectedCategory,
-  selectedSubCategory 
+  onApply, 
+  initialSelections = {}
 }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [viewingCategory, setViewingCategory] = useState(null); // For drill-down into subcategories
+  const [expandedCategories, setExpandedCategories] = useState({}); // { categoryId: true/false }
+  // Internal selections state — committed only on "Apply"
+  const [selections, setSelections] = useState({});
+
+  // Sync internal state when opened
+  React.useEffect(() => {
+    if (isOpen) {
+      setSelections(initialSelections || {});
+      setSearchTerm('');
+      // Auto-expand categories that have selections
+      const expanded = {};
+      Object.keys(initialSelections || {}).forEach(catName => {
+        const cat = CATEGORIES.find(c => c.name === catName);
+        if (cat && cat.subCategories.length > 0) {
+          expanded[cat.id] = true;
+        }
+      });
+      setExpandedCategories(expanded);
+    }
+  }, [isOpen]);
   
   if (!isOpen) return null;
 
-  const filteredCategories = CATEGORIES.filter(cat => 
-    cat.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // ---- Selection helpers ----
+  const isCategoryFullySelected = (category) => {
+    if (!selections[category.name]) return false;
+    if (category.subCategories.length === 0) return true; // no subs → selected
+    // All subs selected?
+    return selections[category.name].length === 0 || 
+           selections[category.name].length === category.subCategories.length;
+  };
 
-  // Subcategory view
-  if (viewingCategory) {
-    const category = CATEGORIES.find(c => c.id === viewingCategory);
-    return (
-      <div className="fixed inset-0 z-50 bg-[#1A1D21] text-white flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-4 border-b border-[#2D3339]">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setViewingCategory(null)} className="p-1">
-              <IconChevronLeft size={24} className="text-white" />
-            </button>
-            <h1 className="text-lg font-semibold">{category?.name}</h1>
-          </div>
-          <button onClick={onClose} className="p-1">
-            <IconX size={24} className="text-white" />
-          </button>
-        </div>
+  const isCategoryPartiallySelected = (category) => {
+    if (!selections[category.name]) return false;
+    if (category.subCategories.length === 0) return false;
+    const subs = selections[category.name];
+    return subs.length > 0 && subs.length < category.subCategories.length;
+  };
 
-        {/* Subcategory List */}
-        <div className="flex-1 overflow-y-auto">
-          {/* All option for parent category */}
-          <button
-            onClick={() => {
-              onSelect(category.name, null);
-              setViewingCategory(null);
-              onClose();
-            }}
-            className="w-full px-4 py-4 flex items-center gap-4 border-b border-[#2D3339] hover:bg-[#2D3339]"
-          >
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-              selectedCategory === category.name && !selectedSubCategory
-                ? 'border-[#F97316] bg-[#F97316]' 
-                : 'border-[#4B5563]'
-            }`}>
-              {selectedCategory === category.name && !selectedSubCategory && (
-                <IconCheck size={14} className="text-white" />
-              )}
-            </div>
-            <span className="text-white">All {category.name}</span>
-          </button>
+  const isSubSelected = (categoryName, subName) => {
+    if (!selections[categoryName]) return false;
+    const subs = selections[categoryName];
+    return subs.length === 0 || subs.includes(subName); // empty = all
+  };
 
-          {category?.subCategories.map(sub => (
-            <button
-              key={sub.id}
-              onClick={() => {
-                onSelect(category.name, sub.name);
-                setViewingCategory(null);
-                onClose();
-              }}
-              className="w-full px-4 py-4 flex items-center gap-4 border-b border-[#2D3339] hover:bg-[#2D3339]"
-            >
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                selectedSubCategory === sub.name 
-                  ? 'border-[#F97316] bg-[#F97316]' 
-                  : 'border-[#4B5563]'
-              }`}>
-                {selectedSubCategory === sub.name && (
-                  <IconCheck size={14} className="text-white" />
-                )}
-              </div>
-              <span className="text-white">{sub.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const toggleCategory = (category) => {
+    setSelections(prev => {
+      const next = { ...prev };
+      if (isCategoryFullySelected(category)) {
+        // Deselect entirely
+        delete next[category.name];
+      } else {
+        // Select all — use empty array to mean "all subs"
+        next[category.name] = [];
+      }
+      return next;
+    });
+  };
 
-  // Main category list view
+  const toggleSubCategory = (category, subName) => {
+    setSelections(prev => {
+      const next = { ...prev };
+      const currentSubs = next[category.name];
+      
+      if (!currentSubs) {
+        // Category not selected at all — select just this sub
+        next[category.name] = [subName];
+      } else if (currentSubs.length === 0) {
+        // All subs selected — remove this one (select all others)
+        next[category.name] = category.subCategories
+          .map(s => s.name)
+          .filter(name => name !== subName);
+        // If nothing left, remove category
+        if (next[category.name].length === 0) {
+          delete next[category.name];
+        }
+      } else if (currentSubs.includes(subName)) {
+        // Remove this sub
+        next[category.name] = currentSubs.filter(s => s !== subName);
+        // If nothing left, remove category
+        if (next[category.name].length === 0) {
+          delete next[category.name];
+        }
+      } else {
+        // Add this sub
+        const updated = [...currentSubs, subName];
+        // If all subs now selected, normalize to empty array
+        if (updated.length === category.subCategories.length) {
+          next[category.name] = [];
+        } else {
+          next[category.name] = updated;
+        }
+      }
+      return next;
+    });
+  };
+
+  const toggleExpandCategory = (categoryId) => {
+    setExpandedCategories(prev => ({ ...prev, [categoryId]: !prev[categoryId] }));
+  };
+
+  const clearAll = () => {
+    setSelections({});
+  };
+
+  const selectAll = () => {
+    const all = {};
+    CATEGORIES.forEach(cat => { all[cat.name] = []; });
+    setSelections(all);
+  };
+
+  // Count total selections
+  const getTotalSelectionCount = () => {
+    let count = 0;
+    Object.entries(selections).forEach(([catName, subs]) => {
+      const cat = CATEGORIES.find(c => c.name === catName);
+      if (!cat) return;
+      if (cat.subCategories.length === 0) {
+        count += 1;
+      } else if (subs.length === 0) {
+        count += cat.subCategories.length; // all subs
+      } else {
+        count += subs.length;
+      }
+    });
+    return count;
+  };
+
+  // Build selection chips for display
+  const getSelectionChips = () => {
+    const chips = [];
+    Object.entries(selections).forEach(([catName, subs]) => {
+      const cat = CATEGORIES.find(c => c.name === catName);
+      if (!cat) return;
+      if (cat.subCategories.length === 0 || subs.length === 0) {
+        // Whole category
+        chips.push({ type: 'category', catName, label: catName });
+      } else {
+        // Individual subs
+        subs.forEach(subName => {
+          chips.push({ type: 'sub', catName, subName, label: `${catName} › ${subName}` });
+        });
+      }
+    });
+    return chips;
+  };
+
+  const removeChip = (chip) => {
+    if (chip.type === 'category') {
+      setSelections(prev => {
+        const next = { ...prev };
+        delete next[chip.catName];
+        return next;
+      });
+    } else {
+      const cat = CATEGORIES.find(c => c.name === chip.catName);
+      if (cat) toggleSubCategory(cat, chip.subName);
+    }
+  };
+
+  // Filter
+  const lowerSearch = searchTerm.toLowerCase();
+  const filteredCategories = CATEGORIES.filter(cat => {
+    if (!searchTerm) return true;
+    if (cat.name.toLowerCase().includes(lowerSearch)) return true;
+    return cat.subCategories.some(s => s.name.toLowerCase().includes(lowerSearch));
+  });
+
+  const totalSelected = getTotalSelectionCount();
+  const allSelected = Object.keys(selections).length === CATEGORIES.length &&
+    CATEGORIES.every(c => isCategoryFullySelected(c));
+  const chips = getSelectionChips();
+
   return (
     <div className="fixed inset-0 z-50 bg-[#1A1D21] text-white flex flex-col">
       {/* Header */}
@@ -1040,15 +1362,16 @@ function CategoryPickerScreen({
           <button onClick={onClose} className="p-1">
             <IconX size={24} className="text-white" />
           </button>
-          <h1 className="text-lg font-semibold">Select an option</h1>
+          <h1 className="text-lg font-semibold">Select Categories</h1>
         </div>
-        <button className="p-1">
-          <IconSearch size={24} className="text-white" />
+        {totalSelected > 0 && (
+          <button onClick={clearAll} className="text-[#F97316] text-sm font-medium">
+            Clear all
         </button>
+        )}
       </div>
 
-      {/* Search (shown when search icon is tapped - simplified for demo) */}
-      {searchTerm !== null && (
+      {/* Search */}
         <div className="px-4 py-3 border-b border-[#2D3339]">
           <div className="relative">
             <IconSearch size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
@@ -1059,65 +1382,154 @@ function CategoryPickerScreen({
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-[#2D3339] border border-[#3D4349] rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-[#6B7280] text-sm"
             />
+        </div>
+      </div>
+
+      {/* Selection Chips */}
+      {chips.length > 0 && (
+        <div className="px-4 py-2.5 border-b border-[#2D3339] overflow-x-auto">
+          <div className="flex items-center gap-2 min-w-max">
+            {chips.map((chip, idx) => (
+              <span 
+                key={idx}
+                className="inline-flex items-center gap-1.5 bg-[#F97316]/15 border border-[#F97316]/30 text-[#F97316] text-xs font-medium px-2.5 py-1.5 rounded-full whitespace-nowrap"
+              >
+                {chip.label}
+                <button 
+                  onClick={() => removeChip(chip)}
+                  className="hover:bg-[#F97316]/20 rounded-full p-0.5"
+                >
+                  <IconX size={12} strokeWidth={3} />
+                </button>
+              </span>
+            ))}
           </div>
         </div>
       )}
 
       {/* Category List */}
       <div className="flex-1 overflow-y-auto">
-        {/* Any category option */}
+        {/* Select All */}
+        {!searchTerm && (
         <button
-          onClick={() => {
-            onSelect(null, null);
-            onClose();
-          }}
-          className="w-full px-4 py-4 flex items-center gap-4 border-b border-[#2D3339] hover:bg-[#2D3339]"
-        >
-          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-            !selectedCategory 
-              ? 'border-[#F97316] bg-[#F97316]' 
-              : 'border-[#4B5563]'
-          }`}>
-            {!selectedCategory && (
-              <IconCheck size={14} className="text-white" />
-            )}
-          </div>
-          <span className="text-white">Any category</span>
-        </button>
-
-        {filteredCategories.map(category => (
-          <button
-            key={category.id}
-            onClick={() => {
-              if (category.subCategories.length > 0) {
-                setViewingCategory(category.id);
-              } else {
-                onSelect(category.name, null);
-                onClose();
-              }
-            }}
-            className="w-full px-4 py-4 flex items-center gap-4 border-b border-[#2D3339] hover:bg-[#2D3339]"
+            onClick={() => allSelected ? clearAll() : selectAll()}
+            className="w-full px-4 py-3.5 flex items-center gap-3.5 border-b border-[#2D3339] hover:bg-[#2D3339]/60 transition-colors"
           >
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-              selectedCategory === category.name 
-                ? 'border-[#F97316] bg-[#F97316]' 
-                : 'border-[#4B5563]'
-            }`}>
-              {selectedCategory === category.name && (
-                <IconCheck size={14} className="text-white" />
-              )}
+            <MultiCheckbox
+              checked={allSelected}
+              indeterminate={!allSelected && totalSelected > 0}
+              onChange={() => allSelected ? clearAll() : selectAll()}
+            />
+            <span className="text-white font-medium">Select All</span>
+            <span className="text-[#6B7280] text-xs ml-auto">{CATEGORIES.length} categories</span>
+          </button>
+        )}
+
+        {filteredCategories.map(category => {
+          const isFullySelected = isCategoryFullySelected(category);
+          const isPartial = isCategoryPartiallySelected(category);
+          const hasSubs = category.subCategories.length > 0;
+          const isExpanded = expandedCategories[category.id];
+          // When searching, auto-expand categories with matching subs
+          const searchExpanded = searchTerm && hasSubs && 
+            category.subCategories.some(s => s.name.toLowerCase().includes(lowerSearch));
+
+          const showSubs = hasSubs && (isExpanded || searchExpanded);
+
+          return (
+            <div key={category.id}>
+              {/* Parent Category Row */}
+              <div className="flex items-center border-b border-[#2D3339] hover:bg-[#2D3339]/60 transition-colors">
+                {/* Checkbox area */}
+                <div className="pl-4 pr-2 py-3.5 flex items-center">
+                  <MultiCheckbox
+                    checked={isFullySelected}
+                    indeterminate={isPartial}
+                    onChange={() => toggleCategory(category)}
+                  />
+          </div>
+
+                {/* Category name — tapping here expands subs (or toggles if no subs) */}
+          <button
+            onClick={() => {
+                    if (hasSubs) {
+                      toggleExpandCategory(category.id);
+              } else {
+                      toggleCategory(category);
+                    }
+                  }}
+                  className="flex-1 py-3.5 pr-2 flex items-center gap-2 text-left"
+                >
+                  <span className="text-white flex-1">{category.name}</span>
+                  {hasSubs && (
+                    <span className="text-[#6B7280] text-xs">
+                      {selections[category.name] 
+                        ? selections[category.name].length === 0 
+                          ? `All (${category.subCategories.length})`
+                          : `${selections[category.name].length}/${category.subCategories.length}`
+                        : `${category.subCategories.length} sub`
+                      }
+                    </span>
+                  )}
+                </button>
+
+                {/* Expand chevron for categories with subs */}
+                {hasSubs && (
+                  <button
+                    onClick={() => toggleExpandCategory(category.id)}
+                    className="pr-4 pl-2 py-3.5"
+                  >
+                    {showSubs 
+                      ? <IconChevronDown size={20} className="text-[#6B7280]" />
+                      : <IconChevronRight size={20} className="text-[#6B7280]" />
+                    }
+                  </button>
+                )}
+                {!hasSubs && <div className="pr-4" />}
             </div>
-            <span className="text-white flex-1 text-left">{category.name}</span>
-            {category.subCategories.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className="text-[#6B7280] text-sm">
-                  {category.subCategories.length} sub
-                </span>
-                <IconChevronRight size={20} className="text-[#6B7280]" />
+
+              {/* Subcategories (expanded inline) */}
+              {showSubs && (
+                <div className="bg-[#15181B]">
+                  {category.subCategories
+                    .filter(sub => !searchTerm || sub.name.toLowerCase().includes(lowerSearch) || category.name.toLowerCase().includes(lowerSearch))
+                    .map(sub => {
+                      const subChecked = isSubSelected(category.name, sub.name);
+                      return (
+                        <button
+                          key={sub.id}
+                          onClick={() => toggleSubCategory(category, sub.name)}
+                          className="w-full flex items-center gap-3.5 pl-11 pr-4 py-3 border-b border-[#2D3339]/60 hover:bg-[#2D3339]/40 transition-colors"
+                        >
+                          <MultiCheckbox
+                            checked={subChecked}
+                            indeterminate={false}
+                            onChange={() => toggleSubCategory(category, sub.name)}
+                            size={20}
+                          />
+                          <span className="text-[#D1D5DB] text-sm">{sub.name}</span>
+                        </button>
+                      );
+                    })
+                  }
               </div>
             )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Apply Button */}
+      <div className="px-4 py-4 border-t border-[#2D3339] bg-[#1A1D21]">
+        <button 
+          onClick={() => {
+            onApply(selections);
+            onClose();
+          }}
+          className="w-full bg-[#F97316] text-white font-medium py-3.5 rounded-lg transition-colors hover:bg-[#EA6C10]"
+        >
+          {totalSelected > 0 ? `Apply (${totalSelected} selected)` : 'Apply — No filter'}
           </button>
-        ))}
       </div>
     </div>
   );
@@ -1490,19 +1902,35 @@ export default function MobileCategoryPage() {
   const [showFilter, setShowFilter] = useState(false);
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showAddProducts, setShowAddProducts] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [selectedSubCategory, setSelectedSubCategory] = useState(null);
+  // Multi-select: { "Roofing": ["Installation", "Repair"], "HVAC": [] }
+  // Empty array = all subs selected (or category itself if no subs)
+  const [categorySelections, setCategorySelections] = useState({});
   const [selectedPart, setSelectedPart] = useState(null);
 
-  const handleCategorySelect = (category, subCategory) => {
-    setSelectedCategory(category);
-    setSelectedSubCategory(subCategory);
+  const handleCategoryApply = (selections) => {
+    setCategorySelections(selections);
   };
 
   const getDisplayCategory = () => {
-    if (!selectedCategory) return null;
-    if (selectedSubCategory) return `${selectedCategory} > ${selectedSubCategory}`;
-    return selectedCategory;
+    const keys = Object.keys(categorySelections);
+    if (keys.length === 0) return null;
+    if (keys.length === 1) {
+      const catName = keys[0];
+      const subs = categorySelections[catName];
+      if (subs.length === 0) return catName;
+      if (subs.length === 1) return `${catName} › ${subs[0]}`;
+      return `${catName} (${subs.length})`;
+    }
+    // Count total
+    let total = 0;
+    keys.forEach(catName => {
+      const cat = CATEGORIES.find(c => c.name === catName);
+      const subs = categorySelections[catName];
+      if (!cat || cat.subCategories.length === 0) total += 1;
+      else if (subs.length === 0) total += cat.subCategories.length;
+      else total += subs.length;
+    });
+    return `${keys.length} categories (${total})`;
   };
 
   const handlePartClick = (part) => {
@@ -1625,6 +2053,17 @@ export default function MobileCategoryPage() {
         ))}
       </div>
 
+      {/* FAB - Add Products */}
+      <button
+        onClick={() => setShowAddProducts(true)}
+        className="fixed bottom-20 right-4 w-14 h-14 bg-[#F97316] rounded-full shadow-lg flex items-center justify-center z-30 active:scale-95 transition-transform"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+      </button>
+
       {/* Bottom Navigation - Light theme iOS style */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-8 py-3 pb-6 flex items-center justify-around">
         <button className="p-2">
@@ -1658,9 +2097,8 @@ export default function MobileCategoryPage() {
           setShowCategoryPicker(false);
           setShowFilter(true);
         }}
-        onSelect={handleCategorySelect}
-        selectedCategory={selectedCategory}
-        selectedSubCategory={selectedSubCategory}
+        onApply={handleCategoryApply}
+        initialSelections={categorySelections}
       />
 
       {/* Add Products Screen */}
