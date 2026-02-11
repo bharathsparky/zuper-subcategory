@@ -301,13 +301,15 @@ const SAMPLE_PRODUCTS = [
 // ========================================
 
 // Category Grid Card
-function CategoryCard({ category, image, selected, onTap, subCount, onDrillDown }) {
+function CategoryCard({ category, image, selected, onTap, subCount, selectedSubCount, onDrillDown }) {
   // Simple card: tap = toggle, drill-down badge = view subcategories
   const handleCardClick = (e) => {
     // Ignore clicks on the drill-down badge
     if (e.target.closest('[data-drilldown]')) return;
     onTap?.();
   };
+
+  const hasPartialSubs = selectedSubCount > 0 && selectedSubCount < subCount;
 
   return (
     <div 
@@ -322,23 +324,24 @@ function CategoryCard({ category, image, selected, onTap, subCount, onDrillDown 
         ) : (
           <IconPhoto size={32} className="text-[#5B9BD5]" />
         )}
-        {/* Selected overlay + checkmark */}
-        {selected && (
-          <div className="absolute inset-0 bg-[#F97316]/25 flex items-center justify-center pointer-events-none">
-            <div className="w-8 h-8 rounded-full bg-[#F97316] flex items-center justify-center">
-              <IconCheck size={20} className="text-white" />
-            </div>
-          </div>
-        )}
-        {/* Subcategory count — subtle, always same style */}
+        {/* Subcategory drill-down — prominent tap target */}
         {subCount > 0 && onDrillDown && (
           <div
             data-drilldown
             onClick={(e) => { e.stopPropagation(); onDrillDown(); }}
-            className="absolute bottom-1.5 right-1.5 bg-black/50 backdrop-blur-sm text-white text-[11px] px-2 py-1 rounded flex items-center gap-0.5 z-10 cursor-pointer active:bg-black/70"
+            className={`absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-2 z-10 cursor-pointer transition-colors ${
+              hasPartialSubs
+                ? 'bg-[#F97316]/90 text-white'
+                : 'bg-black/60 backdrop-blur-sm text-white/90'
+            }`}
           >
-            <span>{subCount}</span>
-            <IconChevronRight size={12} />
+            <span className="text-xs font-medium">
+              {hasPartialSubs
+                ? `${selectedSubCount}/${subCount} selected`
+                : `${subCount} subcategories`
+              }
+            </span>
+            <IconChevronRight size={14} />
           </div>
         )}
       </div>
@@ -629,17 +632,24 @@ function CategoryGridPicker({ isOpen, onClose, onApply, initialSelections = {} }
       {/* Grid */}
       <div className="flex-1 overflow-y-auto p-4">
         <div className="grid grid-cols-2 gap-3">
-          {CATEGORIES.map(category => (
-            <CategoryCard
-              key={category.id}
-              category={category.name}
-              image={CATEGORY_IMAGES[category.name]}
-              selected={isSelected(category.name)}
-              onTap={() => toggleParent(category.name)}
-              subCount={category.subCategories.length}
-              onDrillDown={category.subCategories.length > 0 ? () => setViewingCategory(category.id) : undefined}
-            />
-          ))}
+          {CATEGORIES.map(category => {
+            const subs = selections[category.name];
+            const subTotal = category.subCategories.length;
+            // Count selected subs: undefined = 0, [] = all, [items] = items.length
+            const selSubCount = !subs ? 0 : subs.length === 0 ? subTotal : subs.length;
+            return (
+              <CategoryCard
+                key={category.id}
+                category={category.name}
+                image={CATEGORY_IMAGES[category.name]}
+                selected={isSelected(category.name)}
+                onTap={() => toggleParent(category.name)}
+                subCount={subTotal}
+                selectedSubCount={selSubCount}
+                onDrillDown={subTotal > 0 ? () => setViewingCategory(category.id) : undefined}
+              />
+            );
+          })}
         </div>
       </div>
 
