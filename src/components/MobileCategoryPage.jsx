@@ -302,14 +302,22 @@ const SAMPLE_PRODUCTS = [
 
 // Category Grid Card
 function CategoryCard({ category, image, selected, onTap, subCount, selectedSubCount, onDrillDown }) {
-  // Simple card: tap = toggle, drill-down badge = view subcategories
+  // Checkbox = select/deselect parent. Anywhere else = drill into subcategories (if any).
   const handleCardClick = (e) => {
-    // Ignore clicks on the drill-down badge
-    if (e.target.closest('[data-drilldown]')) return;
-    onTap?.();
+    // Ignore clicks on the checkbox area
+    if (e.target.closest('[data-checkbox]')) return;
+    // If has subcategories, drill down; otherwise toggle selection
+    if (subCount > 0 && onDrillDown) {
+      onDrillDown();
+    } else {
+      onTap?.();
+    }
   };
 
-  const hasPartialSubs = selectedSubCount > 0 && selectedSubCount < subCount;
+  const handleCheckboxClick = (e) => {
+    e.stopPropagation();
+    onTap?.();
+  };
 
   return (
     <div 
@@ -324,29 +332,35 @@ function CategoryCard({ category, image, selected, onTap, subCount, selectedSubC
         ) : (
           <IconPhoto size={32} className="text-[#5B9BD5]" />
         )}
-        {/* Subcategory drill-down — prominent tap target */}
-        {subCount > 0 && onDrillDown && (
+        {/* Checkbox overlay — top-left */}
+        <div
+          data-checkbox
+          onClick={handleCheckboxClick}
+          className="absolute top-2 left-2 z-10 cursor-pointer"
+        >
+          <div className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
+            selected
+              ? 'bg-[#F97316] border-[#F97316]'
+              : 'border-2 border-white/70 bg-black/30 backdrop-blur-sm'
+          }`}>
+            {selected && <IconCheck size={16} className="text-white" strokeWidth={3} />}
+          </div>
+        </div>
+        {/* Selected count badge — bottom banner */}
+        {subCount > 0 && selectedSubCount > 0 && (
           <div
-            data-drilldown
-            onClick={(e) => { e.stopPropagation(); onDrillDown(); }}
-            className={`absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-2 z-10 cursor-pointer transition-colors ${
-              hasPartialSubs
-                ? 'bg-[#F97316]/90 text-white'
-                : 'bg-black/60 backdrop-blur-sm text-white/90'
-            }`}
+            className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-1.5 z-10 bg-[#F97316]/90 text-white"
           >
             <span className="text-xs font-medium">
-              {hasPartialSubs
-                ? `${selectedSubCount}/${subCount} selected`
-                : `${subCount} subcategories`
-              }
+              {selectedSubCount}/{subCount} selected
             </span>
-            <IconChevronRight size={14} />
           </div>
         )}
       </div>
       <div className={`py-2.5 px-2 text-center ${selected ? 'bg-[#F97316]/10' : 'bg-[#2D3339]'}`}>
-        <span className={`text-sm ${selected ? 'text-[#F97316] font-medium' : 'text-white'}`}>{category}</span>
+        <span className={`text-sm ${selected ? 'text-[#F97316] font-medium' : 'text-white'}`}>
+          {category}{subCount > 0 ? ` (${subCount})` : ''}
+        </span>
       </div>
     </div>
   );
@@ -572,11 +586,11 @@ function CategoryGridPicker({ isOpen, onClose, onApply, initialSelections = {} }
             }}
             className="w-full flex items-center justify-between px-5 py-4 border-b border-[#2D3339]"
           >
-            <span className="text-white font-medium">All {catName}</span>
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-              allSelected ? 'bg-[#F97316]' : 'border-2 border-[#4B5563]'
+            <span className="text-white font-medium">Select All</span>
+            <div className={`w-5 h-5 rounded flex items-center justify-center ${
+              allSelected ? 'bg-[#F97316] border border-[#F97316]' : 'border-2 border-[#4B5563]'
             }`}>
-              {allSelected && <IconCheck size={16} className="text-white" />}
+              {allSelected && <IconCheck size={14} className="text-white" strokeWidth={3} />}
             </div>
           </button>
 
@@ -590,10 +604,10 @@ function CategoryGridPicker({ isOpen, onClose, onApply, initialSelections = {} }
                 className="w-full flex items-center justify-between px-5 py-4 border-b border-[#2D3339]/50"
               >
                 <span className="text-[#D1D5DB]">{sub.name}</span>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-                  checked ? 'bg-[#F97316]' : 'border-2 border-[#4B5563]'
+                <div className={`w-5 h-5 rounded flex items-center justify-center ${
+                  checked ? 'bg-[#F97316] border border-[#F97316]' : 'border-2 border-[#4B5563]'
                 }`}>
-                  {checked && <IconCheck size={16} className="text-white" />}
+                  {checked && <IconCheck size={14} className="text-white" strokeWidth={3} />}
                 </div>
               </button>
             );
@@ -1184,16 +1198,18 @@ function CategoryPickerScreen({
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3.5 border-b border-[#2D3339] active:bg-[#2D3339]/60"
               >
-                {/* Round checkmark */}
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                {/* Checkbox */}
+                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
                   isFullySelected
                     ? 'bg-[#F97316] border-[#F97316]'
                     : isPartial
-                      ? 'border-[#F97316] bg-transparent'
+                      ? 'bg-[#F97316] border-[#F97316]'
                       : 'border-[#4B5563] bg-transparent'
                 }`}>
                   {isFullySelected && <IconCheck size={14} className="text-white" strokeWidth={3} />}
-                  {isPartial && <div className="w-2.5 h-2.5 rounded-full bg-[#F97316]" />}
+                  {isPartial && (
+                    <div className="w-2.5 h-0.5 rounded-sm bg-white" />
+                  )}
                 </div>
 
                 <span className="text-white flex-1 text-left">{category.name}</span>
@@ -1218,7 +1234,7 @@ function CategoryPickerScreen({
                           onClick={() => toggleSubCategory(category, sub.name)}
                           className="w-full flex items-center gap-3 pl-12 pr-4 py-3 border-b border-[#2D3339]/50 active:bg-[#2D3339]/40"
                         >
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
                             subChecked
                               ? 'bg-[#F97316] border-[#F97316]'
                               : 'border-[#4B5563] bg-transparent'
