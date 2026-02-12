@@ -209,29 +209,18 @@ const SettingsIcon = ({ size = 18, className = '' }) => (
   </svg>
 )
 
-const GripVerticalIcon = ({ size = 20, className = '' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <circle cx="9" cy="5" r="1" />
-    <circle cx="9" cy="12" r="1" />
-    <circle cx="9" cy="19" r="1" />
-    <circle cx="15" cy="5" r="1" />
-    <circle cx="15" cy="12" r="1" />
-    <circle cx="15" cy="19" r="1" />
-  </svg>
-)
-
-const ArrowsUpDownIcon = ({ size = 20, className = '' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="m7 15 5 5 5-5" />
-    <path d="m7 9 5-5 5 5" />
-  </svg>
-)
-
 const WarningIcon = ({ size = 20, className = '' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
     <line x1="12" y1="9" x2="12" y2="13" />
     <line x1="12" y1="17" x2="12.01" y2="17" />
+  </svg>
+)
+
+const CheckSquareIcon = ({ size = 20, className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="9 11 12 14 22 4" />
+    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
   </svg>
 )
 
@@ -336,9 +325,33 @@ function LineItemCard({ item, onQtyChange, sectionDisplay }) {
 }
 
 // ─── Section Header (interactive with display badges) ───────────────
-function MobileSectionHeader({ section, onAddItem, onConfigure, onRename }) {
+function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onAddItem, isKebabOpen, onToggleKebab, onConfigure, onRename, onClone, onRemove }) {
   const display = section.sectionDisplay || 'expanded'
   const colors = SECTION_COLORS[display]
+  const kebabRef = useRef(null)
+  const [menuPos, setMenuPos] = useState({ top: 0, right: 0 })
+
+  // Calculate position and open
+  const handleKebabClick = () => {
+    if (isKebabOpen) {
+      onToggleKebab(null)
+      return
+    }
+    if (kebabRef.current) {
+      const rect = kebabRef.current.getBoundingClientRect()
+      const menuHeight = 160 // approximate dropdown height
+      const spaceBelow = window.innerHeight - rect.bottom
+      // Flip above if not enough space below
+      const top = spaceBelow < menuHeight
+        ? rect.top - menuHeight - 4
+        : rect.bottom + 4
+      setMenuPos({
+        top: Math.max(8, top),
+        right: window.innerWidth - rect.right
+      })
+    }
+    onToggleKebab(section.id)
+  }
 
   return (
     <div
@@ -346,11 +359,15 @@ function MobileSectionHeader({ section, onAddItem, onConfigure, onRename }) {
       style={{ borderLeft: `3px solid ${colors.border}`, backgroundColor: 'white' }}
     >
       <div className="flex items-center px-[12px] py-[10px] gap-[8px]">
-        {/* Drag handle */}
+        {/* Collapse chevron */}
         <button
+          onClick={onToggleCollapse}
           className="w-[24px] h-[24px] flex items-center justify-center shrink-0"
         >
-          <GripVerticalIcon size={18} className="text-[#64748B]" />
+          <ChevronDownIcon
+            size={18}
+            className={`text-[#64748B] transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`}
+          />
         </button>
 
         {/* Section title */}
@@ -365,13 +382,6 @@ function MobileSectionHeader({ section, onAddItem, onConfigure, onRename }) {
           </span>
         )}
 
-        {/* Sort/reorder */}
-        <button
-          className="w-[24px] h-[24px] flex items-center justify-center shrink-0"
-        >
-          <ArrowsUpDownIcon size={18} className="text-[#64748B]" />
-        </button>
-
         {/* Add item to section */}
         <button
           onClick={onAddItem}
@@ -380,21 +390,63 @@ function MobileSectionHeader({ section, onAddItem, onConfigure, onRename }) {
           <img alt="Add" className="block w-[16px] h-[16px]" src={ICO_PLUS} />
         </button>
 
-        {/* Edit/rename */}
+        {/* Kebab menu trigger */}
         <button
-          onClick={onRename}
+          ref={kebabRef}
+          onClick={handleKebabClick}
           className="w-[24px] h-[24px] flex items-center justify-center shrink-0"
         >
-          <PencilIcon size={18} className="text-[#64748B]" />
+          <MoreVertIcon size={18} className="text-[#64748B]" />
         </button>
 
-        {/* Settings/configure */}
-        <button
-          onClick={onConfigure}
-          className="w-[24px] h-[24px] flex items-center justify-center shrink-0"
-        >
-          <SettingsIcon size={18} className="text-[#64748B]" />
-        </button>
+        {/* Kebab dropdown - rendered via portal to avoid overflow clipping */}
+        {isKebabOpen && createPortal(
+          <>
+            {/* Transparent backdrop to catch outside clicks */}
+            <div
+              style={{ position: 'fixed', inset: 0, zIndex: 9998 }}
+              onClick={() => onToggleKebab(null)}
+            />
+            {/* Dropdown menu */}
+            <div
+              className="bg-white border border-[#E8EDF1] rounded-[12px] shadow-xl w-[160px] py-[6px] overflow-hidden"
+              style={{ position: 'fixed', top: menuPos.top, right: menuPos.right, zIndex: 9999 }}
+            >
+              <button
+                onClick={() => { onToggleKebab(null); onConfigure() }}
+                className="w-full flex items-center gap-[10px] px-[14px] py-[12px] text-left active:bg-[#F1F5F9] transition-colors"
+              >
+                <SettingsIcon size={16} className="text-[#64748B]" />
+                <span className="text-[13px] text-black">Configure</span>
+              </button>
+              <div className="h-[1px] bg-[#E8EDF1] mx-[10px] my-[4px]" />
+              <button
+                onClick={() => { onToggleKebab(null); onRename() }}
+                className="w-full flex items-center gap-[10px] px-[14px] py-[12px] text-left active:bg-[#F1F5F9] transition-colors"
+              >
+                <PencilIcon size={16} className="text-[#64748B]" />
+                <span className="text-[14px] text-[#334155]">Rename</span>
+              </button>
+              <div className="h-px bg-[#E8EDF1] mx-[10px]" />
+              <button
+                onClick={() => { onToggleKebab(null); onClone() }}
+                className="w-full flex items-center gap-[10px] px-[14px] py-[12px] text-left active:bg-[#F1F5F9] transition-colors"
+              >
+                <CopyIcon size={16} className="text-[#64748B]" />
+                <span className="text-[14px] text-[#334155]">Clone</span>
+              </button>
+              <div className="h-px bg-[#E8EDF1] mx-[10px]" />
+              <button
+                onClick={() => { onToggleKebab(null); onRemove() }}
+                className="w-full flex items-center gap-[10px] px-[14px] py-[12px] text-left active:bg-[#FEF2F2] transition-colors"
+              >
+                <TrashIcon size={16} className="text-[#EF4444]" />
+                <span className="text-[14px] text-[#EF4444]">Remove</span>
+              </button>
+            </div>
+          </>,
+          document.body
+        )}
       </div>
 
       {/* Section subtotal (shown when toggled on) */}
@@ -975,17 +1027,27 @@ export default function MobileProposalPage() {
         <div className="bg-white flex flex-col items-start rounded-[6px] w-full shrink-0">
           {/* Package header */}
           <div className="flex flex-col items-start px-[12px] py-[10px] border-b border-[#E8EDF1] w-full">
-            <div className="flex items-center gap-[16px] w-full">
+            <div className="flex items-center gap-[8px] w-full">
               <div className="flex-1 flex flex-col items-start min-w-0 leading-[1.4] tracking-[0.2px]">
                 <p className="font-normal text-[12px] text-[#697D95]">{option.packageName}</p>
                 <p className="font-semibold text-[16px] text-[#252A31]">{totalItemCount} items</p>
               </div>
-              <button className="block w-[24px] h-[24px] shrink-0">
-                <img alt="Reorder" className="block w-full h-full" src={ICO_FRAME} />
+              {/* Bulk selection checkbox */}
+              <button className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
+                <CheckSquareIcon size={18} className="text-[#64748B]" />
               </button>
+              {/* Drag handle */}
+              <button className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
+                <GripVerticalIcon size={18} className="text-[#64748B]" />
+              </button>
+              {/* Sort */}
+              <button className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
+                <ArrowsUpDownIcon size={18} className="text-[#64748B]" />
+              </button>
+              {/* Add with dropdown */}
               <div className="relative">
-                <button ref={addBtnRef} onClick={handleToggleAddDropdown} className="block w-[24px] h-[24px] shrink-0">
-                  <img alt="Add" className="block w-full h-full" src={ICO_PLUS} />
+                <button ref={addBtnRef} onClick={handleToggleAddDropdown} className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
+                  <img alt="Add" className="block w-[16px] h-[16px]" src={ICO_PLUS} />
                 </button>
                 <AddDropdown
                   isOpen={showAddDropdown}
@@ -997,11 +1059,9 @@ export default function MobileProposalPage() {
                   anchorRef={addBtnRef}
                 />
               </div>
-              <button className="block w-[24px] h-[24px] shrink-0">
-                <img alt="Edit" className="block w-full h-full" src={ICO_EDIT} />
-              </button>
-              <button className="block w-[24px] h-[24px] shrink-0">
-                <img alt="Settings" className="block w-full h-full" src={ICO_SETTINGS} />
+              {/* Settings */}
+              <button className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
+                <SettingsIcon size={18} className="text-[#64748B]" />
               </button>
             </div>
           </div>
@@ -1014,9 +1074,15 @@ export default function MobileProposalPage() {
                 <React.Fragment key={section.id}>
                   <MobileSectionHeader
                     section={section}
-                    onAddItem={() => handleAddItemToSection(section.id)}
+                    isCollapsed={isCollapsed}
+                    onToggleCollapse={() => handleToggleSectionCollapse(section.id)}
+                    isKebabOpen={kebabSectionId === section.id}
+                    onToggleKebab={setKebabSectionId}
                     onConfigure={() => handleConfigureSection(section)}
                     onRename={() => handleStartRenameSection(section)}
+                    onClone={() => handleCloneSection(section)}
+                    onRemove={() => handleRemoveSection(section.id)}
+                    onAddItem={() => handleAddItemToSection(section.id)}
                   />
                   {!isCollapsed && section.items.map((item) => (
                     <LineItemCard
