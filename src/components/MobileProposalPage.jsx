@@ -16,6 +16,7 @@ const ICO_FRAME = `${ASSETS}/6457940958619f8038c7d1a7b7e7995fd78b3763.svg`
 const ICO_PLUS = `${ASSETS}/8da65b62c2c181c02ef79be07a790a6a87a90e03.svg`
 const ICO_EDIT = `${ASSETS}/ba096f66aa34d369ba6023394c46d8aef20d2ded.svg`
 const ICO_SETTINGS = `${ASSETS}/dba27c561cfa4beb46109bdcc4f408c70edf572c.svg`
+const ICO_LIST_CHECK = `${ASSETS}/9bc131359db44a922a0ca2e18026b917b220b571.svg`
 const ICO_CANCEL_FILLED = `${ASSETS}/a153bece6cad855d32ac37ab9f69614271b5c25e.svg`
 const ICO_EDIT_FILLED = `${ASSETS}/0cb60080c002c39ac752675d5c4902fffd1cbe86.svg`
 const ICO_MINUS_GLYPH = `${ASSETS}/978e3886e5d6920cb614d05432e2292145e37805.svg`
@@ -47,8 +48,8 @@ const INITIAL_OPTIONS = [
         showSubtotal: false,
         showChildPrices: true,
         items: [
-          { id: 'i1', name: 'CAT-6 Cable', sku: '6ENCAT', image: IMG_PRODUCT, qtyLabel: '200 meters X USD 0.95', oldPrice: 'USD 150', price: 'USD 90', taxLabel: 'Incl. Taxes ($250.00)', qty: 1, unitPrice: 90 },
-          { id: 'i2', name: 'CAT-6 Cable', sku: '6ENCAT', image: IMG_PRODUCT, qtyLabel: '200 meters X USD 0.95', oldPrice: 'USD 150', price: 'USD 90', taxLabel: 'Incl. Taxes ($250.00)', qty: 1, unitPrice: 90 },
+          { id: 'i1', name: 'LG Refrigeration Compressors', sku: 'MQ67DFR1', image: IMG_PRODUCT, qtyLabel: '200 meters X USD 0.95', oldPrice: 'USD 150', price: 'USD 7,500', taxLabel: 'Incl. Taxes ($250.00)', qty: 1, unitPrice: 7500, category: 'Labor', description: 'The LG Scroll compressor has been designed for residential and light commercial air conditioning applications.', warehouse: 'Redmond Warehouse' },
+          { id: 'i2', name: 'LG Refrigeration Compressors', sku: 'MQ67DFR1', image: IMG_PRODUCT, qtyLabel: '200 meters X USD 0.95', oldPrice: 'USD 150', price: 'USD 7,500', taxLabel: 'Incl. Taxes ($250.00)', qty: 1, unitPrice: 7500, category: 'Labor', description: 'The LG Scroll compressor has been designed for residential and light commercial air conditioning applications.', warehouse: 'Redmond Warehouse' },
         ],
       },
       {
@@ -58,8 +59,8 @@ const INITIAL_OPTIONS = [
         showSubtotal: false,
         showChildPrices: true,
         items: [
-          { id: 'i3', name: 'CAT-6 Cable', sku: '6ENCAT', image: IMG_PRODUCT, qtyLabel: '200 meters X USD 0.95', oldPrice: 'USD 150', price: 'USD 90', taxLabel: 'Incl. Taxes ($250.00)', qty: 1, unitPrice: 90 },
-          { id: 'i4', name: 'CAT-6 Cable', sku: '6ENCAT', image: IMG_PRODUCT, qtyLabel: '200 meters X USD 0.95', oldPrice: 'USD 150', price: 'USD 90', taxLabel: 'Incl. Taxes ($250.00)', qty: 1, unitPrice: 90 },
+          { id: 'i3', name: 'HK Vision RE120', sku: 'ABC123', image: IMG_PRODUCT, qtyLabel: '1 unit X USD 300.00', oldPrice: '', price: 'USD 300', taxLabel: 'Incl. Taxes ($36.00)', qty: 1, unitPrice: 300, category: 'Labor', description: 'High-definition IP camera system with night vision capability.', warehouse: '' },
+          { id: 'i4', name: 'CAT-6 Cable', sku: '6ENCAT', image: IMG_PRODUCT, qtyLabel: '200 meters X USD 0.95', oldPrice: 'USD 150', price: 'USD 90', taxLabel: 'Incl. Taxes ($250.00)', qty: 1, unitPrice: 90, category: 'Materials', description: 'Premium ethernet cable for network installations.', warehouse: 'Seattle Hub' },
         ],
       },
     ],
@@ -87,7 +88,7 @@ const INITIAL_OPTIONS = [
         showSubtotal: false,
         showChildPrices: true,
         items: [
-          { id: 'i5', name: 'CAT-6 Cable', sku: '6ENCAT', image: IMG_PRODUCT, qtyLabel: '200 meters X USD 0.95', oldPrice: 'USD 150', price: 'USD 90', taxLabel: 'Incl. Taxes ($250.00)', qty: 1, unitPrice: 90 },
+          { id: 'i5', name: 'CAT-6 Cable', sku: '6ENCAT', image: IMG_PRODUCT, qtyLabel: '200 meters X USD 0.95', oldPrice: 'USD 150', price: 'USD 90', taxLabel: 'Incl. Taxes ($250.00)', qty: 1, unitPrice: 90, category: 'Materials', description: 'Premium ethernet cable for network installations.', warehouse: 'Seattle Hub' },
         ],
       },
     ],
@@ -209,18 +210,58 @@ const SettingsIcon = ({ size = 18, className = '' }) => (
   </svg>
 )
 
+const GripDotsIcon = ({ size = 24, className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <circle cx="9" cy="5" r="1.5" />
+    <circle cx="15" cy="5" r="1.5" />
+    <circle cx="9" cy="10" r="1.5" />
+    <circle cx="15" cy="10" r="1.5" />
+    <circle cx="9" cy="15" r="1.5" />
+    <circle cx="15" cy="15" r="1.5" />
+    <circle cx="9" cy="20" r="1.5" />
+    <circle cx="15" cy="20" r="1.5" />
+  </svg>
+)
+
+const SearchIcon = ({ size = 20, className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+)
+
+const InfoCircleIcon = ({ size = 18, className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12.01" y2="8" />
+  </svg>
+)
+
+const MapPinIcon = ({ size = 18, className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+    <circle cx="12" cy="10" r="3" />
+  </svg>
+)
+
+const ToolsIcon = ({ size = 18, className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+  </svg>
+)
+
+const CheckIcon = ({ size = 14, className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+)
+
 const WarningIcon = ({ size = 20, className = '' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
     <line x1="12" y1="9" x2="12" y2="13" />
     <line x1="12" y1="17" x2="12.01" y2="17" />
-  </svg>
-)
-
-const CheckSquareIcon = ({ size = 20, className = '' }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <polyline points="9 11 12 14 22 4" />
-    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
   </svg>
 )
 
@@ -681,6 +722,545 @@ function MobileSectionConfigDialog({ section, onUpdateDisplay, onUpdateSubtotal,
   )
 }
 
+// ─── Reorder Items Screen (sections + items) ──────────────────────
+function ReorderItemsScreen({ sections, onSave, onClose }) {
+  // Deep-clone sections so we can reorder both sections and items within
+  const [orderedSections, setOrderedSections] = useState(() =>
+    sections.map(sec => ({ ...sec, items: sec.items.map(it => ({ ...it })) }))
+  )
+
+  // Track which sections are expanded (all expanded by default)
+  const [expandedSections, setExpandedSections] = useState(() =>
+    new Set(sections.map(s => s.id))
+  )
+
+  // Drag state — supports two modes: 'section' or 'item'
+  const dragTypeRef = useRef(null) // 'section' | 'item'
+  const startYRef = useRef(0)
+  const elementHeightRef = useRef(50)
+
+  // Section drag
+  const [dragSectionIdx, setDragSectionIdx] = useState(null)
+  const [dragSectionY, setDragSectionY] = useState(0)
+
+  // Item drag  — { sectionIdx, itemIdx }
+  const [dragItem, setDragItem] = useState(null)
+  const [dragItemY, setDragItemY] = useState(0)
+
+  const isDragging = dragSectionIdx !== null || dragItem !== null
+
+  // ── Section drag handlers ───────────────────────────────────────
+  const startSectionDrag = (sectionIdx, clientY, el) => {
+    dragTypeRef.current = 'section'
+    startYRef.current = clientY
+    setDragSectionIdx(sectionIdx)
+    setDragSectionY(0)
+    if (el) {
+      const row = el.closest('[data-reorder-section]')
+      elementHeightRef.current = row ? row.offsetHeight + 8 : 56
+    }
+  }
+
+  const handleSectionGripTouch = (sectionIdx, e) => {
+    e.stopPropagation()
+    startSectionDrag(sectionIdx, e.touches[0].clientY, e.target)
+  }
+  const handleSectionGripMouse = (sectionIdx, e) => {
+    e.preventDefault()
+    startSectionDrag(sectionIdx, e.clientY, e.target)
+  }
+
+  // ── Item drag handlers ──────────────────────────────────────────
+  const startItemDrag = (sectionIdx, itemIdx, clientY, el) => {
+    dragTypeRef.current = 'item'
+    startYRef.current = clientY
+    setDragItem({ sectionIdx, itemIdx })
+    setDragItemY(0)
+    if (el) {
+      const row = el.closest('[data-reorder-item]')
+      elementHeightRef.current = row ? row.offsetHeight + 8 : 80
+    }
+  }
+
+  const handleItemGripTouch = (sectionIdx, itemIdx, e) => {
+    e.stopPropagation()
+    startItemDrag(sectionIdx, itemIdx, e.touches[0].clientY, e.target)
+  }
+  const handleItemGripMouse = (sectionIdx, itemIdx, e) => {
+    e.preventDefault()
+    startItemDrag(sectionIdx, itemIdx, e.clientY, e.target)
+  }
+
+  // ── Generic move handler (works for both section & item) ────────
+  const handleMove = (clientY) => {
+    const offset = clientY - startYRef.current
+    const threshold = elementHeightRef.current * 0.55
+
+    if (dragTypeRef.current === 'section' && dragSectionIdx !== null) {
+      setDragSectionY(offset)
+      if (Math.abs(offset) > threshold) {
+        const dir = offset > 0 ? 1 : -1
+        const newIdx = dragSectionIdx + dir
+        if (newIdx >= 0 && newIdx < orderedSections.length) {
+          setOrderedSections(prev => {
+            const next = [...prev]
+            ;[next[dragSectionIdx], next[newIdx]] = [next[newIdx], next[dragSectionIdx]]
+            return next
+          })
+          setDragSectionIdx(newIdx)
+          startYRef.current = clientY
+          setDragSectionY(0)
+        }
+      }
+    }
+
+    if (dragTypeRef.current === 'item' && dragItem) {
+      setDragItemY(offset)
+      if (Math.abs(offset) > threshold) {
+        const dir = offset > 0 ? 1 : -1
+        const { sectionIdx, itemIdx } = dragItem
+        const sectionItems = orderedSections[sectionIdx].items
+        const newIdx = itemIdx + dir
+        if (newIdx >= 0 && newIdx < sectionItems.length) {
+          setOrderedSections(prev => {
+            const next = prev.map((sec, si) => {
+              if (si !== sectionIdx) return sec
+              const items = [...sec.items]
+              ;[items[itemIdx], items[newIdx]] = [items[newIdx], items[itemIdx]]
+              return { ...sec, items }
+            })
+            return next
+          })
+          setDragItem({ sectionIdx, itemIdx: newIdx })
+          startYRef.current = clientY
+          setDragItemY(0)
+        }
+      }
+    }
+  }
+
+  const handleEnd = () => {
+    dragTypeRef.current = null
+    setDragSectionIdx(null)
+    setDragSectionY(0)
+    setDragItem(null)
+    setDragItemY(0)
+  }
+
+  // Mouse events for desktop testing
+  useEffect(() => {
+    if (!isDragging) return
+    const onMouseMove = (e) => { e.preventDefault(); handleMove(e.clientY) }
+    const onMouseUp = () => handleEnd()
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+    }
+  })
+
+  // Toggle section expand/collapse
+  const toggleSection = (id) => {
+    setExpandedSections(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  // ── Change detection ────────────────────────────────────────────
+  const origOrder = JSON.stringify(sections.map(s => [s.id, s.items.map(i => i.id)]))
+  const currOrder = JSON.stringify(orderedSections.map(s => [s.id, s.items.map(i => i.id)]))
+  const hasChanges = origOrder !== currOrder
+
+  // ── Save ────────────────────────────────────────────────────────
+  const handleSave = () => {
+    onSave(orderedSections)
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-[#F8FAFC] flex flex-col max-w-[390px] mx-auto"
+      onTouchMove={(e) => { if (isDragging) { e.preventDefault(); handleMove(e.touches[0].clientY) } }}
+      onTouchEnd={handleEnd}
+      style={{ touchAction: isDragging ? 'none' : 'auto' }}
+    >
+      {/* Header */}
+      <div className="flex items-center px-[16px] py-[14px] border-b border-[#E8EDF1] bg-white shrink-0">
+        <button onClick={onClose} className="w-[32px] h-[32px] flex items-center justify-center">
+          <CloseIcon size={22} className="text-[#252A31]" />
+        </button>
+        <p className="flex-1 font-semibold text-[17px] text-[#252A31] text-center">Reorder items</p>
+        <div className="w-[32px]" />
+      </div>
+
+      {/* Sections + Items list */}
+      <div className="flex-1 overflow-y-auto px-[12px] py-[12px]">
+        {orderedSections.map((section, sIdx) => {
+          const isExpanded = expandedSections.has(section.id)
+          const isSectionDragging = dragSectionIdx === sIdx
+          const sectionTotal = section.items.reduce((sum, it) => sum + it.qty * it.unitPrice, 0)
+
+          return (
+            <div
+              key={section.id}
+              data-reorder-section
+              className={`mb-[10px] rounded-[12px] overflow-hidden border transition-shadow ${
+                isSectionDragging ? 'shadow-lg border-[#3B82F6] bg-white' : 'border-[#E2E8F0] bg-white'
+              }`}
+              style={isSectionDragging ? { transform: `translateY(${dragSectionY}px)`, zIndex: 10, position: 'relative' } : {}}
+            >
+              {/* Section header */}
+              <div
+                className="flex items-center gap-[10px] px-[12px] py-[12px] bg-[#F8FAFC] border-b border-[#E8EDF1] cursor-pointer select-none"
+                onClick={() => toggleSection(section.id)}
+              >
+                {/* Section drag handle */}
+                <div
+                  className="w-[28px] h-[28px] flex items-center justify-center shrink-0 cursor-grab active:cursor-grabbing touch-none"
+                  onClick={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => handleSectionGripTouch(sIdx, e)}
+                  onMouseDown={(e) => handleSectionGripMouse(sIdx, e)}
+                >
+                  <GripDotsIcon size={18} className="text-[#94A3B8] pointer-events-none" />
+                </div>
+
+                {/* Expand/Collapse chevron */}
+                <ChevronDownIcon
+                  size={16}
+                  className={`text-[#64748B] transition-transform duration-200 shrink-0 ${isExpanded ? '' : '-rotate-90'}`}
+                />
+
+                {/* Section title + count */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-[14px] text-[#252A31] truncate leading-[1.4]">{section.title}</p>
+                  <p className="text-[11px] text-[#94A3B8] leading-[1.3]">
+                    {section.items.length} item{section.items.length !== 1 ? 's' : ''} · ${sectionTotal.toLocaleString()}.00
+                  </p>
+                </div>
+              </div>
+
+              {/* Items within section (collapsible) */}
+              {isExpanded && (
+                <div className="px-[8px] py-[8px]">
+                  {section.items.map((item, iIdx) => {
+                    const isItemDragging = dragItem && dragItem.sectionIdx === sIdx && dragItem.itemIdx === iIdx
+                    return (
+                      <div
+                        key={`${item.id}-${iIdx}`}
+                        data-reorder-item
+                        className={`bg-white border rounded-[10px] mb-[6px] last:mb-0 transition-shadow ${
+                          isItemDragging ? 'shadow-md border-[#CBD5E1]' : 'border-[#F1F5F9]'
+                        }`}
+                        style={isItemDragging ? { transform: `translateY(${dragItemY}px)`, zIndex: 10, position: 'relative' } : {}}
+                      >
+                        <div className="flex items-center gap-[10px] px-[10px] py-[10px]">
+                          {/* Item drag handle */}
+                          <div
+                            className="w-[26px] h-[26px] flex items-center justify-center shrink-0 cursor-grab active:cursor-grabbing touch-none select-none"
+                            onTouchStart={(e) => handleItemGripTouch(sIdx, iIdx, e)}
+                            onMouseDown={(e) => handleItemGripMouse(sIdx, iIdx, e)}
+                          >
+                            <GripDotsIcon size={16} className="text-[#CBD5E1] pointer-events-none" />
+                          </div>
+                          {/* Product image */}
+                          <div className="w-[40px] h-[40px] rounded-[6px] overflow-hidden shrink-0 bg-[#F1F5F9]">
+                            <img src={item.image} alt="" className="w-full h-full object-cover" />
+                          </div>
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-[13px] text-[#252A31] truncate leading-[1.4]">{item.name}</p>
+                            <p className="text-[11px] text-[#94A3B8] leading-[1.3]">{item.sku}</p>
+                          </div>
+                          {/* Price */}
+                          <span className="text-[12px] font-medium text-[#0172CB] shrink-0">
+                            ${(item.qty * item.unitPrice).toLocaleString()}.00
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                  {section.items.length === 0 && (
+                    <p className="text-[12px] text-[#94A3B8] text-center py-[12px]">No items in this section</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Save button */}
+      <div className="px-[16px] pb-[34px] pt-[12px] bg-white border-t border-[#E8EDF1] shrink-0">
+        <button
+          onClick={handleSave}
+          disabled={!hasChanges}
+          className={`w-full h-[48px] rounded-[10px] text-[16px] font-medium transition-colors ${
+            hasChanges
+              ? 'bg-[#E44A19] text-white active:bg-[#D03F14]'
+              : 'bg-[#E0E0E0] text-[#9E9E9E] cursor-not-allowed'
+          }`}
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ─── Edit Line Items Screen ────────────────────────────────────────
+function EditLineItemsScreen({ sections, onSave, onClose }) {
+  const [selectedIds, setSelectedIds] = useState(new Set())
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showSearch, setShowSearch] = useState(false)
+  const [expandedDesc, setExpandedDesc] = useState(new Set())
+  const [collapsedSecs, setCollapsedSecs] = useState(new Set())
+
+  const toggleCollapseSection = (secId) => {
+    setCollapsedSecs(prev => {
+      const next = new Set(prev)
+      if (next.has(secId)) next.delete(secId)
+      else next.add(secId)
+      return next
+    })
+  }
+
+  // Build filtered sections — filter items within each section, keep sections that have matches
+  const query = searchQuery.trim().toLowerCase()
+  const filteredSections = sections.map(sec => ({
+    ...sec,
+    items: query
+      ? sec.items.filter(it =>
+          it.name.toLowerCase().includes(query) ||
+          it.sku.toLowerCase().includes(query) ||
+          (it.category || '').toLowerCase().includes(query)
+        )
+      : sec.items,
+  })).filter(sec => sec.items.length > 0)
+
+  const allFilteredItems = filteredSections.flatMap(sec => sec.items)
+  const isAllSelected = allFilteredItems.length > 0 && allFilteredItems.every(it => selectedIds.has(it.id))
+  const isSomeSelected = allFilteredItems.some(it => selectedIds.has(it.id))
+  const selectedCount = selectedIds.size
+
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(allFilteredItems.map(it => it.id)))
+    }
+  }
+
+  const toggleDesc = (id) => {
+    setExpandedDesc(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const handleBulkDelete = () => {
+    if (selectedIds.size === 0) return
+    const newSections = sections.map(sec => ({
+      ...sec,
+      items: sec.items.filter(it => !selectedIds.has(it.id)),
+    }))
+    onSave(newSections)
+    setSelectedIds(new Set())
+  }
+
+  const handleBulkEdit = () => {
+    // Placeholder for bulk edit flow
+  }
+
+  const formatPrice = (price) => {
+    if (typeof price === 'number') return `$${price.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+    return price
+  }
+
+  // Helper: check if all items in a section are selected
+  const isSectionAllSelected = (sec) => sec.items.length > 0 && sec.items.every(it => selectedIds.has(it.id))
+  const isSectionSomeSelected = (sec) => sec.items.some(it => selectedIds.has(it.id))
+
+  return (
+    <div className="fixed inset-0 z-50 bg-white flex flex-col max-w-[390px] mx-auto">
+      {/* Header */}
+      <div className="flex items-center px-[16px] py-[14px] border-b border-[#E8EDF1] shrink-0">
+        <button onClick={onClose} className="w-[32px] h-[32px] flex items-center justify-center -ml-[8px]">
+          <CloseIcon size={22} className="text-[#252A31]" />
+        </button>
+        {showSearch ? (
+          <div className="flex-1 ml-[8px]">
+            <input
+              autoFocus
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search items..."
+              className="w-full text-[16px] text-[#252A31] outline-none bg-transparent placeholder:text-[#94A3B8]"
+            />
+          </div>
+        ) : (
+          <p className="flex-1 ml-[8px] font-semibold text-[17px] text-[#252A31]">Edit Line items</p>
+        )}
+        <button onClick={() => { setShowSearch(!showSearch); if (showSearch) setSearchQuery('') }} className="w-[32px] h-[32px] flex items-center justify-center -mr-[4px]">
+          {showSearch ? <CloseIcon size={20} className="text-[#697D95]" /> : <SearchIcon size={22} className="text-[#252A31]" />}
+        </button>
+      </div>
+
+      {/* Action bar (visible when items are selected) */}
+      {selectedCount > 0 && (
+        <div className="flex items-center px-[16px] py-[10px] border-b border-[#E8EDF1] bg-white shrink-0">
+          <p className="flex-1 text-[14px] font-medium text-[#252A31]">{selectedCount} item{selectedCount !== 1 ? 's' : ''} selected</p>
+          <button onClick={handleBulkEdit} className="w-[36px] h-[36px] flex items-center justify-center">
+            <PencilIcon size={20} className="text-[#64748B]" />
+          </button>
+          <button onClick={handleBulkDelete} className="w-[36px] h-[36px] flex items-center justify-center">
+            <TrashIcon size={20} className="text-[#EF4444]" />
+          </button>
+        </div>
+      )}
+
+      {/* Select all */}
+      <button onClick={toggleSelectAll} className="flex items-center gap-[12px] px-[16px] py-[12px] border-b border-[#E8EDF1] shrink-0 active:bg-[#F8FAFC]">
+        <div className={`w-[22px] h-[22px] rounded-[4px] border-2 flex items-center justify-center transition-colors ${isAllSelected ? 'bg-[#2563EB] border-[#2563EB]' : isSomeSelected ? 'bg-[#2563EB] border-[#2563EB]' : 'border-[#CBD5E1] bg-white'}`}>
+          {isAllSelected && <CheckIcon size={14} className="text-white" />}
+          {!isAllSelected && isSomeSelected && <div className="w-[10px] h-[2px] bg-white rounded-full" />}
+        </div>
+        <span className="text-[15px] text-[#64748B]">Select all</span>
+      </button>
+
+      {/* Sections + Items list */}
+      <div className="flex-1 overflow-y-auto">
+        {filteredSections.map((section) => {
+          const secAllSelected = isSectionAllSelected(section)
+          const secSomeSelected = isSectionSomeSelected(section)
+
+          const isSecCollapsed = collapsedSecs.has(section.id)
+
+          return (
+            <div key={section.id}>
+              {/* Section header — tap to collapse/expand */}
+              <button
+                onClick={() => toggleCollapseSection(section.id)}
+                className="w-full flex items-center gap-[12px] px-[16px] py-[10px] bg-[#F8FAFC] border-b border-[#E8EDF1] active:bg-[#F1F5F9]"
+              >
+                <ChevronDownIcon size={16} className={`text-[#94A3B8] shrink-0 transition-transform ${isSecCollapsed ? '-rotate-90' : ''}`} />
+                <p className="flex-1 text-left text-[13px] font-semibold text-[#64748B] uppercase tracking-[0.5px]">{section.title}</p>
+                <span className="text-[12px] text-[#94A3B8]">{section.items.length} item{section.items.length !== 1 ? 's' : ''}</span>
+                {secSomeSelected && (
+                  <span className="text-[12px] font-medium text-[#2563EB]">
+                    {section.items.filter(it => selectedIds.has(it.id)).length}/{section.items.length}
+                  </span>
+                )}
+              </button>
+
+              {/* Section items (collapsible) */}
+              {!isSecCollapsed && section.items.map((item) => {
+                const isSelected = selectedIds.has(item.id)
+                const isDescExpanded = expandedDesc.has(item.id)
+                const descTruncated = item.description && item.description.length > 50
+                const descPreview = descTruncated && !isDescExpanded
+                  ? item.description.substring(0, 50) + '...'
+                  : item.description
+
+                return (
+                  <div key={item.id} className="flex items-start gap-[12px] px-[16px] py-[16px] border-b border-[#F1F5F9]">
+                    {/* Checkbox */}
+                    <button onClick={() => toggleSelect(item.id)} className="mt-[16px] shrink-0">
+                      <div className={`w-[22px] h-[22px] rounded-[4px] border-2 flex items-center justify-center transition-colors ${isSelected ? 'bg-[#2563EB] border-[#2563EB]' : 'border-[#CBD5E1] bg-white'}`}>
+                        {isSelected && <CheckIcon size={14} className="text-white" />}
+                      </div>
+                    </button>
+
+                    {/* Item content */}
+                    <div className="flex-1 flex flex-col gap-[8px] min-w-0">
+                      {/* Image + Name row */}
+                      <div className="flex items-start gap-[12px]">
+                        <div className="w-[56px] h-[56px] rounded-[8px] bg-[#F1F5F9] shrink-0 overflow-hidden">
+                          <img src={item.image} alt="" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-[15px] text-[#1E293B] leading-[1.3]">{item.name}</p>
+                          <p className="text-[13px] text-[#94A3B8] mt-[2px]">{item.sku}</p>
+                        </div>
+                      </div>
+
+                      {/* Category */}
+                      {item.category && (
+                        <div className="flex items-center gap-[8px]">
+                          <ToolsIcon size={16} className="text-[#3B82F6] shrink-0" />
+                          <span className="text-[13px] text-[#475569]">{item.category}</span>
+                        </div>
+                      )}
+
+                      {/* Description */}
+                      {item.description && (
+                        <div className="flex items-start gap-[8px]">
+                          <InfoCircleIcon size={16} className="text-[#94A3B8] shrink-0 mt-[1px]" />
+                          <p className="text-[13px] text-[#475569] leading-[1.4]">
+                            {descPreview}
+                            {descTruncated && (
+                              <button onClick={() => toggleDesc(item.id)} className="text-[#3B82F6] ml-[4px] font-medium">
+                                {isDescExpanded ? 'show less' : '...show more'}
+                              </button>
+                            )}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Warehouse */}
+                      {item.warehouse && (
+                        <div className="flex items-center gap-[8px]">
+                          <MapPinIcon size={16} className="text-[#94A3B8] shrink-0" />
+                          <span className="text-[13px] text-[#475569]">{item.warehouse}</span>
+                        </div>
+                      )}
+
+                      {/* Price row */}
+                      <div className="flex items-center justify-between mt-[4px]">
+                        <span className="text-[13px] text-[#64748B]">Qty: {item.qty.toFixed(2)} X {formatPrice(item.unitPrice)}</span>
+                        <span className="text-[15px] font-semibold text-[#1E293B]">{formatPrice(item.unitPrice * item.qty)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )
+        })}
+
+        {allFilteredItems.length === 0 && (
+          <div className="flex items-center justify-center py-[40px]">
+            <p className="text-[14px] text-[#94A3B8]">{searchQuery ? 'No items match your search' : 'No items'}</p>
+          </div>
+        )}
+      </div>
+
+      {/* Bottom cancel */}
+      <div className="shrink-0 px-[16px] py-[12px] border-t border-[#E8EDF1] bg-white">
+        <button
+          onClick={onClose}
+          className="w-full py-[14px] rounded-[8px] bg-[#E8561D] text-white font-semibold text-[15px] active:bg-[#D14A17] transition-colors"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Home Indicator ────────────────────────────────────────────────
 function HomeIndicator() {
   return (
@@ -711,6 +1291,8 @@ export default function MobileProposalPage() {
   const [isAddingNewSection, setIsAddingNewSection] = useState(false)
   const [renamingSectionId, setRenamingSectionId] = useState(null)
   const [renameSectionValue, setRenameSectionValue] = useState('')
+  const [showReorder, setShowReorder] = useState(false)
+  const [showEditItems, setShowEditItems] = useState(false)
 
   // UI-only: tracks which sections are visually collapsed in the builder
   const [collapsedSections, setCollapsedSections] = useState(new Set())
@@ -916,6 +1498,24 @@ export default function MobileProposalPage() {
     // In future: open line item picker for this section
   }
 
+  // Save reordered sections (full sections array with new order + item order)
+  const handleSaveReorder = (reorderedSections) => {
+    setOptions(prev => prev.map((opt, oi) => {
+      if (oi !== currentOptionIdx) return opt
+      return { ...opt, sections: reorderedSections }
+    }))
+    setShowReorder(false)
+  }
+
+  // Save edited line items (e.g. after bulk delete)
+  const handleSaveEditItems = (newSections) => {
+    setOptions(prev => prev.map((opt, oi) => {
+      if (oi !== currentOptionIdx) return opt
+      return { ...opt, sections: newSections }
+    }))
+    setShowEditItems(false)
+  }
+
   // Compute total item count across all sections
   const totalItemCount = option.sections.reduce((sum, sec) => sum + sec.items.length, 0)
 
@@ -1032,22 +1632,18 @@ export default function MobileProposalPage() {
                 <p className="font-normal text-[12px] text-[#697D95]">{option.packageName}</p>
                 <p className="font-semibold text-[16px] text-[#252A31]">{totalItemCount} items</p>
               </div>
-              {/* Bulk selection checkbox */}
-              <button className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
-                <CheckSquareIcon size={18} className="text-[#64748B]" />
+              {/* List check / bulk selection */}
+              <button onClick={() => setShowEditItems(true)} className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
+                <img alt="Select" className="block w-[20px] h-[20px]" src={ICO_LIST_CHECK} />
               </button>
-              {/* Drag handle */}
-              <button className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
-                <GripVerticalIcon size={18} className="text-[#64748B]" />
-              </button>
-              {/* Sort */}
-              <button className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
-                <ArrowsUpDownIcon size={18} className="text-[#64748B]" />
+              {/* Sort / reorder */}
+              <button onClick={() => setShowReorder(true)} className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
+                <img alt="Sort" className="block w-[20px] h-[20px]" src={ICO_FRAME} />
               </button>
               {/* Add with dropdown */}
               <div className="relative">
                 <button ref={addBtnRef} onClick={handleToggleAddDropdown} className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
-                  <img alt="Add" className="block w-[16px] h-[16px]" src={ICO_PLUS} />
+                  <img alt="Add" className="block w-[20px] h-[20px]" src={ICO_PLUS} />
                 </button>
                 <AddDropdown
                   isOpen={showAddDropdown}
@@ -1059,9 +1655,13 @@ export default function MobileProposalPage() {
                   anchorRef={addBtnRef}
                 />
               </div>
+              {/* Edit */}
+              <button className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
+                <img alt="Edit" className="block w-[20px] h-[20px]" src={ICO_EDIT} />
+              </button>
               {/* Settings */}
               <button className="w-[24px] h-[24px] flex items-center justify-center shrink-0">
-                <SettingsIcon size={18} className="text-[#64748B]" />
+                <img alt="Settings" className="block w-[20px] h-[20px]" src={ICO_SETTINGS} />
               </button>
             </div>
           </div>
@@ -1208,6 +1808,24 @@ export default function MobileProposalPage() {
           onUpdateChildPrices={(checked) => setConfigSection(prev => ({ ...prev, showChildPrices: checked }))}
           onSave={handleSaveSection}
           onClose={handleCloseConfig}
+        />
+      )}
+
+      {/* ── Edit Line Items Screen ── */}
+      {showEditItems && (
+        <EditLineItemsScreen
+          sections={option.sections}
+          onSave={handleSaveEditItems}
+          onClose={() => setShowEditItems(false)}
+        />
+      )}
+
+      {/* ── Reorder Items Screen ── */}
+      {showReorder && (
+        <ReorderItemsScreen
+          sections={option.sections}
+          onSave={handleSaveReorder}
+          onClose={() => setShowReorder(false)}
         />
       )}
 
