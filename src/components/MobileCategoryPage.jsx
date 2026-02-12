@@ -319,11 +319,15 @@ function CategoryCard({ category, image, selected, onTap, subCount, selectedSubC
     onTap?.();
   };
 
+  const isAllSelected = selected && subCount > 0 && selectedSubCount === subCount;
+  const isPartial = selectedSubCount > 0 && selectedSubCount < subCount;
+  const isChecked = selected && (subCount === 0 || isAllSelected);
+
   return (
     <div 
       onClick={handleCardClick}
       className={`flex flex-col rounded-xl overflow-hidden cursor-pointer transition-all ${
-        selected ? 'ring-2 ring-[#F97316]' : 'border border-[#3D4349]'
+        isChecked || isPartial ? 'ring-2 ring-[#F97316]' : 'border border-[#3D4349]'
       }`}
     >
       <div className="relative h-24 bg-[#3D4955] flex items-center justify-center">
@@ -338,28 +342,21 @@ function CategoryCard({ category, image, selected, onTap, subCount, selectedSubC
           onClick={handleCheckboxClick}
           className="absolute top-2 left-2 z-10 cursor-pointer"
         >
-          <div className={`w-6 h-6 rounded flex items-center justify-center transition-colors ${
-            selected
-              ? 'bg-[#F97316] border-[#F97316]'
-              : 'border-2 border-white/70 bg-black/30 backdrop-blur-sm'
+          <div className={`w-5 h-5 rounded flex items-center justify-center transition-colors ${
+            isChecked
+              ? 'bg-[#F97316] border border-[#F97316]'
+              : isPartial
+                ? 'bg-[#F97316] border border-[#F97316]'
+                : 'border-2 border-white/70 bg-black/30 backdrop-blur-sm'
           }`}>
-            {selected && <IconCheck size={16} className="text-white" strokeWidth={3} />}
+            {isChecked && <IconCheck size={14} className="text-white" strokeWidth={3} />}
+            {isPartial && <div className="w-2.5 h-0.5 rounded-sm bg-white" />}
           </div>
         </div>
-        {/* Selected count badge — bottom banner */}
-        {subCount > 0 && selectedSubCount > 0 && (
-          <div
-            className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-1.5 py-1.5 z-10 bg-[#F97316]/90 text-white"
-          >
-            <span className="text-xs font-medium">
-              {selectedSubCount}/{subCount} selected
-            </span>
-          </div>
-        )}
       </div>
-      <div className={`py-2.5 px-2 text-center ${selected ? 'bg-[#F97316]/10' : 'bg-[#2D3339]'}`}>
-        <span className={`text-sm ${selected ? 'text-[#F97316] font-medium' : 'text-white'}`}>
-          {category}{subCount > 0 ? ` (${subCount})` : ''}
+      <div className={`py-2.5 px-2 text-center ${isChecked || isPartial ? 'bg-[#F97316]/10' : 'bg-[#2D3339]'}`}>
+        <span className={`text-sm ${isChecked || isPartial ? 'text-[#F97316] font-medium' : 'text-white'}`}>
+          {category}{subCount > 0 ? ` (${selectedSubCount > 0 ? `${selectedSubCount}/` : ''}${subCount})` : ''}
         </span>
       </div>
     </div>
