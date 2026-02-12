@@ -1571,7 +1571,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                         // Check if this section has visible children in the builder
                         const hasChildren = !isUiCollapsed && sectionMap.some(s => s.sectionId === item.id && s.item.type !== 'header')
 
-                        const sectionBg = isDisplayHidden ? 'bg-[#FEF2F2]/40' : isDisplayCollapsed ? 'bg-[#FFF7ED]/40' : 'bg-[#EFF6FF]'
+                        const sectionBg = 'bg-white'
                         const sectionBorderColor = isDisplayHidden ? 'border-l-[#FCA5A5]' : isDisplayCollapsed ? 'border-l-[#FDBA74]' : 'border-l-[#3B82F6]'
                         const sectionDragColor = isDisplayHidden ? '#DC2626' : isDisplayCollapsed ? '#C2410C' : '#3B82F6'
                         const sectionChevronColor = isDisplayHidden ? 'text-[#DC2626]' : isDisplayCollapsed ? 'text-[#C2410C]' : 'text-[#3B82F6]'
@@ -1629,23 +1629,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                   </span>
                                 )}
 
-                                {/* Inline + Add button for section */}
-                                <div className="relative">
-                                  <button
-                                    data-section-add-btn="true"
-                                    onMouseDown={(e) => e.stopPropagation()}
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      const rect = e.currentTarget.getBoundingClientRect()
-                                      setSectionAddMenuPos({ top: rect.bottom + 4, left: rect.left })
-                                      setSectionAddMenuId(prev => prev === item.id ? null : item.id)
-                                    }}
-                                    className="h-[26px] px-[10px] flex items-center gap-[5px] border border-[#CBD5E1] rounded-[5px] text-[11px] font-medium text-[#334155] bg-white hover:bg-[#F8FAFC] transition-colors"
-                                  >
-                                    <IconPlus size={11} stroke={2.5} className="text-[#334155]" />
-                                    Add
-                                  </button>
-                                </div>
+                                {/* +Add button moved to actions column */}
                               </div>
 
                               {/* Subtotal display when showSubtotal is enabled (expanded or collapsed) */}
@@ -1663,26 +1647,43 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                 )
                               })()}
                             </td>
-                            <td className={`w-[90px] px-[8px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle sticky right-0 ${sectionBg}`}>
+                            <td className={`w-[90px] px-[8px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle sticky right-0`}>
                               <div className="flex items-center gap-[2px] justify-end">
-                                {/* Gear icon — opens config directly */}
-                                <button
-                                  onClick={() => handleOpenSectionConfig(item)}
-                                  className="w-[32px] h-[32px] flex items-center justify-center rounded-full hover:bg-white/80 transition-colors"
-                                  title="Section settings"
-                                >
-                                  <IconSettings size={15} stroke={2} className="text-[#64748B]" />
-                                </button>
+                                {/* +Add button */}
+                                <div className="relative">
+                                  <button
+                                    data-section-add-btn="true"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      const rect = e.currentTarget.getBoundingClientRect()
+                                      setSectionAddMenuPos({ top: rect.bottom + 4, left: rect.left })
+                                      setSectionAddMenuId(prev => prev === item.id ? null : item.id)
+                                    }}
+                                    className="w-[32px] h-[32px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors"
+                                    title="Add item"
+                                  >
+                                    <IconPlus size={15} stroke={2} className="text-[#64748B]" />
+                                  </button>
+                                </div>
                                 {/* Kebab menu */}
                                 <div className="relative" ref={sectionKebabOpenId === item.id ? sectionKebabRef : null}>
                                   <button
                                     onClick={() => setSectionKebabOpenId(sectionKebabOpenId === item.id ? null : item.id)}
-                                    className="w-[32px] h-[32px] flex items-center justify-center rounded-full hover:bg-white/80 transition-colors"
+                                    className="w-[32px] h-[32px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors"
                                   >
                                     <IconDotsVertical size={15.5} stroke={2} className="text-[rgba(30,41,59,0.87)]" />
                                   </button>
                                   {sectionKebabOpenId === item.id && (
                                     <div className="absolute right-0 top-full mt-[4px] w-[160px] bg-white border border-[#E2E8F0] rounded-[8px] shadow-lg z-50 py-[4px] overflow-hidden">
+                                      <button
+                                        onClick={() => { setSectionKebabOpenId(null); handleOpenSectionConfig(item); }}
+                                        className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[8px]"
+                                      >
+                                        <IconSettings size={14} stroke={2} className="text-[#64748B]" />
+                                        Config
+                                      </button>
+                                      <div className="my-[2px] mx-[10px] border-t border-[#E2E8F0]" />
                                       <button
                                         onClick={() => handleStartRenameSection(item)}
                                         className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[8px]"
@@ -1727,9 +1728,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                       const parentIsHidden = parentDisplayMode === 'hidden'
                       const parentIsCollapsed = parentDisplayMode === 'collapsed'
 
-                      const rowBg = isGrouped
-                        ? parentIsHidden ? 'bg-[#FEF2F2]/20' : parentIsCollapsed ? 'bg-[#FFF7ED]/20' : 'bg-[#FAFBFF]'
-                        : 'bg-white'
+                      const rowBg = 'bg-white'
                       const stickyBg = rowBg
                       const childBorderColor = isGrouped
                         ? parentIsHidden ? 'border-l-[#FCA5A5]' : parentIsCollapsed ? 'border-l-[#FDBA74]' : 'border-l-[#3B82F6]'
