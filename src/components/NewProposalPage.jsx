@@ -1675,7 +1675,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                     <IconDotsVertical size={15.5} stroke={2} className="text-[rgba(30,41,59,0.87)]" />
                                   </button>
                                   {sectionKebabOpenId === item.id && (
-                                    <div className="absolute right-0 top-full mt-[4px] w-[160px] bg-white border border-[#E2E8F0] rounded-[8px] shadow-lg z-50 py-[4px] overflow-hidden">
+                                    <div className="absolute right-0 top-full mt-[4px] w-[160px] bg-white border border-[#E2E8F0] rounded-[8px] shadow-lg z-[100] py-[4px] overflow-hidden">
                                       <button
                                         onClick={() => { setSectionKebabOpenId(null); handleOpenSectionConfig(item); }}
                                         className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[8px]"
