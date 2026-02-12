@@ -209,6 +209,24 @@ const SettingsIcon = ({ size = 18, className = '' }) => (
   </svg>
 )
 
+const GripVerticalIcon = ({ size = 20, className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="9" cy="5" r="1" />
+    <circle cx="9" cy="12" r="1" />
+    <circle cx="9" cy="19" r="1" />
+    <circle cx="15" cy="5" r="1" />
+    <circle cx="15" cy="12" r="1" />
+    <circle cx="15" cy="19" r="1" />
+  </svg>
+)
+
+const ArrowsUpDownIcon = ({ size = 20, className = '' }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m7 15 5 5 5-5" />
+    <path d="m7 9 5-5 5 5" />
+  </svg>
+)
+
 const WarningIcon = ({ size = 20, className = '' }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
@@ -318,49 +336,21 @@ function LineItemCard({ item, onQtyChange, sectionDisplay }) {
 }
 
 // ─── Section Header (interactive with display badges) ───────────────
-function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onAddItem, isKebabOpen, onToggleKebab, onConfigure, onRename, onClone, onRemove }) {
+function MobileSectionHeader({ section, onAddItem, onConfigure, onRename }) {
   const display = section.sectionDisplay || 'expanded'
   const colors = SECTION_COLORS[display]
-  const kebabRef = useRef(null)
-  const [menuPos, setMenuPos] = useState({ top: 0, right: 0 })
-
-  // Calculate position and open
-  const handleKebabClick = () => {
-    if (isKebabOpen) {
-      onToggleKebab(null)
-      return
-    }
-    if (kebabRef.current) {
-      const rect = kebabRef.current.getBoundingClientRect()
-      const menuHeight = 160 // approximate dropdown height
-      const spaceBelow = window.innerHeight - rect.bottom
-      // Flip above if not enough space below
-      const top = spaceBelow < menuHeight
-        ? rect.top - menuHeight - 4
-        : rect.bottom + 4
-      setMenuPos({
-        top: Math.max(8, top),
-        right: window.innerWidth - rect.right
-      })
-    }
-    onToggleKebab(section.id)
-  }
 
   return (
     <div
       className="w-full"
-      style={{ borderLeft: `3px solid ${colors.border}`, backgroundColor: colors.bg }}
+      style={{ borderLeft: `3px solid ${colors.border}`, backgroundColor: 'white' }}
     >
       <div className="flex items-center px-[12px] py-[10px] gap-[8px]">
-        {/* Collapse chevron */}
+        {/* Drag handle */}
         <button
-          onClick={onToggleCollapse}
           className="w-[24px] h-[24px] flex items-center justify-center shrink-0"
         >
-          <ChevronDownIcon
-            size={18}
-            className={`text-[#64748B] transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`}
-          />
+          <GripVerticalIcon size={18} className="text-[#64748B]" />
         </button>
 
         {/* Section title */}
@@ -375,6 +365,13 @@ function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onAddItem
           </span>
         )}
 
+        {/* Sort/reorder */}
+        <button
+          className="w-[24px] h-[24px] flex items-center justify-center shrink-0"
+        >
+          <ArrowsUpDownIcon size={18} className="text-[#64748B]" />
+        </button>
+
         {/* Add item to section */}
         <button
           onClick={onAddItem}
@@ -383,63 +380,21 @@ function MobileSectionHeader({ section, isCollapsed, onToggleCollapse, onAddItem
           <img alt="Add" className="block w-[16px] h-[16px]" src={ICO_PLUS} />
         </button>
 
-        {/* Gear icon — opens config directly */}
+        {/* Edit/rename */}
+        <button
+          onClick={onRename}
+          className="w-[24px] h-[24px] flex items-center justify-center shrink-0"
+        >
+          <PencilIcon size={18} className="text-[#64748B]" />
+        </button>
+
+        {/* Settings/configure */}
         <button
           onClick={onConfigure}
           className="w-[24px] h-[24px] flex items-center justify-center shrink-0"
         >
-          <SettingsIcon size={16} className="text-[#64748B]" />
+          <SettingsIcon size={18} className="text-[#64748B]" />
         </button>
-
-        {/* Kebab menu trigger */}
-        <button
-          ref={kebabRef}
-          onClick={handleKebabClick}
-          className="w-[24px] h-[24px] flex items-center justify-center shrink-0"
-        >
-          <MoreVertIcon size={18} className="text-[#64748B]" />
-        </button>
-
-        {/* Kebab dropdown - rendered via portal to avoid overflow clipping */}
-        {isKebabOpen && createPortal(
-          <>
-            {/* Transparent backdrop to catch outside clicks */}
-            <div
-              style={{ position: 'fixed', inset: 0, zIndex: 9998 }}
-              onClick={() => onToggleKebab(null)}
-            />
-            {/* Dropdown menu */}
-            <div
-              className="bg-white border border-[#E8EDF1] rounded-[12px] shadow-xl w-[160px] py-[6px] overflow-hidden"
-              style={{ position: 'fixed', top: menuPos.top, right: menuPos.right, zIndex: 9999 }}
-            >
-              <button
-                onClick={() => { onToggleKebab(null); onRename() }}
-                className="w-full flex items-center gap-[10px] px-[14px] py-[12px] text-left active:bg-[#F1F5F9] transition-colors"
-              >
-                <PencilIcon size={16} className="text-[#64748B]" />
-                <span className="text-[14px] text-[#334155]">Rename</span>
-              </button>
-              <div className="h-px bg-[#E8EDF1] mx-[10px]" />
-              <button
-                onClick={() => { onToggleKebab(null); onClone() }}
-                className="w-full flex items-center gap-[10px] px-[14px] py-[12px] text-left active:bg-[#F1F5F9] transition-colors"
-              >
-                <CopyIcon size={16} className="text-[#64748B]" />
-                <span className="text-[14px] text-[#334155]">Clone</span>
-              </button>
-              <div className="h-px bg-[#E8EDF1] mx-[10px]" />
-              <button
-                onClick={() => { onToggleKebab(null); onRemove() }}
-                className="w-full flex items-center gap-[10px] px-[14px] py-[12px] text-left active:bg-[#FEF2F2] transition-colors"
-              >
-                <TrashIcon size={16} className="text-[#EF4444]" />
-                <span className="text-[14px] text-[#EF4444]">Remove</span>
-              </button>
-            </div>
-          </>,
-          document.body
-        )}
       </div>
 
       {/* Section subtotal (shown when toggled on) */}
@@ -1059,15 +1014,9 @@ export default function MobileProposalPage() {
                 <React.Fragment key={section.id}>
                   <MobileSectionHeader
                     section={section}
-                    isCollapsed={isCollapsed}
-                    onToggleCollapse={() => handleToggleSectionCollapse(section.id)}
-                    isKebabOpen={kebabSectionId === section.id}
-                    onToggleKebab={setKebabSectionId}
+                    onAddItem={() => handleAddItemToSection(section.id)}
                     onConfigure={() => handleConfigureSection(section)}
                     onRename={() => handleStartRenameSection(section)}
-                    onClone={() => handleCloneSection(section)}
-                    onRemove={() => handleRemoveSection(section.id)}
-                    onAddItem={() => handleAddItemToSection(section.id)}
                   />
                   {!isCollapsed && section.items.map((item) => (
                     <LineItemCard
