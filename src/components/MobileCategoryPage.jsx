@@ -1212,9 +1212,21 @@ function CategoryPickerScreen({
                 <span className="text-white flex-1 text-left">{category.name}</span>
 
                 {hasSubs && (
-                  showSubs 
-                    ? <IconChevronDown size={20} className="text-[#6B7280]" />
-                    : <IconChevronRight size={20} className="text-[#6B7280]" />
+                  <>
+                    {(isFullySelected || isPartial) && (
+                      <span className="text-[#F97316] text-sm font-medium">
+                        {(() => {
+                          const selectedSubs = selections[category.name] || [];
+                          const selectedCount = selectedSubs.length === 0 ? category.subCategories.length : selectedSubs.length;
+                          return `${selectedCount}/${category.subCategories.length}`;
+                        })()}
+                      </span>
+                    )}
+                    {showSubs 
+                      ? <IconChevronDown size={20} className="text-[#6B7280]" />
+                      : <IconChevronRight size={20} className="text-[#6B7280]" />
+                    }
+                  </>
                 )}
               </button>
 
