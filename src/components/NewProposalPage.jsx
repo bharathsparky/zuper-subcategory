@@ -1053,6 +1053,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
   const [itemKebabOpenId, setItemKebabOpenId] = useState(null) // item action menu
   const [moveToSectionModalOpen, setMoveToSectionModalOpen] = useState(false)
   const [moveToSectionItems, setMoveToSectionItems] = useState([]) // items being moved
+  const [removeSectionConfirm, setRemoveSectionConfirm] = useState(null) // section pending deletion confirmation
   const sectionKebabRef = useRef(null)
   const sectionAddMenuRef = useRef(null)
   const addMenuRef = useRef(null)
@@ -1286,10 +1287,38 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
     setSectionKebabOpenId(null)
   }
 
-  // Remove a section
-  const handleRemoveSection = (itemId) => {
-    setLineItems(prev => prev.filter(li => li.id !== itemId))
+  // Prompt to remove a section (shows warning dialog)
+  const handleRemoveSection = (item) => {
+    // Count child items in this section
+    const childCount = sectionMap.filter(s => s.sectionId === item.id && s.item.type !== 'header').length
+    setRemoveSectionConfirm({ ...item, childCount })
     setSectionKebabOpenId(null)
+  }
+
+  // Actually remove the section + all its child items
+  const confirmRemoveSection = () => {
+    if (!removeSectionConfirm) return
+    const sectionId = removeSectionConfirm.id
+    setLineItems(prev => {
+      const sectionIdx = prev.findIndex(li => li.id === sectionId)
+      if (sectionIdx === -1) return prev
+      // Find all children: items after the header until the next header
+      let endIdx = sectionIdx + 1
+      while (endIdx < prev.length && prev[endIdx].type !== 'header') {
+        endIdx++
+      }
+      // Remove from sectionIdx to endIdx (inclusive of header, exclusive of next header)
+      return [...prev.slice(0, sectionIdx), ...prev.slice(endIdx)]
+    })
+    // Clear any selections for removed items
+    setSelectedItemIds(prev => {
+      const next = new Set(prev)
+      next.delete(sectionId)
+      // Also clear children (they were removed)
+      sectionMap.filter(s => s.sectionId === sectionId).forEach(s => next.delete(s.item.id))
+      return next
+    })
+    setRemoveSectionConfirm(null)
   }
 
   const handleStartRenameSection = (item) => {
@@ -1902,7 +1931,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                                       </button>
                                       <div className="my-[2px] mx-[10px] border-t border-[#E2E8F0]" />
                                       <button
-                                        onClick={() => handleRemoveSection(item.id)}
+                                        onClick={() => handleRemoveSection(item)}
                                         className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#DC2626] hover:bg-[#FEF2F2] transition-colors flex items-center gap-[8px]"
                                       >
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
@@ -2531,6 +2560,59 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                 className="h-[36px] px-[16px] border border-[#E2E8F0] rounded-[6px] text-[13px] font-medium text-[#334155] bg-white hover:bg-[#F8FAFC] transition-colors"
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Remove Section Confirmation Dialog */}
+      {removeSectionConfirm && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center" onClick={() => setRemoveSectionConfirm(null)}>
+          <div className="absolute inset-0 bg-black/30" />
+          <div
+            className="relative bg-white rounded-[12px] shadow-[0px_8px_32px_rgba(0,0,0,0.16)] w-[420px] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-[20px] pt-[20px] pb-[8px] flex items-center gap-[10px]">
+              <div className="w-[36px] h-[36px] rounded-full bg-[#FEF2F2] flex items-center justify-center flex-shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+              </div>
+              <h3 className="text-[15px] font-semibold text-[#1E293B]">Remove Section</h3>
+            </div>
+            <div className="px-[20px] py-[12px]">
+              <p className="text-[13px] text-[#475569] leading-[20px]">
+                Are you sure you want to remove <span className="font-semibold text-[#1E293B]">"{removeSectionConfirm.name}"</span>?
+              </p>
+              {removeSectionConfirm.childCount > 0 && (
+                <div className="mt-[10px] p-[12px] bg-[#FEF2F2] border border-[#FECACA] rounded-[8px]">
+                  <p className="text-[12.6px] text-[#991B1B] leading-[19px]">
+                    <span className="font-semibold">Warning:</span> This will also delete{' '}
+                    <span className="font-semibold">{removeSectionConfirm.childCount} item{removeSectionConfirm.childCount > 1 ? 's' : ''}</span>{' '}
+                    inside this section. This action cannot be undone.
+                  </p>
+                </div>
+              )}
+              {removeSectionConfirm.childCount === 0 && (
+                <p className="text-[12.6px] text-[#64748B] mt-[6px]">This section is empty and will be removed.</p>
+              )}
+            </div>
+            <div className="px-[20px] pb-[16px] flex items-center justify-end gap-[8px]">
+              <button
+                onClick={() => setRemoveSectionConfirm(null)}
+                className="h-[36px] px-[16px] border border-[#E2E8F0] rounded-[6px] text-[13px] font-medium text-[#334155] bg-white hover:bg-[#F8FAFC] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmRemoveSection}
+                className="h-[36px] px-[20px] bg-[#DC2626] border border-[#DC2626] rounded-[6px] text-[13px] font-medium text-white hover:bg-[#B91C1C] transition-colors"
+              >
+                Remove
               </button>
             </div>
           </div>
