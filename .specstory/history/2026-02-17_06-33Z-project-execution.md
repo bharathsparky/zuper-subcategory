@@ -2365,42 +2365,51 @@ Now update `handleRemoveSection` to show the confirmation instead of deleting di
 
 <details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
 
-Status: **loading**
+**Chunk 1**
+Lines added: 31, lines removed: 3
 
-```javascriptreact
-  // Prompt to remove a section (shows warning dialog)
-  const handleRemoveSection = (item) => {
-    // Count child items in this section
-    const childCount = sectionMap.filter(s => s.sectionId === item.id && s.item.type !== 'header').length
-    setRemoveSectionConfirm({ ...item, childCount })
-    setSectionKebabOpenId(null)
-  }
-
-  // Actually remove the section + all its child items
-  const confirmRemoveSection = () => {
-    if (!removeSectionConfirm) return
-    const sectionId = removeSectionConfirm.id
-    setLineItems(prev => {
-      const sectionIdx = prev.findIndex(li => li.id === sectionId)
-      if (sectionIdx === -1) return prev
-      // Find all children: items after the header until the next header
-      let endIdx = sectionIdx + 1
-      while (endIdx < prev.length && prev[endIdx].type !== 'header') {
-        endIdx++
-      }
-      // Remove from sectionIdx to endIdx (inclusive of header, exclusive of next header)
-      return [...prev.slice(0, sectionIdx), ...prev.slice(endIdx)]
-    })
-    // Clear any selections for removed items
-    setSelectedItemIds(prev => {
-      const next = new Set(prev)
-      next.delete(sectionId)
-      // Also clear children (they were removed)
-      sectionMap.filter(s => s.sectionId === sectionId).forEach(s => next.delete(s.item.id))
-      return next
-    })
-    setRemoveSectionConfirm(null)
-  }
+```diff
+@@ -1288,9 +1288,37 @@
+    }
+  
+-   // Remove a section
+-   const handleRemoveSection = (itemId) =&gt; {
+-     setLineItems(prev =&gt; prev.filter(li =&gt; li.id !== itemId))
++   // Prompt to remove a section (shows warning dialog)
++   const handleRemoveSection = (item) =&gt; {
++     // Count child items in this section
++     const childCount = sectionMap.filter(s =&gt; s.sectionId === item.id &amp;&amp; s.item.type !== 'header').length
++     setRemoveSectionConfirm({ ...item, childCount })
+      setSectionKebabOpenId(null)
+    }
++ 
++   // Actually remove the section + all its child items
++   const confirmRemoveSection = () =&gt; {
++     if (!removeSectionConfirm) return
++     const sectionId = removeSectionConfirm.id
++     setLineItems(prev =&gt; {
++       const sectionIdx = prev.findIndex(li =&gt; li.id === sectionId)
++       if (sectionIdx === -1) return prev
++       // Find all children: items after the header until the next header
++       let endIdx = sectionIdx + 1
++       while (endIdx &lt; prev.length &amp;&amp; prev[endIdx].type !== 'header') {
++         endIdx++
++       }
++       // Remove from sectionIdx to endIdx (inclusive of header, exclusive of next header)
++       return [...prev.slice(0, sectionIdx), ...prev.slice(endIdx)]
++     })
++     // Clear any selections for removed items
++     setSelectedItemIds(prev =&gt; {
++       const next = new Set(prev)
++       next.delete(sectionId)
++       // Also clear children (they were removed)
++       sectionMap.filter(s =&gt; s.sectionId === sectionId).forEach(s =&gt; next.delete(s.item.id))
++       return next
++     })
++     setRemoveSectionConfirm(null)
++   }
+  
+    const handleStartRenameSection = (item) =&gt; {
 ```
 
 </details>
@@ -2409,7 +2418,227 @@ Status: **loading**
 
 ---
 
+Now update the kebab menu's Remove button to pass the full `item` object instead of just `item.id`:
 
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -1932,5 +1932,5 @@
+                                        &lt;div className="my-[2px] mx-[10px] border-t border-[#E2E8F0]" /&gt;
+                                        &lt;button
+-                                         onClick={() =&gt; handleRemoveSection(item.id)}
++                                         onClick={() =&gt; handleRemoveSection(item)}
+                                          className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#DC2626] hover:bg-[#FEF2F2] transition-colors flex items-center gap-[8px]"
+                                        &gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+Now add the confirmation dialog. Let me place it right after the Move to Section modal:
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "\\{/\\* Move to Section Modal \\*/\\}" in "/Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx" • 0 matches</summary>
+
+Output mode: content
+
+
+_No matches found_
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "Move to Section Modal" in "/Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx" • 1 match</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `src/components/NewProposalPage.jsx` | `\{/* Move to Section Modal */\}` | L2495 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+The model provided an ambiguous search string to replace.
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "moveToSectionItems\[\].*\}\)$" " in "/Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx" • 0 matches</summary>
+
+Output mode: content
+
+
+_No matches found_
+
+</details>
+</tool-use>
+
+---
+
+Let me be more specific with the context around the end of the Move to Section modal:
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx</summary>
+
+**Chunk 1**
+Lines added: 53, lines removed: undefined
+
+```diff
+@@ -2566,4 +2566,57 @@
+          &lt;/div&gt;
+        )}
++ 
++       {/* Remove Section Confirmation Dialog */}
++       {removeSectionConfirm &amp;&amp; (
++         &lt;div className="fixed inset-0 z-[80] flex items-center justify-center" onClick={() =&gt; setRemoveSectionConfirm(null)}&gt;
++           &lt;div className="absolute inset-0 bg-black/30" /&gt;
++           &lt;div
++             className="relative bg-white rounded-[12px] shadow-[0px_8px_32px_rgba(0,0,0,0.16)] w-[420px] overflow-hidden"
++             onClick={(e) =&gt; e.stopPropagation()}
++           &gt;
++             &lt;div className="px-[20px] pt-[20px] pb-[8px] flex items-center gap-[10px]"&gt;
++               &lt;div className="w-[36px] h-[36px] rounded-full bg-[#FEF2F2] flex items-center justify-center flex-shrink-0"&gt;
++                 &lt;svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"&gt;
++                   &lt;circle cx="12" cy="12" r="10"/&gt;
++                   &lt;line x1="12" y1="8" x2="12" y2="12"/&gt;
++                   &lt;line x1="12" y1="16" x2="12.01" y2="16"/&gt;
++                 &lt;/svg&gt;
++               &lt;/div&gt;
++               &lt;h3 className="text-[15px] font-semibold text-[#1E293B]"&gt;Remove Section&lt;/h3&gt;
++             &lt;/div&gt;
++             &lt;div className="px-[20px] py-[12px]"&gt;
++               &lt;p className="text-[13px] text-[#475569] leading-[20px]"&gt;
++                 Are you sure you want to remove &lt;span className="font-semibold text-[#1E293B]"&gt;"{removeSectionConfirm.name}"&lt;/span&gt;?
++               &lt;/p&gt;
++               {removeSectionConfirm.childCount &gt; 0 &amp;&amp; (
++                 &lt;div className="mt-[10px] p-[12px] bg-[#FEF2F2] border border-[#FECACA] rounded-[8px]"&gt;
++                   &lt;p className="text-[12.6px] text-[#991B1B] leading-[19px]"&gt;
++                     &lt;span className="font-semibold"&gt;Warning:&lt;/span&gt; This will also delete{' '}
++                     &lt;span className="font-semibold"&gt;{removeSectionConfirm.childCount} item{removeSectionConfirm.childCount &gt; 1 ? 's' : ''}&lt;/span&gt;{' '}
++                     inside this section. This action cannot be undone.
++                   &lt;/p&gt;
++                 &lt;/div&gt;
++               )}
++               {removeSectionConfirm.childCount === 0 &amp;&amp; (
++                 &lt;p className="text-[12.6px] text-[#64748B] mt-[6px]"&gt;This section is empty and will be removed.&lt;/p&gt;
++               )}
++             &lt;/div&gt;
++             &lt;div className="px-[20px] pb-[16px] flex items-center justify-end gap-[8px]"&gt;
++               &lt;button
++                 onClick={() =&gt; setRemoveSectionConfirm(null)}
++                 className="h-[36px] px-[16px] border border-[#E2E8F0] rounded-[6px] text-[13px] font-medium text-[#334155] bg-white hover:bg-[#F8FAFC] transition-colors"
++               &gt;
++                 Cancel
++               &lt;/button&gt;
++               &lt;button
++                 onClick={confirmRemoveSection}
++                 className="h-[36px] px-[20px] bg-[#DC2626] border border-[#DC2626] rounded-[6px] text-[13px] font-medium text-white hover:bg-[#B91C1C] transition-colors"
++               &gt;
++                 Remove
++               &lt;/button&gt;
++             &lt;/div&gt;
++           &lt;/div&gt;
++         &lt;/div&gt;
++       )}
+      &lt;/div&gt;
+    )
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `/Users/bharath.s/zuper-subcategory/src/components/NewProposalPage.jsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+Clean. Now let me push the changes:
+
+---
+
+<tool-use data-tool-type="shell" data-tool-name="run_terminal_cmd">
+<details><summary>Tool use: **run_terminal_cmd** • Run command: cd /Users/bharath.s/zuper-subcategory && git add -A && git commit -m "Add warning confirmation dialog when removing a section with items" && git push</summary>
+
+```bash
+cd /Users/bharath.s/zuper-subcategory && git add -A && git commit -m "Add warning confirmation dialog when removing a section with items" && git push
+```
+
+```
+[main 2bfd8a0d] Add warning confirmation dialog when removing a section with items
+ 2 files changed, 266 insertions(+), 4 deletions(-)
+To github.com:bharathsparky/zuper-subcategory.git
+   e916a933..2bfd8a0d  main -&gt; main
+
+```
+</details>
+</tool-use>
+
+---
+
+Pushed! Here's what changed:
+
+- **Warning dialog on section removal** — Clicking "Remove" on a section's kebab menu now shows a confirmation dialog instead of deleting immediately.
+  - If the section has items, it shows a red warning box: *"Warning: This will also delete X item(s) inside this section. This action cannot be undone."*
+  - If the section is empty, it shows: *"This section is empty and will be removed."*
+  - You can **Cancel** or confirm with **Remove**.
+- **Deletes everything** — Confirming removal now deletes the section header **and** all items inside it.
 
 ---
 
