@@ -40,6 +40,7 @@ import {
   IconEye,
   IconCircleCheck,
   IconSettings,
+  IconCornerDownRight,
 } from '@tabler/icons-react'
 
 // Asset paths from Figma
@@ -1048,9 +1049,14 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
   const [sectionAddMenuPos, setSectionAddMenuPos] = useState({ top: 0, left: 0 }) // position for fixed dropdown
   const [addToSectionId, setAddToSectionId] = useState(null) // tracks target section when opening line item picker from section
   const [previewOption, setPreviewOption] = useState(null) // option being previewed in modal
+  const [selectedItemIds, setSelectedItemIds] = useState(new Set()) // bulk selection
+  const [itemKebabOpenId, setItemKebabOpenId] = useState(null) // item action menu
+  const [moveToSectionModalOpen, setMoveToSectionModalOpen] = useState(false)
+  const [moveToSectionItems, setMoveToSectionItems] = useState([]) // items being moved
   const sectionKebabRef = useRef(null)
   const sectionAddMenuRef = useRef(null)
   const addMenuRef = useRef(null)
+  const itemKebabRef = useRef(null)
 
   // Stateful line items - initialized with sample data, updated when items are added from picker
   const [lineItems, setLineItems] = useState([
@@ -1237,6 +1243,19 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [sectionKebabOpenId])
 
+  // Close item kebab on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (itemKebabRef.current && !itemKebabRef.current.contains(e.target)) {
+        setItemKebabOpenId(null)
+      }
+    }
+    if (itemKebabOpenId !== null) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [itemKebabOpenId])
+
   // Close section inline add menu on click outside
   useEffect(() => {
     if (sectionAddMenuId === null) return
@@ -1289,6 +1308,121 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
     setRenameSectionValue('')
   }
 
+  // ── Selection Logic ──────────────────────────────────────────────────
+  const toggleSelectItem = useCallback((id) => {
+    setSelectedItemIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }, [])
+
+  const toggleSelectAll = useCallback(() => {
+    setSelectedItemIds(prev => {
+      if (prev.size === lineItems.length && lineItems.length > 0) return new Set()
+      return new Set(lineItems.map(li => li.id))
+    })
+  }, [lineItems])
+
+  const clearSelection = useCallback(() => {
+    setSelectedItemIds(new Set())
+  }, [])
+
+  // Check if selection includes any sections
+  const hasSelectedSections = useMemo(() => {
+    return [...selectedItemIds].some(id => {
+      const li = lineItems.find(l => l.id === id)
+      return li && li.type === 'header'
+    })
+  }, [selectedItemIds, lineItems])
+
+  const isAllSelected = lineItems.length > 0 && selectedItemIds.size === lineItems.length
+  const isIndeterminate = selectedItemIds.size > 0 && !isAllSelected
+
+  // Get available sections for Move to Section
+  const availableSections = useMemo(() => {
+    return lineItems.filter(li => li.type === 'header')
+  }, [lineItems])
+
+  // ── Item Actions ─────────────────────────────────────────────────────
+  const handleRemoveItem = useCallback((itemId) => {
+    setLineItems(prev => prev.filter(li => li.id !== itemId))
+    setItemKebabOpenId(null)
+    setSelectedItemIds(prev => {
+      const next = new Set(prev)
+      next.delete(itemId)
+      return next
+    })
+  }, [])
+
+  const handleCloneItem = useCallback((item) => {
+    const cloned = { ...item, id: Date.now() }
+    setLineItems(prev => {
+      const idx = prev.findIndex(li => li.id === item.id)
+      const updated = [...prev]
+      updated.splice(idx + 1, 0, cloned)
+      return updated
+    })
+    setItemKebabOpenId(null)
+  }, [])
+
+  // Open Move to Section modal for individual item
+  const openMoveToSectionForItem = useCallback((item) => {
+    setMoveToSectionItems([item])
+    setMoveToSectionModalOpen(true)
+    setItemKebabOpenId(null)
+  }, [])
+
+  // Open Move to Section modal for bulk selected items
+  const openBulkMoveToSection = useCallback(() => {
+    const items = lineItems.filter(li => selectedItemIds.has(li.id) && li.type === 'item')
+    setMoveToSectionItems(items)
+    setMoveToSectionModalOpen(true)
+  }, [lineItems, selectedItemIds])
+
+  // Move items to a target section
+  const handleMoveToSection = useCallback((targetSectionId) => {
+    const itemIds = new Set(moveToSectionItems.map(i => i.id))
+
+    setLineItems(prev => {
+      // Remove items from their current positions
+      const remaining = prev.filter(li => !itemIds.has(li.id))
+      const itemsToMove = prev.filter(li => itemIds.has(li.id))
+
+      // Find the target section header in remaining
+      const sectionIdx = remaining.findIndex(li => li.id === targetSectionId)
+      if (sectionIdx === -1) return prev
+
+      // Find insertion point: after the last child of the target section
+      let insertIdx = sectionIdx + 1
+      while (insertIdx < remaining.length && remaining[insertIdx].type !== 'header') {
+        insertIdx++
+      }
+
+      const result = [...remaining]
+      result.splice(insertIdx, 0, ...itemsToMove)
+      return result
+    })
+
+    // Expand the target section in the UI
+    setUiCollapsedSections(prev => {
+      const next = new Set(prev)
+      next.delete(targetSectionId)
+      return next
+    })
+
+    setMoveToSectionModalOpen(false)
+    setMoveToSectionItems([])
+    setSelectedItemIds(new Set())
+  }, [moveToSectionItems])
+
+  // Bulk delete
+  const handleBulkDelete = useCallback(() => {
+    setLineItems(prev => prev.filter(li => !selectedItemIds.has(li.id)))
+    setSelectedItemIds(new Set())
+  }, [selectedItemIds])
+
   // ── Drag & Drop Setup ───────────────────────────────────────────────
   const dndSensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -1336,6 +1470,7 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
     // Close any open menus
     setSectionAddMenuId(null)
     setSectionKebabOpenId(null)
+    setItemKebabOpenId(null)
     setShowAddMenu(false)
   }, [])
 
@@ -1503,6 +1638,41 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
               </div>
             </div>
 
+            {/* Bulk Action Bar */}
+            {selectedItemIds.size > 0 && (
+              <div className="bg-[#EFF6FF] border-t border-b border-[#BFDBFE] px-[21px] h-[44px] flex items-center gap-[12px] flex-shrink-0">
+                <span className="text-[13px] font-semibold text-[#1E293B]">
+                  {selectedItemIds.size} selected
+                </span>
+                <div className="h-[20px] w-[1px] bg-[#BFDBFE]" />
+                {/* Move to Section — only when NO sections are in the selection */}
+                {!hasSelectedSections && availableSections.length > 0 && (
+                  <button
+                    onClick={openBulkMoveToSection}
+                    className="h-[30px] px-[12px] flex items-center gap-[6px] bg-white border border-[#CBD5E1] rounded-[6px] text-[12.6px] font-medium text-[#334155] hover:bg-[#F8FAFC] transition-colors"
+                  >
+                    <IconCornerDownRight size={13} stroke={2} className="text-[#64748B]" />
+                    Move to Section
+                  </button>
+                )}
+                <button
+                  onClick={handleBulkDelete}
+                  className="h-[30px] px-[12px] flex items-center gap-[6px] bg-white border border-[#FECACA] rounded-[6px] text-[12.6px] font-medium text-[#DC2626] hover:bg-[#FEF2F2] transition-colors"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  Delete
+                </button>
+                <div className="flex-1" />
+                <button
+                  onClick={clearSelection}
+                  className="h-[30px] px-[12px] flex items-center gap-[4px] text-[12.6px] font-medium text-[#64748B] hover:text-[#334155] transition-colors"
+                >
+                  <IconX size={13} stroke={2} />
+                  Clear
+                </button>
+              </div>
+            )}
+
             {/* Table */}
             <div className="border-t border-[#E2E8F0] flex-shrink-0">
               <div className="overflow-x-auto">
@@ -1516,7 +1686,25 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                   <thead>
                     <tr className="bg-[#F8FAFC]">
                       <th className="w-[41px] px-[14px] py-[17px] border-b border-[#E2E8F0] text-left">
-                        <input type="checkbox" className="w-[13px] h-[13px] rounded-[2.5px] border-[#767676] cursor-pointer" />
+                        <button
+                          onClick={toggleSelectAll}
+                          className="w-[13px] h-[13px] rounded-[2.5px] border flex items-center justify-center cursor-pointer"
+                          style={{
+                            backgroundColor: isAllSelected ? '#2563EB' : (isIndeterminate ? '#2563EB' : 'white'),
+                            borderColor: isAllSelected || isIndeterminate ? '#2563EB' : '#767676',
+                          }}
+                        >
+                          {isAllSelected && (
+                            <svg width="8" height="6" viewBox="0 0 10 8" fill="none">
+                              <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          )}
+                          {isIndeterminate && !isAllSelected && (
+                            <svg width="8" height="2" viewBox="0 0 10 2" fill="none">
+                              <path d="M1 1H9" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+                            </svg>
+                          )}
+                        </button>
                       </th>
                       <th className="w-[41px] px-[14px] py-[17px] border-b border-[#E2E8F0] text-left">
                         <span className="text-[12.6px] font-medium text-[#475569] leading-[18.9px]">#</span>
@@ -1581,7 +1769,20 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                             {({ dragHandleRef, dragHandleListeners }) => (
                             <>
                             <td className={`px-[14px] py-[10px] ${hasChildren ? '' : 'border-b border-[#E2E8F0]'} align-middle border-l-[3px] ${sectionBorderColor}`}>
-                              <input type="checkbox" className="w-[13px] h-[13px] rounded-[2.5px] border-[#767676] cursor-pointer" />
+                              <button
+                                onClick={() => toggleSelectItem(item.id)}
+                                className="w-[13px] h-[13px] rounded-[2.5px] border flex items-center justify-center cursor-pointer"
+                                style={{
+                                  backgroundColor: selectedItemIds.has(item.id) ? '#2563EB' : 'white',
+                                  borderColor: selectedItemIds.has(item.id) ? '#2563EB' : '#767676',
+                                }}
+                              >
+                                {selectedItemIds.has(item.id) && (
+                                  <svg width="8" height="6" viewBox="0 0 10 8" fill="none">
+                                    <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                )}
+                              </button>
                             </td>
                             <td
                               ref={dragHandleRef}
@@ -1739,7 +1940,20 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                         {({ dragHandleRef, dragHandleListeners }) => (
                         <>
                         <td className={`px-[14px] py-[14px] ${borderBottom} align-middle ${isGrouped ? `border-l-[3px] ${childBorderColor}` : ''}`}>
-                          <input type="checkbox" className="w-[13px] h-[13px] rounded-[2.5px] border-[#767676] cursor-pointer" />
+                          <button
+                            onClick={() => toggleSelectItem(item.id)}
+                            className="w-[13px] h-[13px] rounded-[2.5px] border flex items-center justify-center cursor-pointer"
+                            style={{
+                              backgroundColor: selectedItemIds.has(item.id) ? '#2563EB' : 'white',
+                              borderColor: selectedItemIds.has(item.id) ? '#2563EB' : '#767676',
+                            }}
+                          >
+                            {selectedItemIds.has(item.id) && (
+                              <svg width="8" height="6" viewBox="0 0 10 8" fill="none">
+                                <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            )}
+                          </button>
                         </td>
                         <td
                           ref={dragHandleRef}
@@ -1859,9 +2073,41 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                           <span className="text-[12.6px] text-[#1E293B] leading-[18.9px]">{item.total}</span>
                         </td>
                         <td className={`w-[72px] px-[14px] py-[14px] ${borderBottom} align-middle sticky right-0 ${stickyBg}`}>
-                          <button className="w-[40px] h-[40px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors">
-                            <IconDotsVertical size={15.5} stroke={2} className="text-[rgba(30,41,59,0.87)]" />
-                          </button>
+                          <div className="relative" ref={itemKebabOpenId === item.id ? itemKebabRef : null}>
+                            <button
+                              onClick={() => setItemKebabOpenId(itemKebabOpenId === item.id ? null : item.id)}
+                              className="w-[40px] h-[40px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors"
+                            >
+                              <IconDotsVertical size={15.5} stroke={2} className="text-[rgba(30,41,59,0.87)]" />
+                            </button>
+                            {itemKebabOpenId === item.id && (
+                              <div className="absolute right-0 top-full mt-[4px] w-[180px] bg-white border border-[#E2E8F0] rounded-[8px] shadow-lg z-[100] py-[4px] overflow-hidden">
+                                <button
+                                  onClick={() => openMoveToSectionForItem(item)}
+                                  className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[8px]"
+                                >
+                                  <IconCornerDownRight size={14} stroke={2} className="text-[#64748B]" />
+                                  Move to Section
+                                </button>
+                                <div className="my-[2px] mx-[10px] border-t border-[#E2E8F0]" />
+                                <button
+                                  onClick={() => handleCloneItem(item)}
+                                  className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#1E293B] hover:bg-[#F8FAFC] transition-colors flex items-center gap-[8px]"
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                  Clone
+                                </button>
+                                <div className="my-[2px] mx-[10px] border-t border-[#E2E8F0]" />
+                                <button
+                                  onClick={() => handleRemoveItem(item.id)}
+                                  className="w-full text-left px-[14px] py-[9px] text-[13px] text-[#DC2626] hover:bg-[#FEF2F2] transition-colors flex items-center gap-[8px]"
+                                >
+                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                  Remove
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </td>
                         </>
                         )}
@@ -2211,6 +2457,80 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
                 className="h-[36px] px-[20px] bg-[#E44A19] border border-[#E44A19] rounded-[6px] text-[13px] font-medium text-white hover:bg-[#D03F14] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Move to Section Modal */}
+      {moveToSectionModalOpen && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center" onClick={() => { setMoveToSectionModalOpen(false); setMoveToSectionItems([]) }}>
+          <div className="absolute inset-0 bg-black/30" />
+          <div
+            className="relative bg-white rounded-[12px] shadow-[0px_8px_32px_rgba(0,0,0,0.16)] w-[400px] overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-[20px] pt-[20px] pb-[8px] flex items-center justify-between">
+              <h3 className="text-[15px] font-semibold text-[#1E293B]">Move to Section</h3>
+              <button
+                onClick={() => { setMoveToSectionModalOpen(false); setMoveToSectionItems([]) }}
+                className="w-[28px] h-[28px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors"
+              >
+                <IconX size={14} stroke={2} className="text-[#64748B]" />
+              </button>
+            </div>
+            <div className="px-[20px] py-[8px]">
+              <p className="text-[12.6px] text-[#64748B] mb-[12px]">
+                {moveToSectionItems.length === 1
+                  ? `Move "${moveToSectionItems[0].name}" to:`
+                  : `Move ${moveToSectionItems.length} items to:`}
+              </p>
+              <div className="flex flex-col gap-[4px] max-h-[240px] overflow-y-auto">
+                {availableSections.length === 0 ? (
+                  <p className="text-[13px] text-[#94A3B8] py-[16px] text-center">No sections available. Create a section first.</p>
+                ) : (
+                  availableSections.map((section) => {
+                    // Don't show the section the item is already in
+                    const isCurrentSection = moveToSectionItems.length === 1 && (() => {
+                      const itemIdx = lineItems.findIndex(li => li.id === moveToSectionItems[0].id)
+                      // Walk backwards from item to find its section
+                      for (let i = itemIdx - 1; i >= 0; i--) {
+                        if (lineItems[i].type === 'header') {
+                          return lineItems[i].id === section.id
+                        }
+                      }
+                      return false
+                    })()
+
+                    return (
+                      <button
+                        key={section.id}
+                        disabled={isCurrentSection}
+                        onClick={() => handleMoveToSection(section.id)}
+                        className={`w-full text-left px-[14px] py-[10px] rounded-[8px] text-[13px] transition-colors flex items-center gap-[10px] ${
+                          isCurrentSection
+                            ? 'text-[#94A3B8] bg-[#F8FAFC] cursor-not-allowed'
+                            : 'text-[#1E293B] hover:bg-[#F1F5F9] cursor-pointer'
+                        }`}
+                      >
+                        <IconCornerDownRight size={14} stroke={2} className={isCurrentSection ? 'text-[#CBD5E1]' : 'text-[#3B82F6]'} />
+                        <span className="font-medium">{section.name}</span>
+                        {isCurrentSection && (
+                          <span className="ml-auto text-[11px] text-[#94A3B8]">(current)</span>
+                        )}
+                      </button>
+                    )
+                  })
+                )}
+              </div>
+            </div>
+            <div className="px-[20px] pb-[16px] pt-[8px] flex items-center justify-end">
+              <button
+                onClick={() => { setMoveToSectionModalOpen(false); setMoveToSectionItems([]) }}
+                className="h-[36px] px-[16px] border border-[#E2E8F0] rounded-[6px] text-[13px] font-medium text-[#334155] bg-white hover:bg-[#F8FAFC] transition-colors"
+              >
+                Cancel
               </button>
             </div>
           </div>
