@@ -41,6 +41,8 @@ import {
   IconCircleCheck,
   IconSettings,
   IconCornerDownRight,
+  IconStack2,
+  IconArrowRight,
 } from '@tabler/icons-react'
 
 // Asset paths from Figma
@@ -2493,78 +2495,130 @@ function EditOptionDialog({ option, onClose, onUpdate }) {
       )}
 
       {/* Move to Section Modal */}
-      {moveToSectionModalOpen && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center" onClick={() => { setMoveToSectionModalOpen(false); setMoveToSectionItems([]) }}>
-          <div className="absolute inset-0 bg-black/30" />
-          <div
-            className="relative bg-white rounded-[12px] shadow-[0px_8px_32px_rgba(0,0,0,0.16)] w-[400px] overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="px-[20px] pt-[20px] pb-[8px] flex items-center justify-between">
-              <h3 className="text-[15px] font-semibold text-[#1E293B]">Move to Section</h3>
-              <button
-                onClick={() => { setMoveToSectionModalOpen(false); setMoveToSectionItems([]) }}
-                className="w-[28px] h-[28px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors"
-              >
-                <IconX size={14} stroke={2} className="text-[#64748B]" />
-              </button>
-            </div>
-            <div className="px-[20px] py-[8px]">
-              <p className="text-[12.6px] text-[#64748B] mb-[12px]">
-                {moveToSectionItems.length === 1
-                  ? `Move "${moveToSectionItems[0].name}" to:`
-                  : `Move ${moveToSectionItems.length} items to:`}
-              </p>
-              <div className="flex flex-col gap-[4px] max-h-[240px] overflow-y-auto">
-                {availableSections.length === 0 ? (
-                  <p className="text-[13px] text-[#94A3B8] py-[16px] text-center">No sections available. Create a section first.</p>
-                ) : (
-                  availableSections.map((section) => {
-                    // Don't show the section the item is already in
-                    const isCurrentSection = moveToSectionItems.length === 1 && (() => {
-                      const itemIdx = lineItems.findIndex(li => li.id === moveToSectionItems[0].id)
-                      // Walk backwards from item to find its section
-                      for (let i = itemIdx - 1; i >= 0; i--) {
-                        if (lineItems[i].type === 'header') {
-                          return lineItems[i].id === section.id
-                        }
-                      }
-                      return false
-                    })()
+      {moveToSectionModalOpen && (() => {
+        // Compute item counts per section
+        const sectionItemCounts = {}
+        let currentSectionIdForCount = null
+        for (const li of lineItems) {
+          if (li.type === 'header') {
+            currentSectionIdForCount = li.id
+            if (!sectionItemCounts[li.id]) sectionItemCounts[li.id] = 0
+          } else if (currentSectionIdForCount) {
+            sectionItemCounts[currentSectionIdForCount] = (sectionItemCounts[currentSectionIdForCount] || 0) + 1
+          }
+        }
+        // Determine the current section for the item(s) being moved
+        let currentSectionIdForItem = null
+        if (moveToSectionItems.length === 1) {
+          const itemIdx = lineItems.findIndex(li => li.id === moveToSectionItems[0].id)
+          for (let i = itemIdx - 1; i >= 0; i--) {
+            if (lineItems[i].type === 'header') {
+              currentSectionIdForItem = lineItems[i].id
+              break
+            }
+          }
+        }
+        // Description text
+        const itemLabel = moveToSectionItems.length === 1
+          ? `Move "${moveToSectionItems[0].name}" to a section in ${packageName || 'this option'}`
+          : `Move ${moveToSectionItems.length} items to a section in ${packageName || 'this option'}`
 
-                    return (
-                      <button
-                        key={section.id}
-                        disabled={isCurrentSection}
-                        onClick={() => handleMoveToSection(section.id)}
-                        className={`w-full text-left px-[14px] py-[10px] rounded-[8px] text-[13px] transition-colors flex items-center gap-[10px] ${
-                          isCurrentSection
-                            ? 'text-[#94A3B8] bg-[#F8FAFC] cursor-not-allowed'
-                            : 'text-[#1E293B] hover:bg-[#F1F5F9] cursor-pointer'
-                        }`}
-                      >
-                        <IconCornerDownRight size={14} stroke={2} className={isCurrentSection ? 'text-[#CBD5E1]' : 'text-[#3B82F6]'} />
-                        <span className="font-medium">{section.name}</span>
-                        {isCurrentSection && (
-                          <span className="ml-auto text-[11px] text-[#94A3B8]">(current)</span>
-                        )}
-                      </button>
-                    )
-                  })
-                )}
+        return (
+          <div className="fixed inset-0 z-[80] flex items-center justify-center" onClick={() => { setMoveToSectionModalOpen(false); setMoveToSectionItems([]) }}>
+            <div className="absolute inset-0 bg-black/30" />
+            <div
+              className="relative bg-white rounded-[12px] shadow-[0px_8px_32px_rgba(0,0,0,0.16)] w-[400px] overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="px-[20px] pt-[20px] pb-[4px] flex items-start justify-between">
+                <h3 className="text-[17px] font-bold text-[#1E293B] leading-[24px]">Move to Section</h3>
+                <button
+                  onClick={() => { setMoveToSectionModalOpen(false); setMoveToSectionItems([]) }}
+                  className="w-[28px] h-[28px] flex items-center justify-center rounded-full hover:bg-[#F1F5F9] transition-colors -mt-[2px]"
+                >
+                  <IconX size={16} stroke={2} className="text-[#64748B]" />
+                </button>
+              </div>
+              {/* Subtitle */}
+              <div className="px-[20px] pb-[16px]">
+                <p className="text-[13px] text-[#64748B] leading-[18px]">{itemLabel}</p>
+              </div>
+              {/* Section Cards */}
+              <div className="px-[20px] pb-[16px]">
+                <div className="flex flex-col gap-[10px] max-h-[300px] overflow-y-auto">
+                  {availableSections.length === 0 ? (
+                    <p className="text-[13px] text-[#94A3B8] py-[24px] text-center">No sections available. Create a section first.</p>
+                  ) : (
+                    availableSections.map((section) => {
+                      const isCurrentSection = section.id === currentSectionIdForItem
+                      const itemCount = sectionItemCounts[section.id] || 0
+
+                      return (
+                        <button
+                          key={section.id}
+                          disabled={isCurrentSection}
+                          onClick={() => handleMoveToSection(section.id)}
+                          className={`group w-full text-left rounded-[10px] border transition-all duration-150 flex items-center gap-[14px] px-[14px] py-[14px] ${
+                            isCurrentSection
+                              ? 'border-[#E44A19]/40 bg-[#E44A19]/[0.06] cursor-default'
+                              : 'border-[#E2E8F0] bg-white hover:border-[#E44A19]/60 hover:bg-[#E44A19]/[0.06] cursor-pointer'
+                          }`}
+                        >
+                          {/* Section Icon */}
+                          <div className={`w-[44px] h-[44px] rounded-[10px] flex items-center justify-center flex-shrink-0 transition-colors duration-150 ${
+                            isCurrentSection ? 'bg-[#E44A19]/[0.12]' : 'bg-[#F1F5F9] group-hover:bg-[#E44A19]/[0.12]'
+                          }`}>
+                            <IconStack2
+                              size={22}
+                              stroke={1.5}
+                              className={`transition-colors duration-150 ${isCurrentSection ? 'text-[#E44A19]/80' : 'text-[#94A3B8] group-hover:text-[#E44A19]/80'}`}
+                            />
+                          </div>
+                          {/* Section Info */}
+                          <div className="flex flex-col gap-[2px] min-w-0 flex-1">
+                            <div className="flex items-center gap-[8px]">
+                              <span className={`text-[14px] font-semibold leading-[20px] truncate transition-colors duration-150 ${
+                                isCurrentSection ? 'text-[#1E293B]' : 'text-[#1E293B] group-hover:text-[#E44A19]'
+                              }`}>{section.name}</span>
+                              {isCurrentSection && (
+                                <span className="text-[11px] font-medium text-[#E44A19]/80 bg-[#E44A19]/[0.10] px-[8px] py-[2px] rounded-[4px] flex-shrink-0">
+                                  Current
+                                </span>
+                              )}
+                            </div>
+                            <span className={`text-[12px] leading-[16px] ${
+                              isCurrentSection ? 'text-[#94A3B8]' : 'text-[#94A3B8]'
+                            }`}>
+                              {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                            </span>
+                          </div>
+                          {/* Arrow for non-current sections */}
+                          {!isCurrentSection && (
+                            <div className="w-[32px] h-[32px] rounded-full border border-[#E2E8F0] flex items-center justify-center flex-shrink-0 transition-all duration-150 group-hover:bg-[#E44A19] group-hover:border-[#E44A19]">
+                              <IconArrowRight size={16} stroke={2} className="text-[#94A3B8] transition-colors duration-150 group-hover:text-white" />
+                            </div>
+                          )}
+                        </button>
+                      )
+                    })
+                  )}
+                </div>
+              </div>
+              {/* Divider + Cancel Button */}
+              <div className="border-t border-[#E2E8F0] mx-[20px]" />
+              <div className="px-[20px] pt-[16px] pb-[20px]">
+                <button
+                  onClick={() => { setMoveToSectionModalOpen(false); setMoveToSectionItems([]) }}
+                  className="w-full h-[44px] border border-[#E2E8F0] rounded-[8px] text-[14px] font-medium text-[#334155] bg-white hover:bg-[#F8FAFC] transition-colors"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
-            <div className="px-[20px] pb-[16px] pt-[8px] flex items-center justify-end">
-              <button
-                onClick={() => { setMoveToSectionModalOpen(false); setMoveToSectionItems([]) }}
-                className="h-[36px] px-[16px] border border-[#E2E8F0] rounded-[6px] text-[13px] font-medium text-[#334155] bg-white hover:bg-[#F8FAFC] transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* Remove Section Confirmation Dialog */}
       {removeSectionConfirm && (
